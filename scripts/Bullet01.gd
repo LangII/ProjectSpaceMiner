@@ -6,7 +6,7 @@ onready var tile_map_logic = get_node('/root/Main/TileMapLogic')
 onready var tile_map = get_node('/root/Main/TileMap')
 
 var COLLISION_NORMAL_CLAMP = 0.01
-var SPEED = 250
+var SPEED = 320
 var DMG = 20
 
 var velocity = Vector2()

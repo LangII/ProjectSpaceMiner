@@ -14,7 +14,7 @@ var SPIN_ACC = 2000
 var SPIN_MAX_SPEED = 7
 var SPIN_MAX_SPEED_RESISTANCE = 10
 
-var TURRET_COOL_DOWN = 0.8
+var TURRET_COOL_DOWN = 0.4
 
 var can_shoot = true
 
@@ -71,9 +71,18 @@ func setCameraParams():
 
 
 func applyMoveAcc():
-    if Input.is_action_pressed('up'):  applied_force = Vector2(0, -MOVE_ACC).rotated(rotation)
-    elif Input.is_action_pressed('down'):  applied_force = -Vector2(0, -MOVE_ACC).rotated(rotation)
-    else:  applied_force = Vector2()
+    if Input.is_action_pressed('up') and Input.is_action_pressed('down'):
+        applied_force = Vector2()
+        linear_damp = 5
+    elif Input.is_action_pressed('up'):
+        applied_force = Vector2(0, -MOVE_ACC).rotated(rotation)
+        linear_damp = 0
+    elif Input.is_action_pressed('down'):
+        applied_force = -Vector2(0, -MOVE_ACC).rotated(rotation)
+        linear_damp = 0
+    else:
+        applied_force = Vector2()
+        linear_damp = 0
 
 
 func applyMoveMaxSpeed():

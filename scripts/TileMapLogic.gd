@@ -2,13 +2,26 @@
 extends Node
 
 onready var main = get_node('/root/Main')
+onready var util = get_node('/root/Main/Utilities')
 
 onready var tile_map = preload("res://scenes/TileMap.tscn").instance()
 onready var destruct_tile_map = preload("res://scenes/DestructTileMap.tscn").instance()
 onready var mini_tile_map = preload("res://scenes/MiniTileMap.tscn").instance()
 
-var TILE_MAP_WIDTH = 200
+var TILE_MAP_WIDTH = 600
 var TILE_MAP_HEIGHT = 200
+
+var BOARDER_NOISE_MAX_HEIGHT = 10
+var BOARDER_NOISE_OCTAVES = 2  # 1 = 3 = 9 (int) (edge distortion)
+var BOARDER_NOISE_PERIOD = 40  # 0.1 = 64 = 256 (float) (noise size)
+var BOARDER_NOISE_PERSISTENCE = 0.9  # 0 = 0.5 = 1 (float)
+var BOARDER_NOISE_LACUNARITY = 3.5  # 0.1 = 2 = 4 (float)
+
+var BOARDER_AIR_NOISE_MAX_HEIGHT = 50
+var BOARDER_AIR_NOISE_OCTAVES = 4  # 1 = 3 = 9 (int) (edge distortion)
+var BOARDER_AIR_NOISE_PERIOD = 30  # 0.1 = 64 = 256 (float) (noise size)
+var BOARDER_AIR_NOISE_PERSISTENCE = 0.5  # 0 = 0.5 = 1 (float)
+var BOARDER_AIR_NOISE_LACUNARITY = 0.5  # 0.1 = 2 = 4 (float)
 
 var NOISE_OCTAVES = 3  # 1 = 3 = 9 (int) (edge distortion)
 var NOISE_PERIOD = 64  # 0.1 = 64 = 256 (float) (noise size)
@@ -147,16 +160,28 @@ func _ready():
     
     main.add_child(tile_map)
     main.add_child(destruct_tile_map)
-#    main.add_child(mini_tile_map)
+    
+    main.add_child(mini_tile_map)
     
     randomize()
     
+#    noise.seed = randi()
+    noise.seed = 1234
     setNoiseParams()
     print("noise.seed = ", noise.seed)
     
     initTileDataContainer()
     
+    
+    
     setTileDataPhaseOne()
+    
+    if mini_tile_map in main.get_children():
+        for k in tile_data.keys():
+            var y = tile_data[k]['y']
+            var x = tile_data[k]['x']
+            setTileMapCells(k, y, x)
+        return
     
     setTileDataPhaseTwo()
     
@@ -171,7 +196,6 @@ func _ready():
 
 
 func setNoiseParams():
-    noise.seed = randi()
     noise.octaves = NOISE_OCTAVES
     noise.period = NOISE_PERIOD
     noise.persistence = NOISE_PERSISTENCE
@@ -181,7 +205,73 @@ func setNoiseParams():
 func initTileDataContainer():
     for y in TILE_MAP_HEIGHT:
         for x in TILE_MAP_WIDTH:
-            tile_data['%s,%s' % [y, x]] = {'y': y, 'x': x, 'pos': [y, x]}
+            tile_data['%s,%s' % [y, x]] = {
+                'y': y,
+                'x': x,
+                'pos': [y, x],
+                'tile_level': 0,
+                'tile_code': 0,
+                'noise': null
+            }
+
+
+func setBoarderWallFrom1dNoise():
+    noise.octaves = BOARDER_NOISE_OCTAVES
+    noise.period = BOARDER_NOISE_PERIOD
+    noise.persistence = BOARDER_NOISE_PERSISTENCE
+    noise.lacunarity = BOARDER_NOISE_LACUNARITY
+    
+    var selected_noise = null
+    for level_noise in LEVEL_NOISE:
+        if level_noise['TILE_LEVEL'] == 1:  selected_noise = level_noise
+    var wall_noise = float((selected_noise['HIGH'] - selected_noise['LOW']) / 2) + selected_noise['LOW']
+#    print("wall_noise = ", wall_noise)
+    
+    # left wall
+    for y in TILE_MAP_HEIGHT:
+        var boarder_noise = noise.get_noise_1d(y)
+        var tile_level = int(round(util.normalize(boarder_noise, -1, +1, 0, BOARDER_NOISE_MAX_HEIGHT)))
+        for x in tile_level:
+            var k = '%s,%s' % [y, x]
+            if tile_data[k]['tile_level'] != 0:  continue
+            tile_data[k]['noise'] = wall_noise
+            tile_data[k]['tile_level'] = 1
+            tile_data[k]['tile_code'] = TILE_L01
+#            tile_map.set_cell(x, y, tile_data[k]['tile_code'])
+#            if mini_tile_map in main.get_children():
+#                mini_tile_map.set_cell(x, y, tile_data[k]['tile_level'])
+    
+    # right wall
+    for y in TILE_MAP_HEIGHT:
+        var boarder_noise = noise.get_noise_1d(y)
+        var tile_level = int(round(util.normalize(boarder_noise, -1, +1, 0, BOARDER_NOISE_MAX_HEIGHT)))
+        for x in tile_level:
+            x = (TILE_MAP_WIDTH - 1) - x
+            var k = '%s,%s' % [y, x]
+            if tile_data[k]['tile_level'] != 0:  continue
+            tile_data[k]['noise'] = wall_noise
+            tile_data[k]['tile_level'] = 1
+            tile_data[k]['tile_code'] = TILE_L01
+#            tile_map.set_cell(x, y, tile_data[k]['tile_code'])
+#            if mini_tile_map in main.get_children():
+#                mini_tile_map.set_cell(x, y, tile_data[k]['tile_level'])
+    
+    # bottom wall
+    for x in TILE_MAP_WIDTH:
+        var boarder_noise = noise.get_noise_1d(x)
+        var tile_level = int(round(util.normalize(boarder_noise, -1, +1, 0, BOARDER_NOISE_MAX_HEIGHT)))
+        for y in tile_level:
+            y = (TILE_MAP_HEIGHT - 1) - y
+            var k = '%s,%s' % [y, x]
+            if tile_data[k]['tile_level'] != 0:  continue
+            tile_data[k]['noise'] = wall_noise
+            tile_data[k]['tile_level'] = 1
+            tile_data[k]['tile_code'] = TILE_L01
+#            tile_map.set_cell(x, y, tile_data[k]['tile_code'])
+#            if mini_tile_map in main.get_children():
+#                mini_tile_map.set_cell(x, y, tile_data[k]['tile_level'])
+    
+    setNoiseParams()
 
 
 func setTileDataPhaseOne():
@@ -190,13 +280,40 @@ func setTileDataPhaseOne():
         var y = tile_data[k]['y']
         var x = tile_data[k]['x']
         
-        setTileDataNoise(k, y, x)
-        
+        setTileDataNoise(k, y, x, true)
+    
+    
+    
+    for k in tile_data.keys():
         setTileDataTileLevelAndTileCode(k)
-        
-        setTileDataHealth(k)
-        
-        setTileDataDestructs(k)
+
+    setBoarderWallFrom1dNoise()
+    
+    updateNoiseWithVerticalFade()
+    
+    for k in tile_data.keys():
+        setTileDataTileLevelAndTileCode(k)
+    
+#    setBoarderAirNoise()
+    
+#    setTerrainCapFromAirNoise()
+    
+#    var counter = 1
+#    for k in tile_data.keys():
+#        if counter > 100:  break
+#        print("tile_data[k] = ", tile_data[k])
+#        counter += 1
+    
+    
+#    for k in tile_data.keys():
+#        var y = tile_data[k]['y']
+#        var x = tile_data[k]['x']
+#        setTileMapCells(k, y, x)
+##        print("\nk = ", k)
+##        print("y = ", y)
+##        print("x = ", x)
+#        updateTileMapColTile(k, y, x)
+#        updateTileMapEdgeTile(k, y, x)
 
 
 func setTileDataPhaseTwo():
@@ -204,27 +321,31 @@ func setTileDataPhaseTwo():
     for k in tile_data.keys():
         var y = tile_data[k]['y']
         var x = tile_data[k]['x']
+        
+        setTileDataHealth(k)
+#
+        setTileDataDestructs(k)
     
         setTileDataNeighborPos(k, y, x)
-        
+
         setTileDataNeighborTileLevelAndCode(k)
-        
+
         setTileDataCol(k)
-        
+
         setTileDataAirCount(k)
-        
+
         setTileDataAirDirCode(k)
-        
+
         setTileDataEdge(k)
-        
+
         setTileDataEdgeCount(k)
-        
+
         setTileDataEdgeDirCode(k)
         
         setTileMapCells(k, y, x)
         
         updateTileMapColTile(k, y, x)
-        
+
         updateTileMapEdgeTile(k, y, x)
 
 
@@ -233,12 +354,22 @@ func setTileDataPhaseThree():
     updateBorderWall()
 
 
+
 ####################################################################################################
 """ _ready / setTileDataPhaseOne FUNCS """
 
 
-func setTileDataNoise(k, y, x):
+func setTileDataNoise(k, y, x, replace=false):
+    if not replace and tile_data[k]['noise']:  return
     tile_data[k]['noise'] = noise.get_noise_2d(x, y)
+
+
+func updateNoiseWithVerticalFade():
+    for y in TILE_MAP_HEIGHT / 2:
+        var modifier = util.normalize(y, 0, TILE_MAP_HEIGHT / 2, 0, 1)
+        for x in TILE_MAP_WIDTH:
+            var k = '%s,%s' % [y, x]
+            tile_data[k]['noise'] *= modifier
 
 
 func setTileDataTileLevelAndTileCode(k):
@@ -247,6 +378,10 @@ func setTileDataTileLevelAndTileCode(k):
             (tile_data[k]['noise'] >= +ln['LOW'] and tile_data[k]['noise'] < +ln['HIGH']) or
             (tile_data[k]['noise'] >= -ln['HIGH'] and tile_data[k]['noise'] < -ln['LOW'])
         ):
+            
+#            # If air, ignore prev created boarder tiles.
+#            if ln['TILE_LEVEL'] == 0 and tile_data[k]['tile_level']:  return
+            
             tile_data[k]['tile_level'] = ln['TILE_LEVEL']
             tile_data[k]['tile_code'] = ln['TILE_CODE']
 
@@ -375,6 +510,10 @@ func getModTypeCount(type, k):
 func updateTileMapColTile(k, y, x):
     if not tile_data[k]['is_col']:  return
     var mod_air_count = getModTypeCount('air', k)
+    
+#    print("mod_air_count = ", mod_air_count)
+#    print("tile_data[k] = ", tile_data[k])
+    
     var tile_ref = TILE_COL_MAP[tile_data[k]['tile_level']][mod_air_count]['TILE_REF']
     var dir_code_ref = TILE_COL_MAP[tile_data[k]['tile_level']][mod_air_count]['DIR_CODE_REF']
     if dir_code_ref:
@@ -398,6 +537,235 @@ func updateTileMapEdgeTile(k, y, x):
 
 ####################################################################################################
 """ _ready / setTileDataPhaseThree FUNCS """
+
+
+func setBoarderAirNoise():
+    noise.octaves = BOARDER_AIR_NOISE_OCTAVES
+    noise.period = BOARDER_AIR_NOISE_PERIOD
+    noise.persistence = BOARDER_AIR_NOISE_PERSISTENCE
+    noise.lacunarity = BOARDER_AIR_NOISE_LACUNARITY
+    for x in TILE_MAP_WIDTH:
+        var boarder_noise = noise.get_noise_1d(x)
+        var air_level = int(round(util.normalize(boarder_noise, -1, +1, 0, BOARDER_AIR_NOISE_MAX_HEIGHT)))
+        for y in air_level:
+#            y = (TILE_MAP_HEIGHT - 1) - y
+            var k = '%s,%s' % [y, x]
+#            print("k = ", k)
+            tile_data[k]['tile_level'] = 0
+            tile_data[k]['tile_code'] = TILE_L00_AIR
+            tile_map.set_cell(x, y, tile_data[k]['tile_code'])
+            if mini_tile_map in main.get_children():
+                mini_tile_map.set_cell(x, y, tile_data[k]['tile_level'])
+        
+        setTerrainCapAfterAirNoise(air_level, x)
+        
+    setNoiseParams()
+
+
+func setTerrainCapAfterAirNoise(y, x):
+    var cap_width = 4
+#    var top_tile_level = tile_data['%s,%s' % [y, x]]['tile_level']
+    var top_tile_level = getTopTileLevel(y, x)
+    if top_tile_level <= 1:  return
+    if top_tile_level == 3:
+#        print("MADE IT HERE")
+        for n in cap_width:
+            n += cap_width
+            var new_y = y + n
+            var new_k = '%s,%s' % [new_y, x]
+            tile_data[new_k]['tile_level'] = 2
+            tile_data[new_k]['tile_code'] = TILE_L02
+            tile_map.set_cell(x, new_y, tile_data[new_k]['tile_code'])
+            if mini_tile_map in main.get_children():
+                mini_tile_map.set_cell(x, new_y, tile_data[new_k]['tile_level'])
+    for n in cap_width:
+#        n += 1
+        var new_y = y + n
+        var new_k = '%s,%s' % [new_y, x]
+        tile_data[new_k]['tile_level'] = 1
+        tile_data[new_k]['tile_code'] = TILE_L01
+        tile_map.set_cell(x, new_y, tile_data[new_k]['tile_code'])
+        if mini_tile_map in main.get_children():
+            mini_tile_map.set_cell(x, new_y, tile_data[new_k]['tile_level'])
+
+
+func getTopTileLevel(y, x):
+    var cap_width = 4
+    var top_tile_levels = []
+    for n in cap_width:
+        n += 1
+        var k = '%s,%s' % [y + n, x]
+        top_tile_levels += [tile_data[k]['tile_level']]
+    return top_tile_levels.max()
+
+
+func setTerrainCapFromAirNoise():
+    
+#    return
+    
+    var cap_width = 2
+    var neighbor_width = 2
+    var levels = [1, 2, 3]
+    
+#    levels.remove(len(levels) - 1)
+#    print("levels = ", levels)
+    
+    var loop_levels = levels.duplicate(true)
+    loop_levels.remove(len(loop_levels) - 1)
+    loop_levels.invert()
+    
+#    print("levels = ", levels)
+#    print("loop_levels = ", loop_levels)
+    
+    for l in loop_levels:
+#    for l in levels:
+        print("l = ", l)
+        var cap_dict = getCapDict()
+        for cap in cap_dict.keys():
+            
+            var has_neighbor = false
+            if cap_dict[cap]['level'] == l:
+                for nw in neighbor_width:
+                    nw += 1
+                    var new_plus_cap = str(int(cap) + nw)
+                    if int(new_plus_cap) <= TILE_MAP_WIDTH - 1 and cap_dict[new_plus_cap]['level'] == l + 1:
+                        print("\n", cap_dict[cap])
+                        print(cap_dict[new_plus_cap])
+                        has_neighbor = true
+                        break
+                    var new_minus_cap = str(int(cap) - nw)
+                    if int(new_minus_cap) >= 0 and cap_dict[new_minus_cap]['level'] == l + 1:
+                        print("\n", cap_dict[cap])
+                        print(cap_dict[new_minus_cap])
+                        has_neighbor = true
+                        break
+#            if has_neighbor:  print("HAS NEIGHBOR (%s)" % [cap])
+            
+#            var has_neighbor = false
+#            for n in neighbor_width:
+#                n += 1
+#                var n_y = cap_dict[cap]['pos'][0]
+#                var n_x = cap_dict[cap]['pos'][1]
+#                var neighbors = []
+#                for cap_2 in cap_dict.keys():
+#                    if cap_dict[cap_2]['pos'][1] in [n_x + n, n_x - 1]:
+#                        neighbors += [cap_2]
+#                for neigh in neighbors:
+#                    if cap_dict[neigh]['level'] == l + 1:
+#                        has_neighbor = true
+#                        break
+##                if cap_dict['%s,%s' % [n_y, n_x + n]]['level'] == l + 1:
+##                    has_neighbor = true
+##                    break
+##                if cap_dict['%s,%s' % [n_y, n_x - n]]['level'] == l + 1:
+##                    has_neighbor = true
+##                    break
+            
+            if cap_dict[cap]['level'] in [l, l + 1]:
+#            if cap_dict[cap]['level'] in [l, l + 1]:
+                
+                var y = cap_dict[cap]['pos'][0]
+                var x = cap_dict[cap]['pos'][1]
+                
+                tile_data['%s,%s' % [y - 1, x]]['tile_level'] = l
+                match l:
+                    1:  tile_data['%s,%s' % [y - 1, x]]['tile_code'] = TILE_L01
+                    2:  tile_data['%s,%s' % [y - 1, x]]['tile_code'] = TILE_L02
+    #                3:  tile_data['%s,%s' % [y - 1, x]]['tile_code'] = TILE_L03
+                
+                tile_data['%s,%s' % [y - 2, x]]['tile_level'] = l
+                match l:
+                    1:  tile_data['%s,%s' % [y - 2, x]]['tile_code'] = TILE_L01
+                    2:  tile_data['%s,%s' % [y - 2, x]]['tile_code'] = TILE_L02
+    #                3:  tile_data['%s,%s' % [y - 1, x]]['tile_code'] = TILE_L03
+            
+#            if has_neighbor:
+#
+#                var y = cap_dict[cap]['pos'][0]
+#                var x = cap_dict[cap]['pos'][1]
+#
+                tile_data['%s,%s' % [y - 3, x]]['tile_level'] = l
+                match l:
+                    1:  tile_data['%s,%s' % [y - 3, x]]['tile_code'] = TILE_L01
+                    2:  tile_data['%s,%s' % [y - 3, x]]['tile_code'] = TILE_L02
+    #                3:  tile_data['%s,%s' % [y - 1, x]]['tile_code'] = TILE_L03
+
+                tile_data['%s,%s' % [y - 4, x]]['tile_level'] = l
+                match l:
+                    1:  tile_data['%s,%s' % [y - 4, x]]['tile_code'] = TILE_L01
+                    2:  tile_data['%s,%s' % [y - 4, x]]['tile_code'] = TILE_L02
+    #                3:  tile_data['%s,%s' % [y - 1, x]]['tile_code'] = TILE_L03
+                
+                
+#                var tile_array = []
+#                for n in cap_dict[cap]['level']:
+#                    n += 1
+#                    for i in cap_width:  tile_array += [n]
+#                tile_array.invert()
+#
+#                print("tile_array = ", tile_array)
+#
+#                var cur_y = cap_dict[cap]['pos'][0] - 1
+#                for tile in tile_array:
+#
+#                    var k = '%s,%s' % [cur_y, cap_dict[cap]['pos'][1]]
+#                    tile_data[k]['tile_level'] = tile
+#                    match tile:
+#                        1:  tile_data[k]['tile_code'] = TILE_L01
+#                        2:  tile_data[k]['tile_code'] = TILE_L02
+#                    cur_y -= 1
+                
+    
+#    var cap_dict = getCapDict()
+##    print("cap_dict = ", cap_dict)
+#
+#    for cap in cap_dict.keys():
+#        if cap_dict[cap]['level'] == 1:  continue
+##        print("\ncap_dict[cap] = ", cap_dict[cap])
+#        var tile_array = []
+#        for n in cap_dict[cap]['level']:
+##            print("n = ", n)
+#            n += 1
+#            for i in cap_width:  tile_array += [n]
+#        tile_array.invert()
+##        print("tile_array = ", tile_array)
+#        var y = cap_dict[cap]['pos'][0]
+#        var x = cap_dict[cap]['pos'][1]
+#        var cur_y = y - 1
+#        for tile in tile_array:
+#            var cur_k = '%s,%s' % [cur_y, x]
+#            tile_data[cur_k]['tile_level'] = tile
+#            match tile:
+#                1:  tile_data[cur_k]['tile_code'] = TILE_L01
+#                2:  tile_data[cur_k]['tile_code'] = TILE_L02
+#                3:  tile_data[cur_k]['tile_code'] = TILE_L03
+#            cur_y -= 1
+    
+#    for col in cap_dict.keys():
+#        if cap_dict[col]['level'] == 1:  continue
+#        var x = cap_dict[col]['pos'][1]
+#        var y = cap_dict[col]['pos'][0]
+#        var tile_array = []
+#        for n in cap_dict[col]['level']:
+#            n += 1
+#            for i in cap_width:  tile_array += [n]
+#        tile_array.invert()
+##        print("tile_array = ", tile_array)
+#        var new_y = y
+#        for tile in tile_array:
+#            new_y -= 1
+#            tile_data['%s,%s' % [new_y, x]]['tile_level'] = tile
+
+
+func getCapDict():
+    var cap_dict = {}
+    for x in TILE_MAP_WIDTH:
+        for y in TILE_MAP_HEIGHT:
+            var k = '%s,%s' % [y, x]
+            if tile_data[k]['tile_level'] != 0:
+                cap_dict[str(x)] = {'k': k, 'pos': [y, x], 'level': tile_data[k]['tile_level']}
+                break
+    return cap_dict
 
 
 func updateBorderWall():
