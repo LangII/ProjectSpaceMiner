@@ -1,9 +1,10 @@
 
 extends RigidBody2D
 
+onready var tile_map_logic = get_node('/root/Main/TileMapLogic')
 onready var tile_map = get_node('/root/Main/TileMap')
 
-onready var projectiles = get_node('/root/Main/Projectiles')
+onready var projectiles = get_node('/root/Main/Gameplay/Projectiles')
 onready var bullet_01 = preload('res://scenes/Bullet01.tscn')
 
 var MOVE_ACC = 250
@@ -16,6 +17,8 @@ var SPIN_MAX_SPEED_RESISTANCE = 10
 
 var TURRET_COOL_DOWN = 0.4
 
+var DROP_PICK_UP_RADIUS = 100
+
 var can_shoot = true
 
 
@@ -27,6 +30,8 @@ func _ready():
     setCameraParams()
     
     $CanShootTimer.wait_time = TURRET_COOL_DOWN
+    
+    $DropPickUp/CollisionShape2D.shape.radius = DROP_PICK_UP_RADIUS
 
 
 func _physics_process(_delta):
@@ -55,15 +60,12 @@ func _integrate_forces(_state):
 
 
 func setCameraParams():
-    if tile_map:
-        var map_limits = tile_map.get_used_rect()
-        var map_cellsize = tile_map.cell_size
-        $GamePlayCamera.limit_left = map_limits.position.x * map_cellsize.x
-        $GamePlayCamera.limit_right = map_limits.end.x * map_cellsize.x
-        $GamePlayCamera.limit_top = map_limits.position.y * map_cellsize.y
-        $GamePlayCamera.limit_bottom = map_limits.end.y * map_cellsize.y
-    else:
-        $GamePlayCamera.current = false
+    var map_limits = tile_map.get_used_rect()
+    var map_cellsize = tile_map.cell_size
+    $GamePlayCamera.limit_left = map_limits.position.x * map_cellsize.x
+    $GamePlayCamera.limit_right = map_limits.end.x * map_cellsize.x
+    $GamePlayCamera.limit_top = map_limits.position.y * map_cellsize.y
+    $GamePlayCamera.limit_bottom = map_limits.end.y * map_cellsize.y
 
 
 ####################################################################################################
@@ -118,7 +120,24 @@ func shoot():
 
 
 ####################################################################################################
+""" signal FUNCS """
 
 
 func _on_CanShootTimer_timeout():
     can_shoot = true
+
+
+func _on_DropPickUp_body_entered(body):
+    if body.get_parent().name == 'Drops':
+        body.shipSensed()
+
+
+
+
+
+
+
+
+
+
+

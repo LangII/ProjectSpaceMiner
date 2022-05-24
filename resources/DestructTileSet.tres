@@ -1,8 +1,8 @@
 [gd_resource type="TileSet" load_steps=4 format=2]
 
-[ext_resource path="res://sprites/destruct_50.png" type="Texture" id=1]
-[ext_resource path="res://sprites/destruct_75.png" type="Texture" id=2]
-[ext_resource path="res://sprites/destruct_25.png" type="Texture" id=3]
+[ext_resource path="res://sprites/tiles/destruct_50.png" type="Texture" id=1]
+[ext_resource path="res://sprites/tiles/destruct_75.png" type="Texture" id=2]
+[ext_resource path="res://sprites/tiles/destruct_25.png" type="Texture" id=3]
 
 [resource]
 0/name = "1"
