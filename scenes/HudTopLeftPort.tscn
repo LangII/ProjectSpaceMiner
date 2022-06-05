@@ -1,0 +1,9 @@
+[gd_scene format=2]
+
+[node name="HudTopLeftPort" type="ColorRect"]
+margin_right = 161.0
+margin_bottom = 120.0
+color = Color( 0, 0.392157, 0.470588, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}

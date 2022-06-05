@@ -6,7 +6,15 @@ var MINERAL_MAP = {
     'mineral_01': {
         'TILE_CODE': 0, 'TILE_LEVELS': [1], 'VEIN_ATTEMPTS': 1_000, 'VALUE_MIN': 1, 'VALUE_MAX': 3,
         'VEIN_SIZE_MIN': 1, 'VEIN_SIZE_MAX': 8
-    }
+    },
+    'mineral_02': {
+        'TILE_CODE': 1, 'TILE_LEVELS': [1], 'VEIN_ATTEMPTS': 1_000, 'VALUE_MIN': 1, 'VALUE_MAX': 3,
+        'VEIN_SIZE_MIN': 1, 'VEIN_SIZE_MAX': 8
+    },
+    'mineral_03': {
+        'TILE_CODE': 2, 'TILE_LEVELS': [1], 'VEIN_ATTEMPTS': 1_000, 'VALUE_MIN': 1, 'VALUE_MAX': 3,
+        'VEIN_SIZE_MIN': 1, 'VEIN_SIZE_MAX': 8
+    },
 }
 
 

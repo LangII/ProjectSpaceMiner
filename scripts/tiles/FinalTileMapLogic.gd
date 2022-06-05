@@ -11,12 +11,7 @@ func _ready():
     
     main.add_child(mineral_tile_map)
     
-    randomize()
-    
-    noise.seed = randi()
-#    noise.seed = 1234
     setNoiseParams()
-    print("noise.seed = ", noise.seed)
     
     initTileDataContainer()
         

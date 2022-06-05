@@ -1,0 +1,64 @@
+[gd_scene format=2]
+
+[node name="StandardContainerBoarder" type="ColorRect"]
+margin_right = 400.0
+margin_bottom = 400.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color( 0, 0, 0, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 2
+custom_constants/margin_top = 2
+custom_constants/margin_left = 2
+custom_constants/margin_bottom = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="MarginContainer"]
+margin_left = 2.0
+margin_top = 2.0
+margin_right = 398.0
+margin_bottom = 398.0
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/ColorRect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 5
+custom_constants/margin_top = 5
+custom_constants/margin_left = 5
+custom_constants/margin_bottom = 5
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="MarginContainer/ColorRect/MarginContainer"]
+margin_left = 5.0
+margin_top = 5.0
+margin_right = 391.0
+margin_bottom = 391.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/ColorRect/MarginContainer/ColorRect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 2
+custom_constants/margin_top = 2
+custom_constants/margin_left = 2
+custom_constants/margin_bottom = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer"]
+margin_left = 2.0
+margin_top = 2.0
+margin_right = 384.0
+margin_bottom = 384.0
+color = Color( 0, 0.392157, 0.470588, 1 )

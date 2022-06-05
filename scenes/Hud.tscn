@@ -1,0 +1,82 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://scenes/HudTopLeftPort.tscn" type="PackedScene" id=1]
+[ext_resource path="res://scripts/Hud.gd" type="Script" id=2]
+
+[node name="Hud" type="CanvasLayer"]
+script = ExtResource( 2 )
+
+[node name="TopLeftContainerBoarder" type="ColorRect" parent="."]
+margin_right = 160.0
+margin_bottom = 128.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color( 0, 0, 0, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MarginContainer" type="MarginContainer" parent="TopLeftContainerBoarder"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 2
+custom_constants/margin_bottom = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="TopLeftContainerBoarder/MarginContainer"]
+margin_right = 158.0
+margin_bottom = 126.0
+
+[node name="MarginContainer" type="MarginContainer" parent="TopLeftContainerBoarder/MarginContainer/ColorRect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 5
+custom_constants/margin_bottom = 5
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="TopLeftContainerBoarder/MarginContainer/ColorRect/MarginContainer"]
+margin_right = 153.0
+margin_bottom = 121.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="MarginContainer" type="MarginContainer" parent="TopLeftContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 2
+custom_constants/margin_bottom = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="TopLeftContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer"]
+margin_right = 151.0
+margin_bottom = 119.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color( 0, 0.392157, 0.470588, 1 )
+
+[node name="TopLeftViewportContainer" type="ViewportContainer" parent="TopLeftContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_bottom = 1.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Viewport" type="Viewport" parent="TopLeftContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/TopLeftViewportContainer"]
+size = Vector2( 151, 1 )
+handle_input_locally = false
+usage = 0
+render_target_update_mode = 3
+
+[node name="Camera2D" type="Camera2D" parent="TopLeftContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/TopLeftViewportContainer/Viewport"]
+anchor_mode = 0
+current = true
+
+[node name="HudTopLeftPort" parent="TopLeftContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/TopLeftViewportContainer/Viewport" instance=ExtResource( 1 )]
