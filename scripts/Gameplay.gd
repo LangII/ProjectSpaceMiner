@@ -38,7 +38,17 @@ func _ready():
     main.add_child(tile_map_logic)
     if tile_map_logic.mini_map_test:  return
     
-    add_child(load('res://scenes/Ship.tscn').instance())
+    var ship = load('res://scenes/Ship.tscn').instance()
+    add_child(ship)
+    
+    for i in 1:
+        var enemy = load('res://scenes/Enemy01.tscn').instance()
+        enemy.global_position = Vector2(250, 250)
+        enemy.HOME_POS = Vector2(200.0, 200.0)
+        enemy.HOME_RADIUS = 100.0
+        add_child(enemy)
+#        enemy.setUniquePassiveTarget()
+#    print("ship.global_position = ", ship.global_position)
     
     hud = load('res://scenes/Hud.tscn').instance()
     add_child(hud)
@@ -65,12 +75,33 @@ func dropCollected(drop_type, drop_value):
         data.drops_collected[drop_type]['count'] += 1
         data.drops_collected[drop_type]['value'] += drop_value
         drop_is_new = false
-    hud.dropCollected(drop_is_new, drop_type, 1, drop_value)
-#    print("data.drops_collected = ", data.drops_collected)
-    
+    hud.dropCollected(drop_is_new, drop_type)
 
 
+func getTerrainColDataPack(ship_obj, col_state, col_i) -> Dictionary:
+    var data_pack = {}
+    data_pack['col_pos'] = col_state.get_contact_local_position(col_i)
+    data_pack['speed_damp'] = clamp(
+        util.normalize(
+            ship_obj.linear_velocity.length(), 0,
+            ship_obj.MOVE_MAX_SPEED * ship_obj.COL_DMG_SPEED_MODIFIER, 0, 1
+        ),
+        0, 1
+    )
+    data_pack['col_angle'] = 90 - abs(rad2deg(
+        col_state.get_contact_local_normal(col_i).angle_to(ship_obj.linear_velocity)
+    ))
+    data_pack['col_angle_damp'] = util.normalize(data_pack['col_angle'], 0, 90, 0, 1)
+    data_pack['prev_frame_dir'] = ship_obj.prev_frame_dir
+    return data_pack
 
+
+func setTerrainColParticlesFromDataPack(data_pack):
+    $ShipToTerrainColParticles2D.global_position = data_pack['col_pos']
+    $ShipToTerrainColParticles2D.global_rotation_degrees = data_pack['prev_frame_dir'] + 90
+    $ShipToTerrainColParticles2D.process_material.spread = data_pack['col_angle']
+    $ShipToTerrainColParticles2D.lifetime = 1 * data_pack['speed_damp']
+    $ShipToTerrainColParticles2D.restart()
 
 
 

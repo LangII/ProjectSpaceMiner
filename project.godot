@@ -47,6 +47,14 @@ left_click={
  ]
 }
 
+[layer_names]
+
+2d_physics/layer_1="terrain"
+2d_physics/layer_2="ship"
+2d_physics/layer_3="bullets"
+2d_physics/layer_4="drops"
+2d_physics/layer_5="enemies"
+
 [physics]
 
 common/enable_pause_aware_picking=true

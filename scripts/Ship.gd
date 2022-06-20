@@ -1,6 +1,10 @@
 
 extends RigidBody2D
 
+onready var util = get_node('/root/Main/Utilities')
+onready var gameplay = get_node('/root/Main/Gameplay')
+onready var hud = null  # assigned in Hud.gd
+
 onready var tile_map_logic = get_node('/root/Main/TileMapLogic')
 onready var tile_map = get_node('/root/Main/TileMap')
 
@@ -15,11 +19,22 @@ var SPIN_ACC = 2000
 var SPIN_MAX_SPEED = 7
 var SPIN_MAX_SPEED_RESISTANCE = 10
 
-var TURRET_COOL_DOWN = 0.4
+var TURRET_COOL_DOWN_WAIT_TIME = 0.4
+
+var MAX_TERRAIN_COL_DMG = 2.0
+var MAX_HEALTH = 200
+var COL_DMG_SPEED_MODIFIER = 0.75
+var PHYSICAL_ARMOR = 0.02
+var TERRAIN_COL_WAIT_TIME = 0.1
+var can_take_terrain_col_dmg = true
 
 var DROP_PICK_UP_RADIUS = 100
 
+var health = MAX_HEALTH
+
 var can_shoot = true
+
+var prev_frame_dir = 0
 
 
 ####################################################################################################
@@ -29,7 +44,9 @@ func _ready():
     
     setCameraParams()
     
-    $CanShootTimer.wait_time = TURRET_COOL_DOWN
+    $CanShootTimer.wait_time = TURRET_COOL_DOWN_WAIT_TIME
+    
+    $CanTakeTerrainColDmgTimer.wait_time = TERRAIN_COL_WAIT_TIME
     
     $DropPickUp/CollisionShape2D.shape.radius = DROP_PICK_UP_RADIUS
 
@@ -42,7 +59,11 @@ func _physics_process(_delta):
     if Input.is_action_pressed('left_click') and can_shoot:  shoot()
 
 
-func _integrate_forces(_state):
+func _integrate_forces(state):
+    
+    if state.get_contact_count() >= 1:  loopThroughColContacts(state)
+    
+    setPrevFrameDir(state)
     
     applyMoveAcc()
     
@@ -107,6 +128,28 @@ func applySpinMaxSpeed():
     if abs(angular_velocity) > SPIN_MAX_SPEED:  applied_torque = angular_velocity * -SPIN_MAX_SPEED_RESISTANCE
 
 
+func setPrevFrameDir(state):
+    prev_frame_dir = rad2deg(state.linear_velocity.angle())
+    prev_frame_dir = prev_frame_dir if prev_frame_dir > 0 else 360 + prev_frame_dir
+
+
+func loopThroughColContacts(state):
+    for col_i in state.get_contact_count():
+        if state.get_contact_collider_object(col_i).name == 'TileMap' and can_take_terrain_col_dmg:
+            can_take_terrain_col_dmg = false
+            $CanTakeTerrainColDmgTimer.start()
+            var col_dp = gameplay.getTerrainColDataPack(self, state, col_i)
+            var terrain_col_dmg = getTerrainColDmgFromDataPack(col_dp)
+            health -= terrain_col_dmg * 20
+            gameplay.setTerrainColParticlesFromDataPack(col_dp)
+            hud.updateHealthValues(health)
+
+
+func getTerrainColDmgFromDataPack(data_pack) -> float:
+    var col_dmg = MAX_TERRAIN_COL_DMG * data_pack['speed_damp'] * data_pack['col_angle_damp'] * (1.0 - PHYSICAL_ARMOR)
+    return col_dmg
+
+
 ####################################################################################################
 
 
@@ -132,12 +175,5 @@ func _on_DropPickUp_body_entered(body):
         body.shipSensed()
 
 
-
-
-
-
-
-
-
-
-
+func _on_CanTakeTerrainColDmgTimer_timeout():
+    can_take_terrain_col_dmg = true

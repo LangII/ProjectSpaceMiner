@@ -5,13 +5,21 @@ onready var main = get_node('/root/Main')
 onready var data = get_node('/root/Main/Data')
 onready var util = get_node('/root/Main/Utilities')
 onready var gameplay = get_node('/root/Main/Gameplay')
+onready var ship = gameplay.get_node('Ship')
 
 onready var top_left_viewport_container = find_node('TopLeftViewportContainer')
 onready var top_left_port = find_node('HudTopLeftPort')
-onready var drop_display_res = preload('res://scenes/iterables/DropDisplay.tscn')
+onready var health_bar_under = find_node('HealthTextureProgUnder')
+onready var health_bar_over = find_node('HealthTextureProgOver')
+onready var health_bar_under_tween = find_node('HealthTextureProgUnderTween')
+onready var health_label = find_node('HealthLabel')
+onready var drop_display_res = preload('res://scenes/iterables/HudDropDisplay.tscn')
 
 var DROP_DISPLAY_COUNT = 3
 var DROP_DISPLAY_POS_DIF = 0
+
+var HEALTH_TEXT_FORMAT = '%7.2f'
+var HEALTH_UNDER_TWEEN_DURATION = 1.0
 
 var drop_displays = []
 var drop_display_pos = {}
@@ -22,11 +30,15 @@ var drop_display_pos = {}
 
 func _ready():
     
+    ship.hud = self
+    
     setDropDisplayPosDif()
     
     setTopLeftViewportHeights()
     
     setDropDisplaysInTopLeftPort()
+    
+    setHealthValues()
 
 
 ####################################################################################################
@@ -57,11 +69,19 @@ func setDropDisplaysInTopLeftPort():
         drop_displays += [new_drop_display]
 
 
+func setHealthValues():
+    health_bar_under.max_value = ship.health
+    health_bar_under.value = ship.health
+    health_bar_over.max_value = ship.health
+    health_bar_over.value = ship.health
+    health_label.text = HEALTH_TEXT_FORMAT % [ship.health]
+
+
 ####################################################################################################
-""" top left drop display FUNCS """
+""" top left FUNCS """
 
 
-func dropCollected(new, type, count, value):
+func dropCollected(new, type):
     var drop_texture = gameplay.DROP_TEXTURE_MAP[type]
     if new:
         drop_displays[-1].loadDisplayFromDataDropsCollected(type)
@@ -106,6 +126,19 @@ func moveDropDisplayFromMiddleToFront(middle_i):
 func moveAllDropDisplaysDown(to_i):
     for i in range(1, to_i + 1):
         drop_displays[i].setAndStartPosTween(i * DROP_DISPLAY_POS_DIF)
+
+
+####################################################################################################
+""" bottom FUNCS """
+
+
+func updateHealthValues(value):
+    health_label.text = HEALTH_TEXT_FORMAT % [value]
+    health_bar_over.value = value
+    health_bar_under_tween.interpolate_property(
+        health_bar_under, 'value', null, value, HEALTH_UNDER_TWEEN_DURATION, 0, 2
+    )
+    health_bar_under_tween.start()
 
 
 

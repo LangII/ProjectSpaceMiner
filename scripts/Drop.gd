@@ -40,7 +40,7 @@ func _ready():
     
     apply_central_impulse(vel)
 
-func _process(delta):
+func _process(_delta):
     
     $Sprite.rotation_degrees += ROTATION_SPEED
 

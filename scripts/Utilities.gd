@@ -39,4 +39,8 @@ func getRandomFloat(_min, _max):
     return rng.randf_range(_min, _max)
 
 
+func getRandomItemFromArray(_array):
+    return _array[getRandomInt(0, len(_array) - 1)]
+
+
 

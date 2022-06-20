@@ -3,8 +3,8 @@ extends Node
 
 func _ready():
     
-#    for _n in 10:
-#        print($Utilities.getRandomInt(0, 1))
+#    var new_vector = Vector2(50, 50).move_toward(Vector2(50, 100), 10)
+#    print("new_vector = ", new_vector)
 #
 #    return
     
