@@ -18,7 +18,7 @@ onready var DROP_TEXTURE_MAP = {
 
 #onready var SEED = util.rng.randi()
 #onready var SEED = hash('1234')
-onready var SEED = 3161026589
+onready var SEED = 4057731354
 
 var hud = null
 
@@ -29,9 +29,7 @@ var hud = null
 func _ready():
     
     print("SEED = ", SEED)
-    
     util.rng.seed = SEED
-    util.rng.randomize()
     
     var tile_map_logic = load('res://scenes/tiles/TileMapLogic.tscn').instance()
     tile_map_logic.noise.seed = SEED
@@ -41,14 +39,12 @@ func _ready():
     var ship = load('res://scenes/Ship.tscn').instance()
     add_child(ship)
     
-    for i in 1:
+    for i in 10:
         var enemy = load('res://scenes/Enemy01.tscn').instance()
-        enemy.global_position = Vector2(250, 250)
-        enemy.HOME_POS = Vector2(200.0, 200.0)
+        enemy.global_position = Vector2(240, 1050)
+        enemy.HOME_POS = Vector2(240, 1050)
         enemy.HOME_RADIUS = 100.0
         add_child(enemy)
-#        enemy.setUniquePassiveTarget()
-#    print("ship.global_position = ", ship.global_position)
     
     hud = load('res://scenes/Hud.tscn').instance()
     add_child(hud)

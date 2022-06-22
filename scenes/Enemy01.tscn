@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://sprites/enemy_01.png" type="Texture" id=1]
-[ext_resource path="res://scenes/Enemy01.gd" type="Script" id=2]
+[ext_resource path="res://scripts/Enemy01.gd" type="Script" id=2]
 
 [sub_resource type="CircleShape2D" id=1]
 
@@ -24,19 +24,19 @@ cast_to = Vector2( 0, 0 )
 collision_mask = 19
 collide_with_areas = true
 
-[node name="PassiveRotDelayTimer" type="Timer" parent="."]
+[node name="MasterRotDelayTimer" type="Timer" parent="."]
 one_shot = true
 
-[node name="PassiveRotTimer" type="Timer" parent="."]
+[node name="MasterRotTimer" type="Timer" parent="."]
 one_shot = true
 
-[node name="PassiveMoveDelayTimer" type="Timer" parent="."]
+[node name="MasterMoveDelayTimer" type="Timer" parent="."]
 one_shot = true
 
-[node name="PassiveMoveTimer" type="Timer" parent="."]
+[node name="MasterMoveTimer" type="Timer" parent="."]
 one_shot = true
 
-[connection signal="timeout" from="PassiveRotDelayTimer" to="." method="_on_PassiveRotDelayTimer_timeout"]
-[connection signal="timeout" from="PassiveRotTimer" to="." method="_on_PassiveRotTimer_timeout"]
-[connection signal="timeout" from="PassiveMoveDelayTimer" to="." method="_on_PassiveMoveDelayTimer_timeout"]
-[connection signal="timeout" from="PassiveMoveTimer" to="." method="_on_PassiveMoveTimer_timeout"]
+[connection signal="timeout" from="MasterRotDelayTimer" to="." method="_on_MasterRotDelayTimer_timeout"]
+[connection signal="timeout" from="MasterRotTimer" to="." method="_on_MasterRotTimer_timeout"]
+[connection signal="timeout" from="MasterMoveDelayTimer" to="." method="_on_MasterMoveDelayTimer_timeout"]
+[connection signal="timeout" from="MasterMoveTimer" to="." method="_on_MasterMoveTimer_timeout"]

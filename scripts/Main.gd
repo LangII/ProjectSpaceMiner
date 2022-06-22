@@ -3,8 +3,13 @@ extends Node
 
 func _ready():
     
-#    var new_vector = Vector2(50, 50).move_toward(Vector2(50, 100), 10)
-#    print("new_vector = ", new_vector)
+#    var item = get_node('Utilities').getRandomItemFromArrayWithWeight(
+#        ['a', 'b', 'c', 'd'],
+#        [0.10, 0.20, 0.20, 0.50]
+#    )
+#
+#    print("")
+#    print("item = ", item)
 #
 #    return
     
@@ -15,3 +20,9 @@ func _ready():
     
     Input.set_custom_mouse_cursor(load('res://sprites/cursor.png'), 0, Vector2(20, 20))
 
+func _process(_delta):
+    
+    if Input.is_action_pressed('test'):
+        
+        var ship = get_node('Gameplay/Ship')
+        print("ship.global_position = ", ship.global_position)

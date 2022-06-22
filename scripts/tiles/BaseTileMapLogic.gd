@@ -16,8 +16,8 @@ onready var mini_tile_map = preload("res://scenes/tiles/MiniTileMap.tscn").insta
 """ adjustable constants """
 
 
-var TILE_MAP_WIDTH = 50
-var TILE_MAP_HEIGHT = 50
+var TILE_MAP_WIDTH = 80
+var TILE_MAP_HEIGHT = 80
 
 var NOISE_OCTAVES = 3  # 1 = 3 = 9 (int) (edge distortion)
 var NOISE_PERIOD = 64  # 0.1 = 64 = 256 (float) (noise size)
