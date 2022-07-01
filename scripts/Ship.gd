@@ -5,8 +5,8 @@ onready var util = get_node('/root/Main/Utilities')
 onready var gameplay = get_node('/root/Main/Gameplay')
 onready var hud = null  # assigned in Hud.gd
 
-onready var tile_map_logic = get_node('/root/Main/TileMapLogic')
-onready var tile_map = get_node('/root/Main/TileMap')
+onready var tile_map_logic = get_node('/root/Main/Gameplay/TileMapLogic')
+onready var tile_map = get_node('/root/Main/Gameplay/TileMap')
 
 onready var projectiles = get_node('/root/Main/Gameplay/Projectiles')
 onready var bullet_01 = preload('res://scenes/Bullet01.tscn')
@@ -36,17 +36,20 @@ var can_shoot = true
 
 var prev_frame_dir = 0
 
+var STUNNED_DELAY = 0.5
+var is_stunned = false
+
 
 ####################################################################################################
 
 
 func _ready():
     
-    setCameraParams()
-    
     $CanShootTimer.wait_time = TURRET_COOL_DOWN_WAIT_TIME
     
     $CanTakeTerrainColDmgTimer.wait_time = TERRAIN_COL_WAIT_TIME
+    
+    $StunnedTimer.wait_time = STUNNED_DELAY
     
     $DropPickUp/CollisionShape2D.shape.radius = DROP_PICK_UP_RADIUS
 
@@ -77,30 +80,17 @@ func _integrate_forces(state):
 
 
 ####################################################################################################
-""" _ready FUNCS """
-
-
-func setCameraParams():
-    var map_limits = tile_map.get_used_rect()
-    var map_cellsize = tile_map.cell_size
-    $GamePlayCamera.limit_left = map_limits.position.x * map_cellsize.x
-    $GamePlayCamera.limit_right = map_limits.end.x * map_cellsize.x
-    $GamePlayCamera.limit_top = map_limits.position.y * map_cellsize.y
-    $GamePlayCamera.limit_bottom = map_limits.end.y * map_cellsize.y
-
-
-####################################################################################################
 """ _integrate_forces FUNCS """
 
 
 func applyMoveAcc():
-    if Input.is_action_pressed('up') and Input.is_action_pressed('down'):
+    if Input.is_action_pressed('up') and Input.is_action_pressed('down') and not is_stunned:
         applied_force = Vector2()
         linear_damp = 5
-    elif Input.is_action_pressed('up'):
+    elif Input.is_action_pressed('up') and not is_stunned:
         applied_force = Vector2(0, -MOVE_ACC).rotated(rotation)
         linear_damp = 0
-    elif Input.is_action_pressed('down'):
+    elif Input.is_action_pressed('down') and not is_stunned:
         applied_force = -Vector2(0, -MOVE_ACC).rotated(rotation)
         linear_damp = 0
     else:
@@ -135,14 +125,18 @@ func setPrevFrameDir(state):
 
 func loopThroughColContacts(state):
     for col_i in state.get_contact_count():
+        
+        # sometimes when colliding with an object that is deleted within the same frame as the
+        # collision, the collider object will return 'null instance'
+        if not state.get_contact_collider_object(col_i):  continue
+        
         if state.get_contact_collider_object(col_i).name == 'TileMap' and can_take_terrain_col_dmg:
             can_take_terrain_col_dmg = false
             $CanTakeTerrainColDmgTimer.start()
             var col_dp = gameplay.getTerrainColDataPack(self, state, col_i)
             var terrain_col_dmg = getTerrainColDmgFromDataPack(col_dp)
-            health -= terrain_col_dmg * 20
+            takeDmg(terrain_col_dmg)
             gameplay.setTerrainColParticlesFromDataPack(col_dp)
-            hud.updateHealthValues(health)
 
 
 func getTerrainColDmgFromDataPack(data_pack) -> float:
@@ -162,6 +156,14 @@ func shoot():
     b.start($Turret/BulletSpawn.global_position, dir)
 
 
+func takeDmg(_dmg):
+    health -= _dmg
+    hud.updateHealthValues(health)
+    is_stunned = true
+    $StunnedTimer.start()
+    gameplay.cam_shake_trauma += 0.2
+
+
 ####################################################################################################
 """ signal FUNCS """
 
@@ -177,3 +179,7 @@ func _on_DropPickUp_body_entered(body):
 
 func _on_CanTakeTerrainColDmgTimer_timeout():
     can_take_terrain_col_dmg = true
+
+
+func _on_StunnedTimer_timeout():
+    is_stunned = false

@@ -16,11 +16,29 @@ onready var DROP_TEXTURE_MAP = {
     'mineral_03': mineral_03_texture
 }
 
+var TILE_MAP_LOGIC_SCN_REF = 'res://scenes/tiles/TileMapLogic.tscn'
+var SHIP_SCN_REF = 'res://scenes/Ship.tscn'
+var HUD_SCN_REF = 'res://scenes/Hud.tscn'
+
 #onready var SEED = util.rng.randi()
 #onready var SEED = hash('1234')
 onready var SEED = 4057731354
 
+var tile_map_logic = null
+var tile_map = null
+var ship = null
+var camera = null
 var hud = null
+
+
+var cam_noise = OpenSimplexNoise.new()
+var cam_shake_noise_x = 0
+var cam_shake_trauma = 0.0
+var CAM_SHAKE_SPEED = 5  # 1 - 10
+var CAM_SHAKE_DECAY = 0.4
+var CAM_SHAKE_OFFSET_MOD = 200
+var CAM_SHAKE_TRAUMA_MOD = 2.2
+var CAM_SHAKE_MAX_OFFSET = 10
 
 
 ####################################################################################################
@@ -31,23 +49,85 @@ func _ready():
     print("SEED = ", SEED)
     util.rng.seed = SEED
     
-    var tile_map_logic = load('res://scenes/tiles/TileMapLogic.tscn').instance()
-    tile_map_logic.noise.seed = SEED
-    main.add_child(tile_map_logic)
+    addTileMap()
     if tile_map_logic.mini_map_test:  return
     
-    var ship = load('res://scenes/Ship.tscn').instance()
-    add_child(ship)
+    addShip()
     
+    addCamera()
+    
+    addHud()
+    
+    var enemies = get_node('Enemies')
+    var enemy_pos = Vector2(650, 50)
     for i in 10:
         var enemy = load('res://scenes/Enemy01.tscn').instance()
-        enemy.global_position = Vector2(240, 1050)
-        enemy.HOME_POS = Vector2(240, 1050)
+        enemy.global_position = enemy_pos
+        enemy.HOME_POS = enemy_pos
         enemy.HOME_RADIUS = 100.0
-        add_child(enemy)
-    
-    hud = load('res://scenes/Hud.tscn').instance()
+        enemies.add_child(enemy)
+
+
+func _process(delta):
+    if cam_shake_trauma:
+        cam_shake_trauma = max(cam_shake_trauma - (CAM_SHAKE_DECAY * delta), 0)
+        shakeCam()
+
+
+####################################################################################################
+""" _ready FUNCS """
+
+
+func addTileMap():
+    tile_map_logic = load(TILE_MAP_LOGIC_SCN_REF).instance()
+    tile_map_logic.noise.seed = SEED
+    add_child(tile_map_logic)
+    tile_map = get_node('TileMap')
+
+
+func addShip():
+    ship = load(SHIP_SCN_REF).instance()
+    add_child(ship)
+
+
+func addCamera():
+    # set noise attributes
+    cam_noise.seed = SEED
+    cam_noise.period = CAM_SHAKE_SPEED
+    # init camera
+    camera = Camera2D.new()
+    camera.current = true
+    # set camera limits
+    var map_limits = tile_map.get_used_rect()
+    var map_cellsize = tile_map.cell_size
+    camera.limit_left = map_limits.position.x * map_cellsize.x
+    camera.limit_right = map_limits.end.x * map_cellsize.x
+    camera.limit_top = map_limits.position.y * map_cellsize.y
+    camera.limit_bottom = map_limits.end.y * map_cellsize.y
+    # add camera
+    ship.add_child(camera)
+
+
+func addHud():
+    hud = load(HUD_SCN_REF).instance()
     add_child(hud)
+
+
+####################################################################################################
+""" _process FUNCS """
+
+
+func shakeCam():
+    var amount = pow(cam_shake_trauma, CAM_SHAKE_TRAUMA_MOD)
+    cam_shake_noise_x += 1
+    camera.offset.x = clamp(
+        CAM_SHAKE_OFFSET_MOD * amount * cam_noise.get_noise_1d(cam_shake_noise_x),
+        -CAM_SHAKE_MAX_OFFSET, CAM_SHAKE_OFFSET_MOD
+    )
+    camera.offset.y = clamp(
+        CAM_SHAKE_OFFSET_MOD * amount * cam_noise.get_noise_1d(cam_shake_noise_x + 1_000),
+        -CAM_SHAKE_MAX_OFFSET, CAM_SHAKE_OFFSET_MOD
+    )
 
 
 ####################################################################################################
@@ -98,6 +178,13 @@ func setTerrainColParticlesFromDataPack(data_pack):
     $ShipToTerrainColParticles2D.process_material.spread = data_pack['col_angle']
     $ShipToTerrainColParticles2D.lifetime = 1 * data_pack['speed_damp']
     $ShipToTerrainColParticles2D.restart()
+
+
+func setEnemyColParticles(_pos):
+    $ShipToEnemyColParticles2D.global_position = _pos
+    $ShipToEnemyColParticles2D.restart()
+
+
 
 
 

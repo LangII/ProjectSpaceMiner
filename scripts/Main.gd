@@ -20,6 +20,8 @@ func _ready():
     
     Input.set_custom_mouse_cursor(load('res://sprites/cursor.png'), 0, Vector2(20, 20))
 
+####################################################################################################
+
 func _process(_delta):
     
     if Input.is_action_pressed('test'):

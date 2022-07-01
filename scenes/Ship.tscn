@@ -27,7 +27,7 @@ orbit_velocity_random = 0.0
 [node name="Ship" type="RigidBody2D"]
 position = Vector2( 356.296, 277.837 )
 collision_layer = 2
-collision_mask = 3
+collision_mask = 19
 physics_material_override = SubResource( 1 )
 gravity_scale = 0.0
 contacts_reported = 8
@@ -54,9 +54,6 @@ collision_mask = 8
 [node name="CollisionShape2D" type="CollisionShape2D" parent="DropPickUp"]
 shape = SubResource( 3 )
 
-[node name="GamePlayCamera" type="Camera2D" parent="."]
-current = true
-
 [node name="Turret" type="Sprite" parent="."]
 texture = ExtResource( 3 )
 offset = Vector2( 0, -8 )
@@ -68,6 +65,8 @@ position = Vector2( 0, -25 )
 wait_time = 0.2
 
 [node name="CanTakeTerrainColDmgTimer" type="Timer" parent="."]
+
+[node name="StunnedTimer" type="Timer" parent="."]
 
 [node name="ColParticles2D" type="Particles2D" parent="."]
 position = Vector2( 0, 20 )
@@ -82,3 +81,4 @@ process_material = SubResource( 4 )
 [connection signal="body_entered" from="DropPickUp" to="." method="_on_DropPickUp_body_entered"]
 [connection signal="timeout" from="CanShootTimer" to="." method="_on_CanShootTimer_timeout"]
 [connection signal="timeout" from="CanTakeTerrainColDmgTimer" to="." method="_on_CanTakeTerrainColDmgTimer_timeout"]
+[connection signal="timeout" from="StunnedTimer" to="." method="_on_StunnedTimer_timeout"]

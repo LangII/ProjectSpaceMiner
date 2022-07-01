@@ -7,6 +7,7 @@
 
 [node name="Enemy01" type="KinematicBody2D"]
 collision_layer = 16
+collision_mask = 7
 script = ExtResource( 2 )
 
 [node name="Sprite" type="Sprite" parent="."]
@@ -36,7 +37,10 @@ one_shot = true
 [node name="MasterMoveTimer" type="Timer" parent="."]
 one_shot = true
 
+[node name="CanDmgShipTimer" type="Timer" parent="."]
+
 [connection signal="timeout" from="MasterRotDelayTimer" to="." method="_on_MasterRotDelayTimer_timeout"]
 [connection signal="timeout" from="MasterRotTimer" to="." method="_on_MasterRotTimer_timeout"]
 [connection signal="timeout" from="MasterMoveDelayTimer" to="." method="_on_MasterMoveDelayTimer_timeout"]
 [connection signal="timeout" from="MasterMoveTimer" to="." method="_on_MasterMoveTimer_timeout"]
+[connection signal="timeout" from="CanDmgShipTimer" to="." method="_on_CanDmgShipTimer_timeout"]

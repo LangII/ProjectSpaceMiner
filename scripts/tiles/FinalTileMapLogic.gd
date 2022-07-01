@@ -3,13 +3,13 @@ extends 'res://scripts/tiles/MineralTileMapLogic.gd'
 
 func _ready():
     
-    main.add_child(tile_map)
+    gameplay.add_child(tile_map)
     
-    if mini_map_test:  main.add_child(mini_tile_map)
+    if mini_map_test:  gameplay.add_child(mini_tile_map)
     
-    main.add_child(destruct_tile_map)
+    gameplay.add_child(destruct_tile_map)
     
-    main.add_child(mineral_tile_map)
+    gameplay.add_child(mineral_tile_map)
     
     setNoiseParams()
     
@@ -26,8 +26,8 @@ func _ready():
     
     if mini_map_test:
         tileDataLoop(funcref(self, 'setTileMapCells'), false, true)
-        main.remove_child(tile_map)
-        main.remove_child(destruct_tile_map)
+        gameplay.remove_child(tile_map)
+        gameplay.remove_child(destruct_tile_map)
         return
     
     generalAllTypesMineralVeins()

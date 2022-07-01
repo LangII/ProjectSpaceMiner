@@ -1,13 +1,13 @@
 
 extends KinematicBody2D
 
-onready var tile_map_logic = get_node('/root/Main/TileMapLogic')
-onready var tile_map = get_node('/root/Main/TileMap')
+onready var tile_map_logic = get_node('/root/Main/Gameplay/TileMapLogic')
+onready var tile_map = get_node('/root/Main/Gameplay/TileMap')
 
 var COLLISION_NORMAL_CLAMP = 0.01
 var SPEED = 450
-#var DMG = 20
-var DMG = 80
+var DMG = 20
+#var DMG = 80
 
 var velocity = Vector2()
 
