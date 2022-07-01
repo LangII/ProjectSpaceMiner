@@ -21,7 +21,7 @@ var SHIP_SCN_REF = 'res://scenes/Ship.tscn'
 var HUD_SCN_REF = 'res://scenes/Hud.tscn'
 
 #onready var SEED = util.rng.randi()
-#onready var SEED = hash('1234')
+#onready var SEED = hash('bender rules')
 onready var SEED = 4057731354
 
 var tile_map_logic = null
@@ -185,7 +185,10 @@ func setEnemyColParticles(_pos):
     $ShipToEnemyColParticles2D.restart()
 
 
-
+func setShipShootBulletParticles(_pos, _rot):
+    $ShipShootBulletParticles2D.global_position = _pos
+    $ShipShootBulletParticles2D.rotation = _rot
+    $ShipShootBulletParticles2D.restart()
 
 
 

@@ -148,12 +148,18 @@ func getTerrainColDmgFromDataPack(data_pack) -> float:
 
 
 func shoot():
+    # reset can_shoot
     can_shoot = false
     $CanShootTimer.start()
-    var dir = Vector2(1, 0).rotated($Turret.global_rotation - deg2rad(90))
-    var b = bullet_01.instance()
-    projectiles.add_child(b)
-    b.start($Turret/BulletSpawn.global_position, dir)
+    # get scope vars
+    var bullet = bullet_01.instance()
+    var bullet_spawn_pos = $Turret/BulletSpawn.global_position
+    var bullet_spawn_rot = $Turret/BulletSpawn.global_rotation
+    var bullet_vector = Vector2(1, 0).rotated($Turret.global_rotation - deg2rad(90))
+    # call bullet spawn funcs
+    projectiles.add_child(bullet)
+    bullet.start(bullet_spawn_pos, bullet_vector)
+    gameplay.setShipShootBulletParticles(bullet_spawn_pos, bullet_spawn_rot)
 
 
 func takeDmg(_dmg):
