@@ -4,15 +4,15 @@ extends 'res://scripts/tiles/BaseTileMapLogic.gd'
 
 var MINERAL_MAP = {
     'mineral_01': {
-        'TILE_CODE': 0, 'TILE_LEVELS': [1], 'VEIN_ATTEMPTS': 100, 'VALUE_MIN': 1, 'VALUE_MAX': 3,
+        'TILE_CODE': 0, 'TILE_LEVELS': [1], 'VEIN_ATTEMPTS': 100, 'DROP_VALUE_MIN': 1, 'DROP_VALUE_MAX': 3,
         'VEIN_SIZE_MIN': 1, 'VEIN_SIZE_MAX': 8
     },
     'mineral_02': {
-        'TILE_CODE': 1, 'TILE_LEVELS': [1], 'VEIN_ATTEMPTS': 50, 'VALUE_MIN': 1, 'VALUE_MAX': 3,
+        'TILE_CODE': 1, 'TILE_LEVELS': [1], 'VEIN_ATTEMPTS': 50, 'DROP_VALUE_MIN': 1, 'DROP_VALUE_MAX': 3,
         'VEIN_SIZE_MIN': 1, 'VEIN_SIZE_MAX': 8
     },
     'mineral_03': {
-        'TILE_CODE': 2, 'TILE_LEVELS': [1], 'VEIN_ATTEMPTS': 50, 'VALUE_MIN': 1, 'VALUE_MAX': 3,
+        'TILE_CODE': 2, 'TILE_LEVELS': [1], 'VEIN_ATTEMPTS': 50, 'DROP_VALUE_MIN': 1, 'DROP_VALUE_MAX': 3,
         'VEIN_SIZE_MIN': 1, 'VEIN_SIZE_MAX': 8
     },
 }
@@ -83,7 +83,7 @@ func generateMineralVeins(mineral_type):
 func setMineralTile(k, y, x, _dict, _type):
     data.tiles[k]['is_mineral'] = true
     data.tiles[k]['mineral_type'] = _type
-    data.tiles[k]['mineral_value'] = util.getRandomInt(_dict['VALUE_MIN'], _dict['VALUE_MAX'])
+    data.tiles[k]['mineral_drop_value'] = util.getRandomInt(_dict['DROP_VALUE_MIN'], _dict['DROP_VALUE_MAX'])
     mineral_tile_map.set_cell(x, y, _dict['TILE_CODE'])
 
 

@@ -196,7 +196,7 @@ func initTileDataContainer():
                 'noise': null,
                 'is_mineral': false,
                 'mineral_type': null,
-                'mineral_value': 0
+                'mineral_drop_value': 0
             }
 
 
@@ -495,7 +495,7 @@ func tileDestroyed(k):
     if data.tiles[k]['is_mineral']:
         mineral_tile_map.set_cell(data.tiles[k]['x'], data.tiles[k]['y'], -1)
         gameplay.initDrop(
-            data.tiles[k]['mineral_type'], data.tiles[k]['mineral_value'],
+            data.tiles[k]['mineral_type'], data.tiles[k]['mineral_drop_value'],
             data.tiles[k]['global_pos_center']
         )
 

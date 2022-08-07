@@ -1,9 +1,28 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://sprites/enemy_01.png" type="Texture" id=1]
 [ext_resource path="res://scripts/Enemy01.gd" type="Script" id=2]
 
 [sub_resource type="CircleShape2D" id=1]
+
+[sub_resource type="Gradient" id=2]
+colors = PoolColorArray( 1, 0, 0, 1, 1, 1, 1, 1 )
+
+[sub_resource type="GradientTexture" id=3]
+gradient = SubResource( 2 )
+
+[sub_resource type="ParticlesMaterial" id=4]
+flag_disable_z = true
+direction = Vector3( 0, 0, 0 )
+spread = 180.0
+gravity = Vector3( 0, 0, 0 )
+initial_velocity = 24.0
+initial_velocity_random = 1.0
+orbit_velocity = 0.0
+orbit_velocity_random = 0.0
+scale = 3.0
+scale_random = 1.0
+color_ramp = SubResource( 3 )
 
 [node name="Enemy01" type="KinematicBody2D"]
 collision_layer = 16
@@ -25,6 +44,19 @@ cast_to = Vector2( 0, 0 )
 collision_mask = 19
 collide_with_areas = true
 
+[node name="LifeEndParticles2D" type="Particles2D" parent="."]
+emitting = false
+amount = 30
+one_shot = true
+explosiveness = 0.49
+process_material = SubResource( 4 )
+
+[node name="WoundedTweenUp" type="Tween" parent="."]
+
+[node name="WoundedTweenDown" type="Tween" parent="."]
+
+[node name="LifeEndParticlesLifeTimeTimer" type="Timer" parent="."]
+
 [node name="MasterRotDelayTimer" type="Timer" parent="."]
 one_shot = true
 
@@ -39,6 +71,9 @@ one_shot = true
 
 [node name="CanDmgShipTimer" type="Timer" parent="."]
 
+[connection signal="tween_all_completed" from="WoundedTweenUp" to="." method="_on_WoundedTweenUp_tween_all_completed"]
+[connection signal="tween_all_completed" from="WoundedTweenDown" to="." method="_on_WoundedTweenDown_tween_all_completed"]
+[connection signal="timeout" from="LifeEndParticlesLifeTimeTimer" to="." method="_on_LifeEndParticlesLifeTimeTimer_timeout"]
 [connection signal="timeout" from="MasterRotDelayTimer" to="." method="_on_MasterRotDelayTimer_timeout"]
 [connection signal="timeout" from="MasterRotTimer" to="." method="_on_MasterRotTimer_timeout"]
 [connection signal="timeout" from="MasterMoveDelayTimer" to="." method="_on_MasterMoveDelayTimer_timeout"]

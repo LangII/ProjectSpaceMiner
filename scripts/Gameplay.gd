@@ -9,11 +9,13 @@ onready var drop = preload('res://scenes/Drop.tscn')
 onready var mineral_01_texture = preload('res://sprites/tiles/mineral_01.png')
 onready var mineral_02_texture = preload('res://sprites/tiles/mineral_02.png')
 onready var mineral_03_texture = preload('res://sprites/tiles/mineral_03.png')
+onready var enemy_01_texture = preload('res://sprites/enemy_01_drop.png')
 
 onready var DROP_TEXTURE_MAP = {
     'mineral_01': mineral_01_texture,
     'mineral_02': mineral_02_texture,
-    'mineral_03': mineral_03_texture
+    'mineral_03': mineral_03_texture,
+    'enemy_01': enemy_01_texture
 }
 
 var TILE_MAP_LOGIC_SCN_REF = 'res://scenes/tiles/TileMapLogic.tscn'
@@ -60,7 +62,7 @@ func _ready():
     
     var enemies = get_node('Enemies')
     var enemy_pos = Vector2(650, 50)
-    for i in 10:
+    for i in 3:
         var enemy = load('res://scenes/Enemy01.tscn').instance()
         enemy.global_position = enemy_pos
         enemy.HOME_POS = enemy_pos

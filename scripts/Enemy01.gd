@@ -24,7 +24,7 @@ var MASTER_MOVE_DELAY_TIME = 0.2
 var MASTER_MOVE_MIN_TIME = 0.5
 var MASTER_MOVE_MAX_TIME = 1.5
 
-var MAX_HEALTH = 20.0
+var MAX_HEALTH = 80.0
 
 var DMG = 10.0
 var DMG_TO_SELF_MOD = 0.5
@@ -33,7 +33,7 @@ var CAN_DMG_SHIP_DELAY = 0.5
 var SHIP_COL_IMPULSE_MOD = 80.0
 var can_dmg_ship = true
 
-var master_behavior = ''  # ['rot_delay', 'rot', 'move_delay', 'move']
+var master_behavior = ''  # ['rot_delay', 'rot', 'move_delay', 'move', 'queue_free_sequence']
 var target_behavior = ''  # ['patrol', 'retreat']
 var pursue_trail = []
 var is_home = true
@@ -52,6 +52,19 @@ var PURSUE_CHANCE_REDUCTION = 0.25
 
 var health = MAX_HEALTH
 
+var WOUNDED_MAP = {
+    'high': {'min': 0.0, 'max': 0.25, 'speed': 0.35},
+    'low': {'min': 0.25, 'max': 0.5, 'speed': 1.0}
+}
+var WOUNDED_COLOR = Color(1, 0.4, 0.4, 1)  # red
+var wounded_level = null
+
+var LIFEEND_PARTICLES_LIFETIME = 1.0
+
+var DROP_VALUE_MIN = 1
+var DROP_VALUE_MAX = 3
+var drop_value = 0
+
 
 ####################################################################################################
 
@@ -67,6 +80,9 @@ func _ready():
     $MasterRotDelayTimer.wait_time = MASTER_ROT_DELAY_TIME
     $MasterMoveDelayTimer.wait_time = MASTER_MOVE_DELAY_TIME
     
+    $LifeEndParticles2D.lifetime = LIFEEND_PARTICLES_LIFETIME
+    $LifeEndParticlesLifeTimeTimer.wait_time = LIFEEND_PARTICLES_LIFETIME
+    
     $MasterRotDelayTimer.start()
     
     $CanDmgShipTimer.wait_time = CAN_DMG_SHIP_DELAY
@@ -75,6 +91,10 @@ func _ready():
     
     setMasterTargetPosAndVector()
     setAndStartMasterRotTime()
+    
+    startWoundedTweenUp()
+    
+    drop_value = util.getRandomInt(DROP_VALUE_MIN, DROP_VALUE_MAX)
 
 
 func _process(delta):
@@ -102,7 +122,9 @@ func _process(delta):
         'move_delay':  pass
         
         'move':  pass
-            
+        
+        'queue_free_sequence':  pass
+        
     var col = move_and_collide(master_move_vector * delta,  false)
     
     if col:
@@ -183,7 +205,52 @@ func colWithShip(_collider):
 
 func takeDmg(_dmg):
     health -= _dmg
-    if health <= 0:  queue_free()
+    if health <= 0:  startQueueFreeSequence()
+    setWoundedLevel()
+    if wounded_level:  startWoundedTweenUp()
+
+
+func startWoundedTweenUp():
+    if not wounded_level:  return
+    $WoundedTweenUp.interpolate_property(
+        $Sprite, 'modulate', Color(1, 1, 1, 1), WOUNDED_COLOR,
+        WOUNDED_MAP[wounded_level]['speed'], 0, 1
+    )
+    $WoundedTweenUp.start()
+
+
+func startWoundedTweenDown():
+    if not wounded_level:  return
+    $WoundedTweenDown.interpolate_property(
+        $Sprite, 'modulate', WOUNDED_COLOR, Color(1, 1, 1, 1),
+        WOUNDED_MAP[wounded_level]['speed'], 0, 1
+    )
+    $WoundedTweenDown.start()
+
+
+func setWoundedLevel():
+    for level in WOUNDED_MAP.keys():
+        var wounded_health_min = MAX_HEALTH * WOUNDED_MAP[level]['min']
+        var wounded_health_max = MAX_HEALTH * WOUNDED_MAP[level]['max']
+        if (health > wounded_health_min) and (health <= wounded_health_max):
+            wounded_level = level
+            return
+    wounded_level = null
+
+
+func startQueueFreeSequence():
+    master_move_vector = Vector2()
+    master_behavior = 'queue_free_sequence'
+    $MasterRotDelayTimer.stop()
+    $MasterRotTimer.stop()
+    $MasterMoveDelayTimer.stop()
+    $MasterMoveTimer.stop()
+    collision_layer = 0
+    collision_mask = 0
+    $Sprite.visible = false
+    $LifeEndParticles2D.restart()
+    $LifeEndParticlesLifeTimeTimer.start()
+    gameplay.initDrop('enemy_01', drop_value, global_position)
 
 
 ####################################################################################################
@@ -215,6 +282,18 @@ func _on_MasterMoveTimer_timeout():
 
 func _on_CanDmgShipTimer_timeout():
     can_dmg_ship = true
+
+
+func _on_WoundedTweenUp_tween_all_completed():
+    if wounded_level:  startWoundedTweenDown()
+
+
+func _on_WoundedTweenDown_tween_all_completed():
+    if wounded_level:  startWoundedTweenUp()
+
+
+func _on_LifeEndParticlesLifeTimeTimer_timeout():
+    queue_free()
 
 
 
