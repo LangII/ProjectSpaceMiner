@@ -26,5 +26,8 @@ func _process(_delta):
     
     if Input.is_action_pressed('test'):
         
-        var ship = get_node('Gameplay/Ship')
-        print("ship.global_position = ", ship.global_position)
+#        var ship = get_node('Gameplay/Ship')
+#        print("ship.global_position = ", ship.global_position)
+        
+        var data = get_node('Data')
+        print("data.tiles = ", data.tiles)

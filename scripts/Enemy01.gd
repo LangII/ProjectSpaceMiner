@@ -7,13 +7,14 @@ onready var ship = get_node('/root/Main/Gameplay/Ship')
 onready var tilemap = get_node('/root/Main/Gameplay/TileMap')
 
 var HOME_POS = Vector2()
-var HOME_RADIUS = 0.0
+var HOME_RADIUS_TILE_COUNT = 0
+var HOME_RADIUS = HOME_RADIUS_TILE_COUNT * 10
 
 var ROT_DIRS = ['left', 'right']
 var ROT_SPEED = 4.0
 var MOVE_SPEED = 150.0
 
-var AGGRESSIVE_DIST_RANGE = 200.0
+var AGGRESSIVE_DIST_RANGE = 400.0
 
 var TARGET_ANGLE_RANGE = 10.0
 

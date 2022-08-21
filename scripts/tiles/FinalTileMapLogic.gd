@@ -5,7 +5,9 @@ func _ready():
     
     gameplay.add_child(tile_map)
     
-    if mini_map_test:  gameplay.add_child(mini_tile_map)
+#    if gameplay.mini_map_test:  gameplay.add_child(mini_tile_map)
+    
+    gameplay.add_child(mini_tile_map)
     
     gameplay.add_child(destruct_tile_map)
     
@@ -20,15 +22,17 @@ func _ready():
     setBoarderWallFrom1dNoise()
     
     # fade out for top air
-    updateNoiseWithVertLinearFade(0, 50, 0, 1)
+    updateNoiseWithVertLinearFade(0, AIR_FADE_START_HEIGHT, 0, 1)
     
     tileDataLoop(funcref(self, 'setTileDataTileLevelAndTileCode'), true, false)
     
-    if mini_map_test:
-        tileDataLoop(funcref(self, 'setTileMapCells'), false, true)
-        gameplay.remove_child(tile_map)
-        gameplay.remove_child(destruct_tile_map)
-        return
+#    if gameplay.mini_map_test:
+#        tileDataLoop(funcref(self, 'setTileMapCells'), false, true)
+##        gameplay.remove_child(tile_map)
+##        gameplay.remove_child(destruct_tile_map)
+##        return
+    
+    tileDataLoop(funcref(self, 'setTileMapCells'), false, true)
     
     generalAllTypesMineralVeins()
     
@@ -65,5 +69,6 @@ func _ready():
     updateBoarderWall()
     
     updateAirBoarderWall()
+    
     
 

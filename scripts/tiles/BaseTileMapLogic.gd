@@ -2,8 +2,9 @@
 extends Node
 
 onready var main = get_node('/root/Main')
-onready var data = get_node('/root/Main/Data')
 onready var util = get_node('/root/Main/Utilities')
+onready var data = get_node('/root/Main/Data')
+onready var ctrl = get_node('/root/Main/Controls')
 onready var gameplay = get_node('/root/Main/Gameplay')
 
 onready var tile_map = preload("res://scenes/tiles/TileMap.tscn").instance()
@@ -16,8 +17,8 @@ onready var mini_tile_map = preload("res://scenes/tiles/MiniTileMap.tscn").insta
 """ adjustable constants """
 
 
-var TILE_MAP_WIDTH = 80
-var TILE_MAP_HEIGHT = 80
+onready var TILE_MAP_WIDTH = ctrl.tile_map_width
+onready var TILE_MAP_HEIGHT = ctrl.tile_map_height
 
 var NOISE_OCTAVES = 3  # 1 = 3 = 9 (int) (edge distortion)
 var NOISE_PERIOD = 64  # 0.1 = 64 = 256 (float) (noise size)
@@ -31,12 +32,11 @@ var BOARDER_WALL_NOISE_PERIOD = 40  # 0.1 = 64 = 256 (float) (noise size)
 var BOARDER_WALL_NOISE_PERSISTENCE = 0.9  # 0 = 0.5 = 1 (float)
 var BOARDER_WALL_NOISE_LACUNARITY = 3.5  # 0.1 = 2 = 4 (float)
 
+var AIR_FADE_START_HEIGHT = 50
+
 var TILE_01_HEALTH = 80
 var TILE_02_HEALTH = 500
 var TILE_03_HEALTH = 2000
-
-#var mini_map_test = true
-var mini_map_test = false
 
 
 ####################################################################################################
@@ -63,6 +63,11 @@ var TILE_L03_3EDGE_COL = 16
 var TILE_L03_2EDGE_NONCOL = 17
 var TILE_L03_3EDGE_NONCOL = 18
 
+var MINI_TILE_L00 = 0
+var MINI_TILE_L01 = 1
+var MINI_TILE_L02 = 2
+var MINI_TILE_L03 = 3
+
 var DESTRUCT_TILE_AIR = 0
 var DESTRUCT_TILE_25 = 1
 var DESTRUCT_TILE_50 = 2
@@ -88,10 +93,10 @@ var TILE_3EDGE_DIR_CODE = {
 }
 
 var NOISE_SETTINGS = [
-    {'TILE_LEVEL': 0, 'TILE_CODE': TILE_L00_AIR, 'LOW': 0.00, 'HIGH': 0.20},
-    {'TILE_LEVEL': 1, 'TILE_CODE': TILE_L01, 'LOW': 0.20, 'HIGH': 0.30},
-    {'TILE_LEVEL': 2, 'TILE_CODE': TILE_L02, 'LOW': 0.30, 'HIGH': 0.40},
-    {'TILE_LEVEL': 3, 'TILE_CODE': TILE_L03, 'LOW': 0.40, 'HIGH': 1.10}
+    {'TILE_LEVEL': 0, 'TILE_CODE': TILE_L00_AIR, 'MINI_TILE_CODE': MINI_TILE_L00, 'LOW': 0.00, 'HIGH': 0.20},
+    {'TILE_LEVEL': 1, 'TILE_CODE': TILE_L01, 'MINI_TILE_CODE': MINI_TILE_L01, 'LOW': 0.20, 'HIGH': 0.30},
+    {'TILE_LEVEL': 2, 'TILE_CODE': TILE_L02, 'MINI_TILE_CODE': MINI_TILE_L02, 'LOW': 0.30, 'HIGH': 0.40},
+    {'TILE_LEVEL': 3, 'TILE_CODE': TILE_L03, 'MINI_TILE_CODE': MINI_TILE_L03, 'LOW': 0.40, 'HIGH': 1.10}
 ]
 
 var TILE_COL_MAP = {
@@ -193,6 +198,7 @@ func initTileDataContainer():
                 'global_pos_center': tile_map.map_to_world(Vector2(x, y)) + (tile_map.cell_size / 2),
                 'tile_level': 0,
                 'tile_code': 0,
+                'mini_tile_code': 0,
                 'noise': null,
                 'is_mineral': false,
                 'mineral_type': null,
@@ -255,6 +261,7 @@ func setTileDataTileLevelAndTileCode(k):
         if data.tiles[k]['noise'] >= ln['LOW'] and data.tiles[k]['noise'] < ln['HIGH']:
             data.tiles[k]['tile_level'] = ln['TILE_LEVEL']
             data.tiles[k]['tile_code'] = ln['TILE_CODE']
+            data.tiles[k]['mini_tile_code'] = ln['MINI_TILE_CODE']
 
 
 func setTileDataHealth(k):
@@ -357,8 +364,7 @@ func setTileDataEdgeDirCode(k):
 
 func setTileMapCells(k, y, x):
     tile_map.set_cell(x, y, data.tiles[k]['tile_code'])
-    if mini_tile_map:
-        mini_tile_map.set_cell(x, y, data.tiles[k]['tile_level'])
+    mini_tile_map.set_cell(x, y, data.tiles[k]['mini_tile_code'])
 
 
 func getModTypeCount(type, k):

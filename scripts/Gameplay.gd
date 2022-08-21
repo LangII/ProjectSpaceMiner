@@ -2,8 +2,12 @@
 extends Node
 
 onready var main = get_node('/root/Main')
-onready var data = get_node('/root/Main/Data')
 onready var util = get_node('/root/Main/Utilities')
+onready var data = get_node('/root/Main/Data')
+onready var ctrl = get_node('/root/Main/Controls')
+
+#onready var tile_map_logic = get_node('TileMapLogic')
+#onready var enemy_gen_logic = get_node("EnemyGenLogic")
 
 onready var drop = preload('res://scenes/Drop.tscn')
 onready var mineral_01_texture = preload('res://sprites/tiles/mineral_01.png')
@@ -19,6 +23,7 @@ onready var DROP_TEXTURE_MAP = {
 }
 
 var TILE_MAP_LOGIC_SCN_REF = 'res://scenes/tiles/TileMapLogic.tscn'
+var ENEMY_GEN_LOGIC_SCN_REF = 'res://scenes/EnemyGenLogic.tscn'
 var SHIP_SCN_REF = 'res://scenes/Ship.tscn'
 var HUD_SCN_REF = 'res://scenes/Hud.tscn'
 
@@ -28,6 +33,7 @@ onready var SEED = 4057731354
 
 var tile_map_logic = null
 var tile_map = null
+var enemy_gen_logic = null
 var ship = null
 var camera = null
 var hud = null
@@ -42,6 +48,9 @@ var CAM_SHAKE_OFFSET_MOD = 200
 var CAM_SHAKE_TRAUMA_MOD = 2.2
 var CAM_SHAKE_MAX_OFFSET = 10
 
+#var mini_map_test = true
+var mini_map_test = false
+
 
 ####################################################################################################
 
@@ -52,22 +61,24 @@ func _ready():
     util.rng.seed = SEED
     
     addTileMap()
-    if tile_map_logic.mini_map_test:  return
     
     addShip()
+    
+    addEnemies()
     
     addCamera()
     
     addHud()
     
-    var enemies = get_node('Enemies')
-    var enemy_pos = Vector2(650, 50)
-    for i in 3:
-        var enemy = load('res://scenes/Enemy01.tscn').instance()
-        enemy.global_position = enemy_pos
-        enemy.HOME_POS = enemy_pos
-        enemy.HOME_RADIUS = 100.0
-        enemies.add_child(enemy)
+    if mini_map_test:
+        remove_child(hud)
+        remove_child(ship)
+        remove_child(get_node('Enemies'))
+        remove_child(tile_map)
+        remove_child(get_node('DestructTileMap'))
+        remove_child(get_node('MineralTileMap'))
+    else:
+        remove_child(get_node('MiniTileMap'))
 
 
 func _process(delta):
@@ -85,6 +96,14 @@ func addTileMap():
     tile_map_logic.noise.seed = SEED
     add_child(tile_map_logic)
     tile_map = get_node('TileMap')
+
+
+func addEnemies():
+    
+    enemy_gen_logic = load(ENEMY_GEN_LOGIC_SCN_REF).instance()
+    add_child(enemy_gen_logic)
+    
+    enemy_gen_logic.genEnemy01s()
 
 
 func addShip():
