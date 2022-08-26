@@ -3,15 +3,11 @@ extends Node
 
 func _ready():
     
-#    var item = get_node('Utilities').getRandomItemFromArrayWithWeight(
-#        ['a', 'b', 'c', 'd'],
-#        [0.10, 0.20, 0.20, 0.50]
-#    )
+#    var testing = int(1.75)
 #
-#    print("")
-#    print("item = ", item)
+#    print("testing = ", testing)
 #
-#    return
+#    return 
     
     ################################################################################################
     

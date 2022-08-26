@@ -8,6 +8,7 @@ onready var ctrl = get_node('/root/Main/Controls')
 onready var gameplay = get_node('/root/Main/Gameplay')
 
 onready var tile_map_logic = gameplay.get_node('TileMapLogic')
+onready var tile_map = gameplay.get_node('TileMap')
 onready var mini_tile_map = gameplay.get_node('MiniTileMap')
 
 onready var _enemies_ = gameplay.get_node('Enemies')
@@ -16,9 +17,14 @@ onready var enemy_01 = preload('res://scenes/Enemy01.tscn')
 
 onready var ENEMY_GEN_MAP = {
     'ENEMY_01': {
-        'SWARM_ATTEMPTS': {'MIN': 10, 'MAX': 20},
-        'COUNT_PER_SWARM': {'MIN': 5, 'MAX': 10},
-        'HOME_RADIUS_TILE_COUNT': {'MIN': 4, 'MAX': 10}
+        'SWARM_ATTEMPTS_PER_BOTTOM_PERC': {
+            1.00: {'MIN': 5, 'MAX': 10},
+            0.50: {'MIN': 5, 'MAX': 10},
+            0.25: {'MIN': 5, 'MAX': 10}
+        },
+        'WEIGHTED_COUNT_PER_SWARM': {'MIN': 2, 'MAX': 8},
+        'WEIGHTED_HOME_RADIUS': {'MIN': 4, 'MAX': 10},  # by tile
+        'WEIGHTED_NEAR_COORDS_DIST': {'MIN': 2, 'MAX': 8}  # by tile
     }
 }
 
@@ -26,47 +32,59 @@ onready var ENEMY_GEN_MAP = {
 ####################################################################################################
 
 
-func genEnemy01s():
+func genEnemy01s() -> void:
     
     var gen_map = ENEMY_GEN_MAP['ENEMY_01']
-    var swarm_attempts = util.getRandomInt(gen_map['SWARM_ATTEMPTS']['MIN'], gen_map['SWARM_ATTEMPTS']['MAX'])
-    var count_per_swarm = util.getRandomInt(gen_map['COUNT_PER_SWARM']['MIN'], gen_map['COUNT_PER_SWARM']['MAX'])
-    var home_radius_tile_count = util.getRandomInt(gen_map['HOME_RADIUS_TILE_COUNT']['MIN'], gen_map['HOME_RADIUS_TILE_COUNT']['MAX'])
+    var spawn_weight = util.getRandomFloat(0.0, 1.0)
+    var attempting_coords = getAttemptingCoords(gen_map['SWARM_ATTEMPTS_PER_BOTTOM_PERC'], spawn_weight)
     
-    print("swarm_attempts = ", swarm_attempts)
-    print("count_per_swarm = ", count_per_swarm)
-    print("home_radius_tile_count = ", home_radius_tile_count)
-    
-    var swarm_attempted_coords = []
-    var good_swarm_coords = []
-    for i in swarm_attempts:
-        var x = util.getRandomInt(0, ctrl.tile_map_width - 1)
-        var y = util.getRandomInt(0 + tile_map_logic.AIR_FADE_START_HEIGHT, ctrl.tile_map_height - 1)
+    var success_spawn_coords = []    
+    for coord in attempting_coords:
         
-        swarm_attempted_coords += ['%s,%s' % [y, x]]
+        var attempt_y = coord[0]
+        var attempt_x = coord[1]
         
-        var near_coords = getNearCoords(x, y, 5)
+        var near_coords_dist = int(round(util.normalize(
+            spawn_weight, 0, 1, gen_map['WEIGHTED_NEAR_COORDS_DIST']['MIN'],
+            gen_map['WEIGHTED_NEAR_COORDS_DIST']['MAX']
+        )))
+        
+        var near_coords = getNearCoords(attempt_x, attempt_y, near_coords_dist)
         
         if isNearSolidTiles(near_coords):  continue
+        if isTooCloseToOtherSpawn(near_coords, success_spawn_coords):  continue
         
-        var too_close_to_other_swarm = false
-        for good_swarm_coord in good_swarm_coords:
-            if good_swarm_coord in near_coords:
-                too_close_to_other_swarm = true
-                break
-        if too_close_to_other_swarm:  continue
+        success_spawn_coords += [[attempt_y, attempt_x]]
         
-        good_swarm_coords += ['%s,%s' % [y, x]]
+        var count_per_swarm = int(round(util.normalize(
+            spawn_weight, 0, 1, gen_map['WEIGHTED_COUNT_PER_SWARM']['MIN'],
+            gen_map['WEIGHTED_COUNT_PER_SWARM']['MAX']
+        )))
+        var home_radius = int(round(util.normalize(
+            spawn_weight, 0, 1, gen_map['WEIGHTED_HOME_RADIUS']['MIN'],
+            gen_map['WEIGHTED_HOME_RADIUS']['MAX']
+        )))
         
-        if gameplay.mini_map_test:  setMiniTileMapEnemyPos(x, y)
-        
-        setEnemy01Swarm(x, y, count_per_swarm, home_radius_tile_count)
-    
-    print("swarm_attempted_coords = ", swarm_attempted_coords)
-    print("good_swarm_coords = ", good_swarm_coords)
+        setEnemy01Swarm(attempt_x, attempt_y, count_per_swarm, home_radius)
+        setMiniTileMapEnemyPos(attempt_x, attempt_y)
 
 
 ####################################################################################################
+
+
+func getAttemptingCoords(_per_bottom_perc_dict:Dictionary, _weight) -> Array:
+    var attempting_coords = []
+    for perc in _per_bottom_perc_dict.keys():
+        var attempts_count = util.getRandomInt(
+            _per_bottom_perc_dict[perc]['MIN'], _per_bottom_perc_dict[perc]['MAX']
+        )
+        var attempt_height_top = max(ctrl.safe_zone_start_height, int(ctrl.tile_map_height * (1 - perc)))
+        var attempt_height_bottom = ctrl.tile_map_height - 1
+        for _i in attempts_count:
+            var attempt_y = util.getRandomInt(attempt_height_top, attempt_height_bottom)
+            var attempt_x = util.getRandomInt(0, ctrl.tile_map_width - 1)
+            attempting_coords += [[attempt_y, attempt_x]]
+    return attempting_coords
 
 
 func getNearCoords(_x:int, _y:int, _how_near:int) -> Array:
@@ -77,10 +95,16 @@ func getNearCoords(_x:int, _y:int, _how_near:int) -> Array:
     return near_coords
 
 
-func isNearSolidTiles(_near_coords) -> bool:
-    var is_solid_bools = []
+func isNearSolidTiles(_near_coords:Array) -> bool:
     for coord in _near_coords:
         if data.tiles[coord]['tile_level'] != 0:  return true
+    return false
+
+
+func isTooCloseToOtherSpawn(_near_coords:Array, _success_spawn_coords:Array) -> bool:
+    for success_spawn_coord in _success_spawn_coords:
+        if success_spawn_coord in _near_coords:
+            return true
     return false
 
 
@@ -91,12 +115,12 @@ func setMiniTileMapEnemyPos(_x:int, _y:int, _buffer:int=1) -> void:
 
 
 func setEnemy01Swarm(_home_x_tile:int, _home_y_tile:int, _enemy_count:int, _home_radius_tile:int) -> void:
-    var enemy_pos = Vector2(_home_x_tile * 20, _home_y_tile * 20)
+    var enemy_pos = Vector2(_home_x_tile * tile_map.cell_size[0], _home_y_tile * tile_map.cell_size[0])
     for i in _enemy_count:
         var enemy = load('res://scenes/Enemy01.tscn').instance()
         enemy.global_position = enemy_pos
         enemy.HOME_POS = enemy_pos
-        enemy.HOME_RADIUS_TILE_COUNT = _home_radius_tile
+        enemy.HOME_RADIUS_BY_TILE = _home_radius_tile
         _enemies_.add_child(enemy)
 
 

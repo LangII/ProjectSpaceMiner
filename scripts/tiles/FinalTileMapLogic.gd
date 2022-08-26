@@ -22,7 +22,7 @@ func _ready():
     setBoarderWallFrom1dNoise()
     
     # fade out for top air
-    updateNoiseWithVertLinearFade(0, AIR_FADE_START_HEIGHT, 0, 1)
+    updateNoiseWithVertLinearFade(0, SAFE_ZONE_START_HEIGHT, 0, 1)
     
     tileDataLoop(funcref(self, 'setTileDataTileLevelAndTileCode'), true, false)
     
@@ -34,7 +34,7 @@ func _ready():
     
     tileDataLoop(funcref(self, 'setTileMapCells'), false, true)
     
-    generalAllTypesMineralVeins()
+    generateAllTypesMineralVeins()
     
     for k in data.tiles.keys():
         var y = data.tiles[k]['y']
@@ -70,5 +70,6 @@ func _ready():
     
     updateAirBoarderWall()
     
-    
-
+    for k in data.tiles.keys():
+        if data.tiles[k]['mineral_type']:
+            setMiniTileMapMineralPos(data.tiles[k]['x'], data.tiles[k]['y'])

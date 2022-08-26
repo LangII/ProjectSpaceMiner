@@ -32,7 +32,7 @@ var BOARDER_WALL_NOISE_PERIOD = 40  # 0.1 = 64 = 256 (float) (noise size)
 var BOARDER_WALL_NOISE_PERSISTENCE = 0.9  # 0 = 0.5 = 1 (float)
 var BOARDER_WALL_NOISE_LACUNARITY = 3.5  # 0.1 = 2 = 4 (float)
 
-var AIR_FADE_START_HEIGHT = 50
+onready var SAFE_ZONE_START_HEIGHT = ctrl.safe_zone_start_height
 
 var TILE_01_HEALTH = 80
 var TILE_02_HEALTH = 500

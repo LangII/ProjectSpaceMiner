@@ -25,10 +25,10 @@ texture = ExtResource( 3 )
 position = Vector2( 32, 8 )
 texture = ExtResource( 4 )
 
-[node name="100" type="Sprite" parent="."]
+[node name="4" type="Sprite" parent="."]
 position = Vector2( 40, 8 )
 texture = ExtResource( 6 )
 
-[node name="200" type="Sprite" parent="."]
+[node name="5" type="Sprite" parent="."]
 position = Vector2( 48, 8 )
 texture = ExtResource( 5 )

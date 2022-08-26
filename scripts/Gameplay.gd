@@ -6,9 +6,6 @@ onready var util = get_node('/root/Main/Utilities')
 onready var data = get_node('/root/Main/Data')
 onready var ctrl = get_node('/root/Main/Controls')
 
-#onready var tile_map_logic = get_node('TileMapLogic')
-#onready var enemy_gen_logic = get_node("EnemyGenLogic")
-
 onready var drop = preload('res://scenes/Drop.tscn')
 onready var mineral_01_texture = preload('res://sprites/tiles/mineral_01.png')
 onready var mineral_02_texture = preload('res://sprites/tiles/mineral_02.png')
@@ -29,7 +26,8 @@ var HUD_SCN_REF = 'res://scenes/Hud.tscn'
 
 #onready var SEED = util.rng.randi()
 #onready var SEED = hash('bender rules')
-onready var SEED = 4057731354
+#onready var SEED = 4057731354
+onready var SEED = 2099129296
 
 var tile_map_logic = null
 var tile_map = null

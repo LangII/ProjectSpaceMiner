@@ -7,8 +7,8 @@ onready var ship = get_node('/root/Main/Gameplay/Ship')
 onready var tilemap = get_node('/root/Main/Gameplay/TileMap')
 
 var HOME_POS = Vector2()
-var HOME_RADIUS_TILE_COUNT = 0
-var HOME_RADIUS = HOME_RADIUS_TILE_COUNT * 10
+var HOME_RADIUS_BY_TILE = 0
+onready var HOME_RADIUS = HOME_RADIUS_BY_TILE * tilemap.cell_size[0]
 
 var ROT_DIRS = ['left', 'right']
 var ROT_SPEED = 4.0
@@ -54,7 +54,7 @@ var PURSUE_CHANCE_REDUCTION = 0.25
 var health = MAX_HEALTH
 
 var WOUNDED_MAP = {
-    'high': {'min': 0.0, 'max': 0.25, 'speed': 0.35},
+    'high': {'min': 0.0, 'max': 0.25, 'speed': 0.25},
     'low': {'min': 0.25, 'max': 0.5, 'speed': 1.0}
 }
 var WOUNDED_COLOR = Color(1, 0.4, 0.4, 1)  # red
