@@ -101,7 +101,8 @@ func addEnemies():
     enemy_gen_logic = load(ENEMY_GEN_LOGIC_SCN_REF).instance()
     add_child(enemy_gen_logic)
     
-    enemy_gen_logic.genEnemy01s()
+#    enemy_gen_logic.genEnemy01s()
+    enemy_gen_logic.genEnemy02s()
 
 
 func addShip():

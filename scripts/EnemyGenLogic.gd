@@ -14,6 +14,7 @@ onready var mini_tile_map = gameplay.get_node('MiniTileMap')
 onready var _enemies_ = gameplay.get_node('Enemies')
 
 onready var enemy_01 = preload('res://scenes/Enemy01.tscn')
+onready var enemy_02 = preload('res://scenes/Enemy02.tscn')
 
 onready var ENEMY_GEN_MAP = {
     'ENEMY_01': {
@@ -69,6 +70,15 @@ func genEnemy01s() -> void:
         setMiniTileMapEnemyPos(attempt_x, attempt_y)
 
 
+func genEnemy02s() -> void:
+    
+    var enemy_inst = enemy_02.instance()
+    enemy_inst.global_position = Vector2(600, 300)
+    _enemies_.add_child(enemy_inst)
+    
+#    enemy_inst.moveSegmentsToIgnored()
+
+
 ####################################################################################################
 
 
@@ -117,11 +127,11 @@ func setMiniTileMapEnemyPos(_x:int, _y:int, _buffer:int=1) -> void:
 func setEnemy01Swarm(_home_x_tile:int, _home_y_tile:int, _enemy_count:int, _home_radius_tile:int) -> void:
     var enemy_pos = Vector2(_home_x_tile * tile_map.cell_size[0], _home_y_tile * tile_map.cell_size[0])
     for i in _enemy_count:
-        var enemy = load('res://scenes/Enemy01.tscn').instance()
-        enemy.global_position = enemy_pos
-        enemy.HOME_POS = enemy_pos
-        enemy.HOME_RADIUS_BY_TILE = _home_radius_tile
-        _enemies_.add_child(enemy)
+        var enemy_inst = enemy_01.instance()
+        enemy_inst.global_position = enemy_pos
+        enemy_inst.HOME_POS = enemy_pos
+        enemy_inst.HOME_RADIUS_BY_TILE = _home_radius_tile
+        _enemies_.add_child(enemy_inst)
 
 
 
