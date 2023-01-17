@@ -1,6 +1,10 @@
 
 extends Node
 
+onready var main = get_node('/root/Main')
+onready var data = get_node('/root/Main/Data')
+onready var ctrl = get_node('/root/Main/Controls')
+
 onready var rng = RandomNumberGenerator.new()
 
 
@@ -64,5 +68,46 @@ func getRandomItemFromArrayWithWeights(_array:Array, _weights:Array):
 
 func getRandomBool(_true_perc:float=0.50) -> bool:
     return getRandomItemFromArrayWithWeights([true, false], [_true_perc, 1.0 - _true_perc])
+
+
+func convAngleTo360Range(_angle:float) -> float:
+    if _angle >= 0:  return _angle
+    else:  return (_angle * -1) + 180
+
+
+func convTileMapPosToGlobalPos(tile_map_pos:Vector2, global_pos_type:String='middle') -> Vector2:
+    var global_pos = data.tiles['%s,%s' % [tile_map_pos.y, tile_map_pos.x]]['global_pos_center']
+    global_pos = Vector2(global_pos[0], global_pos[1])
+    var width_adjust = ctrl.tile_width / 2
+    var height_adjust = ctrl.tile_height / 2
+    var adjust = {}
+    match global_pos_type:
+        'top_left':     adjust = {'x': -width_adjust, 'y': -height_adjust}
+        'top':          adjust = {'x': 0,             'y': -height_adjust}
+        'top_right':    adjust = {'x': +width_adjust, 'y': -height_adjust}
+        'center_left':  adjust = {'x': -width_adjust, 'y': 0             }
+        'middle':       adjust = {'x': 0,             'y': 0             }
+        'center_right': adjust = {'x': +width_adjust, 'y': 0             }
+        'bottom_left':  adjust = {'x': -width_adjust, 'y': +height_adjust}
+        'bottom':       adjust = {'x': 0,             'y': +height_adjust}
+        'bottom_right': adjust = {'x': +width_adjust, 'y': +height_adjust}
+    global_pos.x += adjust['x']
+    global_pos.y += adjust['y']
+    return global_pos
+
+
+#func convGlobalPosToTileMapPos(global_pos:Vector2) -> Vector2:
+    
+
+
+
+
+
+
+
+
+
+
+
 
 

@@ -5,9 +5,9 @@ var gameplay
 
 func _ready():
     
-#    var mod = 9 % 360
+#    var test = util.convTileMapPosToGlobalPos(Vector2())
 #
-#    print("mod = ", mod)
+#    print("test = ", test
 #
 #    return 
     
@@ -24,10 +24,31 @@ func _process(_delta):
     
     if Input.is_action_just_pressed('test'):
         
-        var enemy_02 = get_node('Gameplay/Enemies/Enemy02')
+        var enemy = get_node('Gameplay/Enemies/Enemy02')
         
-        if enemy_02.turn_dir == +1:  enemy_02.turn_dir = -1
-        else:  enemy_02.turn_dir = +1
+        print("\nname =                     ", enemy.name)
+        print("global_position =              ", enemy.global_position)
+        print("target =                       ", enemy.target)
+        print("is_touching_wall =             ", enemy.is_touching_wall)
+        print("angle_to_target =              ", enemy.angle_to_target)
+        print("is_approaching_target =        ", enemy.is_approaching_target)
+        print("angle_to_target_is_expanding = ", enemy.angle_to_target_is_expanding)
+        
+#        var test_x = 10
+#        var test_y = 50
+#        var data_tiles_value = get_node('Data').tiles['%s,%s' % [test_y, test_x]]
+#        var test_vector = Vector2(data_tiles_value['x'], data_tiles_value['y'])
+#
+#        var test = get_node('Utilities').convTileMapPosToGlobalPos(test_vector)
+#
+#        print("test_x =      ", test_x)
+#        print("test_y =      ", test_y)
+#        print("test_vector = ", test_vector)
+#        print("test =        ", test)
+        
+#        var enemy_02 = get_node('Gameplay/Enemies/Enemy02')
+        
+#        enemy_02.changeTurnDir()
         
 #        print("enemy_02.spine = ", enemy_02.spine)
         

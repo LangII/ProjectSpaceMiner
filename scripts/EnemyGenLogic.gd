@@ -73,10 +73,8 @@ func genEnemy01s() -> void:
 func genEnemy02s() -> void:
     
     var enemy_inst = enemy_02.instance()
-    enemy_inst.global_position = Vector2(600, 300)
+    enemy_inst.global_position = Vector2(620, 450)
     _enemies_.add_child(enemy_inst)
-    
-#    enemy_inst.moveSegmentsToIgnored()
 
 
 ####################################################################################################

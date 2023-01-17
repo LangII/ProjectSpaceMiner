@@ -1,6 +1,7 @@
 
 extends Node
 
+### key = '%s,%s' % [y, x]
 """
 {
     0,0: {
