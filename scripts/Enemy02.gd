@@ -63,6 +63,8 @@ onready var is_touching_wall = false
 onready var prev_is_touching_wall = false
 onready var can_get_new_target_from_col = true
 
+onready var CAN_GEN_NEW_TARGET_FROM_COL_DELAY = 2
+
 
 ####################################################################################################
 
@@ -74,6 +76,8 @@ func _ready() -> void:
 	initSegmentsMap()
 	
 	moveSegmentsToIgnored()
+	
+	$CanGetNewTargetFromColTimer.wait_time = CAN_GEN_NEW_TARGET_FROM_COL_DELAY
 
 
 func _process(_delta:float) -> void:
