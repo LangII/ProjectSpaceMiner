@@ -86,3 +86,9 @@ texture = ExtResource( 4 )
 shape = SubResource( 3 )
 
 [node name="Ignored" type="Node" parent="."]
+
+[node name="CanGetNewTargetFromColTimer" type="Timer" parent="."]
+wait_time = 2.0
+one_shot = true
+
+[connection signal="timeout" from="CanGetNewTargetFromColTimer" to="." method="_on_CanGetNewTargetFromColTimer_timeout"]
