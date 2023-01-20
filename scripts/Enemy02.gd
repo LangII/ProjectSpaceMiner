@@ -16,15 +16,12 @@ onready var segments_map = {}
 onready var TAIL_SPIN_SPEED = 4
 onready var tail_spin_dir = util.getRandomItemFromArray([+1, -1])
 
-### movement
-
-#onready var SPEED = 80
-#onready var INNER_TURN_SHARPNESS = 3.8
-onready var SPEED = 60
-onready var INNER_TURN_SHARPNESS = 1.5
+#onready var SPEED = 60
+#onready var INNER_TURN_SHARPNESS = 1.5
+onready var SPEED = 80
+onready var INNER_TURN_SHARPNESS = 2.5
 
 onready var OUTER_TURN_DEG = 70
-#onready var OUTER_TURN_DEG = 80
 
 onready var turn_dir = +1
 onready var cur_dir = 90
@@ -37,13 +34,13 @@ onready var SEGMENT_DIAMETER = 20
 onready var TAIL_DIAMETER = 10
 
 onready var SPEED_TO_DIST_MODIFIER = 60.0
-#onready var SPEED_TO_DIST_MODIFIER = 150.0
 
 onready var SPINE_TO_SPINE_DIST = null
 onready var SEGMENT_TO_SEGMENT_SPINE_COUNT = null
 onready var SEGMENT_TO_TAIL_SPINE_COUNT = null
 onready var TOTAL_SPINE_COUNT = null
 
+""" TODO:  initial target to be randomly generated """
 onready var target = Vector2(620, 1000)
 
 onready var dist_to_target = 0.0
@@ -53,8 +50,8 @@ onready var prev_angle_to_target = 0.0
 onready var angle_to_target_is_expanding = null
 onready var is_approaching_target = null
 
-#onready var NEW_TARGET_SENS_DIST_MIN = 20
-onready var NEW_TARGET_SENS_DIST_MIN = 40
+### if this value is too low (20 gave me problems) then enemy02 sometimes ends in an infinite movement loop
+onready var GEN_NEW_TARGET_WITHIN_DIST = 40
 
 onready var NEW_TARGET_DIST_MIN = 200
 onready var NEW_TARGET_DIST_MAX = 400
@@ -64,6 +61,10 @@ onready var prev_is_touching_wall = false
 onready var can_get_new_target_from_col = true
 
 onready var CAN_GEN_NEW_TARGET_FROM_COL_DELAY = 2
+
+onready var COL_NEW_TARGET_ANGLE_EXPANSION = 22.5
+
+onready var collision = null
 
 
 ####################################################################################################
@@ -77,7 +78,7 @@ func _ready() -> void:
 	
 	moveSegmentsToIgnored()
 	
-	$CanGetNewTargetFromColTimer.wait_time = CAN_GEN_NEW_TARGET_FROM_COL_DELAY
+	$CanGenNewTargetFromColTimer.wait_time = CAN_GEN_NEW_TARGET_FROM_COL_DELAY
 
 
 func _process(_delta:float) -> void:
@@ -86,32 +87,9 @@ func _process(_delta:float) -> void:
 	
 	updateCurVector()
 	
-	var col = move_and_collide(cur_vector * _delta, false)
+	collision = move_and_collide(cur_vector * _delta, false)
 	
-#	prev_is_touching_wall = is_touching_wall
-	
-	is_touching_wall = false
-	
-	if col:
-		
-#        print("col = ", col)
-		
-		if col.collider.name == 'TileMap':
-			
-#            print("col.normal = ", col.normal)
-			
-			is_touching_wall = true
-			
-#            cur_vector = cur_vector.bounce(col.normal)
-			
-#            target = Vector2(600, 450)
-			
-			if can_get_new_target_from_col:
-				
-				can_get_new_target_from_col = false
-				$CanGetNewTargetFromColTimer.start()
-
-				genNewTargetFromCol(col)
+	handleCollision(collision)
 	
 	rotation_degrees = cur_dir
 	
@@ -129,19 +107,12 @@ func _process(_delta:float) -> void:
 	
 	updateAngleToTargetIsExpanding()
 	
-#	if is_touching_wall and angle_to_target > OUTER_TURN_DEG:  SPEED = 0
-#	else:  SPEED = 60
+	if (
+		not is_touching_wall and is_approaching_target and
+		angle_to_target_is_expanding and angle_to_target > OUTER_TURN_DEG
+	):  changeTurnDir()
 	
-#    print("is_approaching_target = ", is_approaching_target)
-	
-	if not is_touching_wall and is_approaching_target and angle_to_target_is_expanding and angle_to_target > OUTER_TURN_DEG:
-		changeTurnDir()
-	
-	if dist_to_target <= NEW_TARGET_SENS_DIST_MIN:
-		
-#        print("IS HAPPENING!!!")
-		
-		genNewTarget()
+	if dist_to_target <= GEN_NEW_TARGET_WITHIN_DIST:  genNewTarget()
 
 
 ####################################################################################################
@@ -199,6 +170,17 @@ func updateCurVector() -> void:
 	cur_vector = Vector2(0, -SPEED).rotated(deg2rad(cur_dir))
 
 
+func handleCollision(_col:KinematicCollision2D) -> void:
+	is_touching_wall = false
+	if _col:
+		if _col.collider.name == 'TileMap':
+			is_touching_wall = true
+			if can_get_new_target_from_col:
+				can_get_new_target_from_col = false
+				$CanGenNewTargetFromColTimer.start()
+				genNewTargetFromCol(_col)
+
+
 func updateSpine() -> void:
 	spine.push_front(global_position)
 	spine.pop_back()
@@ -239,51 +221,36 @@ func changeTurnDir() -> void:
 
 
 func genNewTarget() -> void:
-	
-	""" gen new target within hard coded limits """
-#    target = Vector2(util.getRandomInt(400, 600), util.getRandomInt(100, 400))
-
-	""" gen new target at random angle at NEW_TARGET_DIST_MAX dist from cur pos """
 	var target_dist = util.getRandomInt(NEW_TARGET_DIST_MIN, NEW_TARGET_DIST_MAX)
-	var target_vector = Vector2(target_dist, 0).rotated(deg2rad(util.getRandomInt(0, 360)))
-	target = global_position + target_vector
+	var target_angle = deg2rad(util.getRandomInt(0, 360))
+	target = global_position + Vector2(target_dist, 0).rotated(target_angle)
 
 
 func genNewTargetFromCol(col:KinematicCollision2D) -> void:
-#    var dist_to_new_target = global_position.distance_to(target)
-#    var angle_to_new_target = util.convAngleTo360Range(rad2deg(cur_vector.bounce(col.normal).angle()))
-
-#    var angle_to_new_target = util.convAngleTo360Range(rad2deg(col.normal.angle()))
-#    print("\nangle_to_new_target = ", angle_to_new_target)
-#    var vector_to_new_target = Vector2(NEW_TARGET_DIST_MAX, 0).rotated(deg2rad(angle_to_new_target))
-#    print("vector_to_new_target = ", vector_to_new_target)
-#    target = global_position + vector_to_new_target
-#    print("target = ", target)
-
-#    var old_vector = global_position.direction_to(target)
-#    var new_vector = old_vector.bounce(col.normal)
-#    target = global_position + Vector2(util.getRandomInt(NEW_TARGET_DIST_MIN, NEW_TARGET_DIST_MAX), 0).rotated(new_vector.angle())
-	
-	var new_target_dist = util.getRandomInt(NEW_TARGET_DIST_MIN, NEW_TARGET_DIST_MAX)
-	var new_target_angle_mod = util.getRandomInt(-10, 10)
-	target = global_position + Vector2(new_target_dist, 0).rotated(
-#        col.normal.angle() + deg2rad(new_target_angle_mod)
-		col.normal.angle()
+	var target_dist = util.getRandomInt(NEW_TARGET_DIST_MIN, NEW_TARGET_DIST_MAX)
+	var col_normal = rad2deg(col.normal.angle())
+	var target_rot = util.getRandomInt(
+		col_normal - COL_NEW_TARGET_ANGLE_EXPANSION,
+		col_normal + COL_NEW_TARGET_ANGLE_EXPANSION
 	)
+	target = global_position + Vector2(target_dist, 0).rotated(target_rot)
 
-#    print("\nglobal_position = ", global_position)
-#    print("target =            ", target)
 
-	print("\rad2deg(ncol.normal.angle()) = ", rad2deg(col.normal.angle()))
+####################################################################################################
+
+
+func _on_CanGenNewTargetFromColTimer_timeout():
+	can_get_new_target_from_col = true
+
+
+
+
 
 
 """
 2023-01-18
 TURNOVER NOTES:
-- I think I fixed the problem of the enemy getting caught in an infinite loop by adjust
-NEW_TARGET_SENS_DIST_MIN.
-- When genNewTarget() due to collision, need to include collision reflection in the genNewTarget()
-calculation.
+
 - Need to make tail a little bigger.
 """
 
@@ -292,6 +259,3 @@ calculation.
 
 
 
-func _on_CanGetNewTargetFromColTimer_timeout():
-
-	can_get_new_target_from_col = true
