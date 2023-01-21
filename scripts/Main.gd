@@ -5,11 +5,21 @@ var gameplay
 
 func _ready():
 	
-#    var test = util.convTileMapPosToGlobalPos(Vector2())
+	################################################################################################
+	""" TESTING """
+	
+#	var var01 = 100
+#	var var02 = var01
 #
-#    print("test = ", test
+#	print("\nvar01 = ", var01)
+#	print("var02 = ", var02)
 #
-#    return 
+#	var02 += 50
+#
+#	print("\nvar01 = ", var01)
+#	print("var02 = ", var02)
+#
+#	return
 	
 	################################################################################################
 	

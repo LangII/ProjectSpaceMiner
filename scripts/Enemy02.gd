@@ -16,10 +16,10 @@ onready var segments_map = {}
 onready var TAIL_SPIN_SPEED = 4
 onready var tail_spin_dir = util.getRandomItemFromArray([+1, -1])
 
-#onready var SPEED = 60
-#onready var INNER_TURN_SHARPNESS = 1.5
-onready var SPEED = 80
-onready var INNER_TURN_SHARPNESS = 2.5
+onready var SPEED = 60
+onready var INNER_TURN_SHARPNESS = 1.5
+#onready var SPEED = 80
+#onready var INNER_TURN_SHARPNESS = 2.5
 
 onready var OUTER_TURN_DEG = 70
 
@@ -31,7 +31,7 @@ onready var cur_vector = Vector2(0, SPEED)
 """ TODO:  SEGMENT_COUNT needs to preset the number of 'Body' segments in Enemy. """
 onready var SEGMENT_COUNT = 6
 onready var SEGMENT_DIAMETER = 20
-onready var TAIL_DIAMETER = 10
+onready var TAIL_DIAMETER = 16
 
 onready var SPEED_TO_DIST_MODIFIER = 60.0
 
@@ -62,9 +62,12 @@ onready var can_get_new_target_from_col = true
 
 onready var CAN_GEN_NEW_TARGET_FROM_COL_DELAY = 2
 
-onready var COL_NEW_TARGET_ANGLE_EXPANSION = 22.5
+onready var COL_NEW_TARGET_ANGLE_EXPANSION = 15
 
 onready var collision = null
+
+#onready var SEGMENT_MAX_HEALTH = 80.0
+#onready var health = MAX_HEALTH
 
 
 ####################################################################################################
@@ -248,10 +251,36 @@ func _on_CanGenNewTargetFromColTimer_timeout():
 
 
 """
-2023-01-18
+2023-01-21
 TURNOVER NOTES:
 
-- Need to make tail a little bigger.
+- Need to create an init() to declare and generate number of segments.
+
+- Need to have enemy02 track ship.  When genNewTarget(), if distance to ship is less than VAR, make
+new target be global position of ship.  Also need to make sure that when distance to ship is less
+than VAR, that there is no TileMap between enemy02 and ship.
+
+- Start having interactions between ship and enemy02.  When enemy02 collides with ship, ship takes
+damage and gets knocked back.  When bullets collide with enemy02, enemy02 takes damage.
+
+- Need to figure out enemy02's health.  Each segment will have its own health.  As each segment is
+damaged, the individual segments will start flashing red to indicate damage taken.  If the tail is
+hit, the head takes damage.  If the head dies, the enemy02 dies.  If a segment dies, enemy02 splits
+into 2 enemy02s...  Need to develop mechanic of split.
+
+- Notes for health mechanics:
+	
+	- Each Segment has its own individual Health.  In this statement the Head is considered a
+	Segment.
+	
+	- If the Head or the last Segment touching the Tail gets its Health reduced to 0, the number of
+	Segments the Enemy has is reduced by 1.
+	
+	- If a central Segment (not a Head and not the last Segment touching the Tail) gets its Health
+	reduced to 0, said central Segment will be eliminated and the Enemy will turn into 2 Enemies.
+	
+	- The Tail is the Enemy's weak point.  If the Tail is hit, there is the potential of killing the
+	entire Enemy.  How much damage is done when the Tail is hit 
 """
 
 
