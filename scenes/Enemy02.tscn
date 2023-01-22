@@ -22,58 +22,58 @@ texture = ExtResource( 3 )
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource( 1 )
 
-[node name="Body01" type="Area2D" parent="."]
+[node name="Segment01" type="Area2D" parent="."]
 position = Vector2( 0, 20 )
 
-[node name="Body01Img" type="Sprite" parent="Body01"]
+[node name="Segment01Img" type="Sprite" parent="Segment01"]
 texture = ExtResource( 2 )
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Body01"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Segment01"]
 shape = SubResource( 2 )
 
-[node name="Body02" type="Area2D" parent="."]
+[node name="Segment02" type="Area2D" parent="."]
 position = Vector2( 0, 40 )
 
-[node name="Body02Img" type="Sprite" parent="Body02"]
+[node name="Segment02Img" type="Sprite" parent="Segment02"]
 texture = ExtResource( 2 )
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Body02"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Segment02"]
 shape = SubResource( 2 )
 
-[node name="Body03" type="Area2D" parent="."]
+[node name="Segment03" type="Area2D" parent="."]
 position = Vector2( 0, 60 )
 
-[node name="Body03Img" type="Sprite" parent="Body03"]
+[node name="Segment03Img" type="Sprite" parent="Segment03"]
 texture = ExtResource( 2 )
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Body03"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Segment03"]
 shape = SubResource( 2 )
 
-[node name="Body04" type="Area2D" parent="."]
+[node name="Segment04" type="Area2D" parent="."]
 position = Vector2( 0, 80 )
 
-[node name="Body04Img" type="Sprite" parent="Body04"]
+[node name="Segment04Img" type="Sprite" parent="Segment04"]
 texture = ExtResource( 2 )
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Body04"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Segment04"]
 shape = SubResource( 2 )
 
-[node name="Body05" type="Area2D" parent="."]
+[node name="Segment05" type="Area2D" parent="."]
 position = Vector2( 0, 100 )
 
-[node name="Body05Img" type="Sprite" parent="Body05"]
+[node name="Segment05Img" type="Sprite" parent="Segment05"]
 texture = ExtResource( 2 )
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Body05"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Segment05"]
 shape = SubResource( 2 )
 
-[node name="Body06" type="Area2D" parent="."]
+[node name="Segment06" type="Area2D" parent="."]
 position = Vector2( 0, 120 )
 
-[node name="Body06Img" type="Sprite" parent="Body06"]
+[node name="Segment06Img" type="Sprite" parent="Segment06"]
 texture = ExtResource( 2 )
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Body06"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Segment06"]
 shape = SubResource( 2 )
 
 [node name="Tail" type="Area2D" parent="."]

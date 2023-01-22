@@ -10,10 +10,12 @@ onready var tilemap = get_node('/root/Main/Gameplay/TileMap')
 ####################################################################################################
 
 
+onready var segment_scn = preload('res://scenes/Enemy02Segment.tscn')
+
 onready var spine = []
 onready var segments_map = {}
 
-onready var TAIL_SPIN_SPEED = 4
+onready var TAIL_SPIN_SPEED = 5
 onready var tail_spin_dir = util.getRandomItemFromArray([+1, -1])
 
 onready var SPEED = 60
@@ -75,7 +77,20 @@ onready var collision = null
 
 func _ready() -> void:
 	
+	pass
+
+
+func init(_segment_count:int) -> void:
+	
+	"""
+	Need to add a function between initSpine() and initSegmentsMap() that duplicates node
+	'Segment01'.  Be sure all children are duplicated too, appropriately rename the duplicates, and
+	keep duplicates in correct order.
+	"""
+	
 	initSpine()
+	
+	copySegments(_segment_count)
 	
 	initSegmentsMap()
 	
@@ -129,15 +144,34 @@ func initSpine() -> void:
 	for i in TOTAL_SPINE_COUNT:  spine += [global_position]
 
 
+func copySegments(_segment_count:int) -> void:
+	
+	print("\nsegment_scn = ", segment_scn)
+	
+	for i in _segment_count:
+#		print("i = ", i)
+		i += 1
+		
+		var area_2d_name = 'Segment%02d' % [i]
+		var sprite_name = 'Segment%02dImg' % [i]
+#		print("\narea_2d_name = ", area_2d_name)
+#		print("sprite_name = ", sprite_name)
+		
+		var segment = segment_scn.instance()
+		segment.name = area_2d_name
+		segment.get_node('SegmentImg').name = sprite_name
+		
+
+
 func initSegmentsMap() -> void:
 	
 	var segment_names = []
 	for child in get_children():
-		if child.name.begins_with('Body'):  segment_names += [child.name]
+		if child.name.begins_with('Segment'):  segment_names += [child.name]
 	
 	var segment_lag = 0  # without "lag", the segments will naturally space themselves out a little
 	for segment_name in segment_names:
-		var segment_num = int(segment_name.replace('Body', ''))
+		var segment_num = int(segment_name.replace('Segment', ''))
 		segments_map[segment_name] = {
 			'spine_i': (SEGMENT_TO_SEGMENT_SPINE_COUNT * segment_num) - 1 - segment_lag,
 			'node': get_node(segment_name)
