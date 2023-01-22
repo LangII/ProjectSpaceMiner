@@ -88,6 +88,8 @@ func init(_segment_count:int) -> void:
 	keep duplicates in correct order.
 	"""
 	
+	SEGMENT_COUNT = _segment_count
+	
 	initSpine()
 	
 	copySegments(_segment_count)
@@ -141,16 +143,21 @@ func initSpine() -> void:
 	SEGMENT_TO_SEGMENT_SPINE_COUNT = int(SEGMENT_DIAMETER / SPINE_TO_SPINE_DIST) + 1
 	SEGMENT_TO_TAIL_SPINE_COUNT = int(((SEGMENT_DIAMETER / 2) + (TAIL_DIAMETER / 2)) / SPINE_TO_SPINE_DIST) + 1
 	TOTAL_SPINE_COUNT = (SEGMENT_TO_SEGMENT_SPINE_COUNT * SEGMENT_COUNT) + SEGMENT_TO_TAIL_SPINE_COUNT
+	
+	print("\nTOTAL_SPINE_COUNT = ", TOTAL_SPINE_COUNT)
+	
 	for i in TOTAL_SPINE_COUNT:  spine += [global_position]
 
 
 func copySegments(_segment_count:int) -> void:
 	
-	print("\nsegment_scn = ", segment_scn)
+#	print("\nsegment_scn = ", segment_scn)
 	
-	for i in _segment_count:
+	SEGMENT_COUNT = _segment_count
+	
+	for i in range(SEGMENT_COUNT, 0, -1):
 #		print("i = ", i)
-		i += 1
+#		i += 1
 		
 		var area_2d_name = 'Segment%02d' % [i]
 		var sprite_name = 'Segment%02dImg' % [i]
@@ -160,6 +167,8 @@ func copySegments(_segment_count:int) -> void:
 		var segment = segment_scn.instance()
 		segment.name = area_2d_name
 		segment.get_node('SegmentImg').name = sprite_name
+		
+		add_child_below_node($HeadImg, segment)
 		
 
 
@@ -224,7 +233,13 @@ func updateSpine() -> void:
 
 
 func moveSegmentsAlongSpine() -> void:
+	
+#	print("\nsegments_map = ", segments_map)
+	
 	for segment_name in segments_map.keys():
+		
+#		print("\nsegment_name = ", segment_name)
+		
 		segments_map[segment_name]['node'].global_position = spine[segments_map[segment_name]['spine_i']]
 
 
