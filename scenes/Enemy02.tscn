@@ -20,7 +20,7 @@ position = Vector2( 0, -5 )
 texture = ExtResource( 3 )
 
 [node name="Tail" type="Area2D" parent="."]
-position = Vector2( 0, 135 )
+position = Vector2( 0, 16 )
 
 [node name="TailImg" type="Sprite" parent="Tail"]
 texture = ExtResource( 4 )
@@ -34,4 +34,10 @@ shape = SubResource( 3 )
 wait_time = 2.0
 one_shot = true
 
+[node name="WoundedTweenUp" type="Tween" parent="."]
+
+[node name="WoundedTweenDown" type="Tween" parent="."]
+
 [connection signal="timeout" from="CanGenNewTargetFromColTimer" to="." method="_on_CanGenNewTargetFromColTimer_timeout"]
+[connection signal="tween_all_completed" from="WoundedTweenUp" to="." method="_on_WoundedTweenUp_tween_all_completed"]
+[connection signal="tween_all_completed" from="WoundedTweenDown" to="." method="_on_WoundedTweenDown_tween_all_completed"]

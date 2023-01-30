@@ -20,7 +20,7 @@ func _ready():
 
 
 func throwError(error_msg:String) -> void:
-	print(error_msg)
+	print("\nEXIT ERROR:  " + error_msg)
 	get_tree().quit()
 
 
@@ -96,8 +96,8 @@ func convTileMapPosToGlobalPos(tile_map_pos:Vector2, global_pos_type:String='mid
 	return global_pos
 
 
-#func convGlobalPosToTileMapPos(global_pos:Vector2) -> Vector2:
-	
+
+
 
 
 

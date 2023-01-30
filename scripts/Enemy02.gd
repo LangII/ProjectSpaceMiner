@@ -18,24 +18,27 @@ onready var segments_map = {}
 onready var TAIL_SPIN_SPEED = 5
 onready var tail_spin_dir = util.getRandomItemFromArray([+1, -1])
 
-onready var SPEED = 60
-onready var INNER_TURN_SHARPNESS = 1.5
-#onready var SPEED = 80
-#onready var INNER_TURN_SHARPNESS = 2.5
+onready var SEGMENT_COUNT_LOW = 1
+onready var SEGMENT_COUNT_HIGH = 21
+onready var SPEED_LOW = 100
+onready var SPEED_HIGH = 60
+onready var INNER_TURN_SHARPNESS_LOW = 2.5
+onready var INNER_TURN_SHARPNESS_HIGH = 1.5
+
+onready var SEGMENT_COUNT = null
+onready var SPEED = null
+onready var INNER_TURN_SHARPNESS = null
+
+onready var SPEED_TO_DIST_MODIFIER = 60.0
 
 onready var OUTER_TURN_DEG = 70
 
 onready var turn_dir = +1
 onready var cur_dir = 90
-onready var cur_vector = Vector2(0, SPEED)
+onready var cur_vector = Vector2()
 
-### segment functionality
-""" TODO:  SEGMENT_COUNT needs to preset the number of 'Body' segments in Enemy. """
-onready var SEGMENT_COUNT = 6
 onready var SEGMENT_DIAMETER = 20
 onready var TAIL_DIAMETER = 16
-
-onready var SPEED_TO_DIST_MODIFIER = 60.0
 
 onready var SPINE_TO_SPINE_DIST = null
 onready var SEGMENT_TO_SEGMENT_SPINE_COUNT = null
@@ -68,8 +71,19 @@ onready var COL_NEW_TARGET_ANGLE_EXPANSION = 15
 
 onready var collision = null
 
-#onready var SEGMENT_MAX_HEALTH = 80.0
-#onready var health = MAX_HEALTH
+onready var SEGMENT_MAX_HEALTH = 80.0
+#onready var segments_health = {}
+
+onready var WOUNDED_MAP = {
+	'high': {'min': 0.0, 'max': 0.25, 'speed': 0.25},
+	'low': {'min': 0.25, 'max': 0.5, 'speed': 1.0}
+}
+onready var WOUNDED_COLOR = Color(1, 0.4, 0.4, 1)  # red
+#onready var wounded_levels = {}
+
+onready var HAS_TAKEN_DMG = false
+
+onready var segments_data = {}
 
 
 ####################################################################################################
@@ -82,23 +96,19 @@ func _ready() -> void:
 
 func init(_segment_count:int) -> void:
 	
-	"""
-	Need to add a function between initSpine() and initSegmentsMap() that duplicates node
-	'Segment01'.  Be sure all children are duplicated too, appropriately rename the duplicates, and
-	keep duplicates in correct order.
-	"""
-	
-	SEGMENT_COUNT = _segment_count
+	updateVarsFromSegmentCount(_segment_count)
 	
 	initSpine()
 	
-	copySegments(_segment_count)
+	copySegments()
 	
 	initSegmentsMap()
 	
-	moveSegmentsToIgnored()
+#	moveSegmentsToIgnored()
 	
 	$CanGenNewTargetFromColTimer.wait_time = CAN_GEN_NEW_TARGET_FROM_COL_DELAY
+	
+#	initSegmentsHealth()
 
 
 func _process(_delta:float) -> void:
@@ -138,38 +148,70 @@ func _process(_delta:float) -> void:
 ####################################################################################################
 
 
+func updateVarsFromSegmentCount(_segment_count:int) -> void:
+	if _segment_count < SEGMENT_COUNT_LOW or _segment_count > SEGMENT_COUNT_HIGH:
+		util.throwError(
+			"Enemy02.updateVarsFromSegmentCount() arg _segment_count must be between %s and %s " %
+			[SEGMENT_COUNT_LOW, SEGMENT_COUNT_HIGH] + "inclusively."
+		)
+	SEGMENT_COUNT = _segment_count
+	SPEED = util.normalize(
+		SEGMENT_COUNT, SEGMENT_COUNT_LOW, SEGMENT_COUNT_HIGH, SPEED_LOW, SPEED_HIGH
+	)
+	INNER_TURN_SHARPNESS = util.normalize(
+		SEGMENT_COUNT, SEGMENT_COUNT_LOW, SEGMENT_COUNT_HIGH, INNER_TURN_SHARPNESS_LOW,
+		INNER_TURN_SHARPNESS_HIGH
+	)
+
+
 func initSpine() -> void:
 	SPINE_TO_SPINE_DIST = SPEED / SPEED_TO_DIST_MODIFIER
 	SEGMENT_TO_SEGMENT_SPINE_COUNT = int(SEGMENT_DIAMETER / SPINE_TO_SPINE_DIST) + 1
 	SEGMENT_TO_TAIL_SPINE_COUNT = int(((SEGMENT_DIAMETER / 2) + (TAIL_DIAMETER / 2)) / SPINE_TO_SPINE_DIST) + 1
 	TOTAL_SPINE_COUNT = (SEGMENT_TO_SEGMENT_SPINE_COUNT * SEGMENT_COUNT) + SEGMENT_TO_TAIL_SPINE_COUNT
-	
-	print("\nTOTAL_SPINE_COUNT = ", TOTAL_SPINE_COUNT)
-	
 	for i in TOTAL_SPINE_COUNT:  spine += [global_position]
 
 
-func copySegments(_segment_count:int) -> void:
+func copySegments() -> void:
 	
-#	print("\nsegment_scn = ", segment_scn)
+#	segments_health['Head'] = SEGMENT_MAX_HEALTH
+#	wounded_levels['Head'] = null	
 	
-	SEGMENT_COUNT = _segment_count
+	segments_data['Head'] = {
+		'health': SEGMENT_MAX_HEALTH,
+		'wounded_level': null,
+		'col_node': self,
+		'img_node': $HeadImg
+	}
 	
 	for i in range(SEGMENT_COUNT, 0, -1):
-#		print("i = ", i)
-#		i += 1
-		
-		var area_2d_name = 'Segment%02d' % [i]
-		var sprite_name = 'Segment%02dImg' % [i]
-#		print("\narea_2d_name = ", area_2d_name)
-#		print("sprite_name = ", sprite_name)
-		
 		var segment = segment_scn.instance()
-		segment.name = area_2d_name
-		segment.get_node('SegmentImg').name = sprite_name
-		
+		segment.name = 'Segment%02d' % [i]
+		segment.get_node('SegmentImg').name = 'Segment%02dImg' % [i]
 		add_child_below_node($HeadImg, segment)
 		
+#		segments_health[segment.name] = SEGMENT_MAX_HEALTH
+#		wounded_levels[segment.name] = null
+		
+		segments_data[segment.name] = {
+			'health': SEGMENT_MAX_HEALTH,
+			'wounded_level': null,
+			'col_node': segment,
+			'img_node': segment.get_node('Segment%02dImg' % [i])
+		}
+	
+#	segments_health['Tail'] = SEGMENT_MAX_HEALTH
+#	wounded_levels['Tail'] = null
+	
+	segments_data['Tail'] = {
+		'health': SEGMENT_MAX_HEALTH,
+		'wounded_level': null,
+		'col_node': $Tail,
+		'img_node': $Tail/TailImg
+	}
+	
+#	print("\nsegments_health = ", segments_health)
+#	print("\nwounded_levels = ", wounded_levels)
 
 
 func initSegmentsMap() -> void:
@@ -203,6 +245,11 @@ func moveSegmentsToIgnored() -> void:
 		$Ignored.add_child(segment_node)
 
 
+#func initSegmentsHealth() -> void:
+#	for _i in SEGMENT_COUNT:
+#		segments_health += [SEGMENT_MAX_HEALTH]
+
+
 ####################################################################################################
 
 
@@ -233,18 +280,13 @@ func updateSpine() -> void:
 
 
 func moveSegmentsAlongSpine() -> void:
-	
-#	print("\nsegments_map = ", segments_map)
-	
 	for segment_name in segments_map.keys():
-		
-#		print("\nsegment_name = ", segment_name)
-		
 		segments_map[segment_name]['node'].global_position = spine[segments_map[segment_name]['spine_i']]
 
 
 func spinTail() -> void:
-	$Ignored/Tail/TailImg.rotation_degrees += TAIL_SPIN_SPEED * tail_spin_dir
+#	$Ignored/Tail/TailImg.rotation_degrees += TAIL_SPIN_SPEED * tail_spin_dir
+	$Tail/TailImg.rotation_degrees += TAIL_SPIN_SPEED * tail_spin_dir
 
 
 ####################################################################################################
@@ -288,6 +330,158 @@ func genNewTargetFromCol(col:KinematicCollision2D) -> void:
 	target = global_position + Vector2(target_dist, 0).rotated(target_rot)
 
 
+#func hasDamagedSegment() -> bool:
+#	for segment_health in segments_health.values():
+#		if segment_health < SEGMENT_MAX_HEALTH:  return true
+#	return false
+#
+#
+#func hasWoundedSegment() -> bool:
+#	for wounded_level in wounded_levels.values():
+#		if wounded_level:  return true
+#	return false
+
+
+####################################################################################################
+
+
+#func takeDmg(_dmg)
+
+
+func takeDmg(_node_took_dmg:Object, _dmg:int) -> void:
+	
+	HAS_TAKEN_DMG = true
+	
+#	print("_node_took_dmg = ", _node_took_dmg)
+#	print("_dmg = ", _dmg)
+	
+	var segment_name = ''
+	if _node_took_dmg.name.begins_with('Segment'):
+		segment_name = _node_took_dmg.name
+	elif _node_took_dmg.name.begins_with('Enemy02'):
+		segment_name = 'Head'
+	elif _node_took_dmg.name == 'Tail':
+		segment_name = 'Tail'
+	
+#	segments_health[segment_name] -= _dmg
+	segments_data[segment_name]['health'] -= _dmg
+	
+	setWoundedLevels(segment_name)
+	
+#	print("\nsegments_health = ", segments_health)
+#	print("\nwounded_levels = ", wounded_levels)
+	
+	startWoundedTweenUp()
+	
+#	health -= _dmg
+#	if health <= 0:  startQueueFreeSequence()
+#	setWoundedLevel()
+#	if wounded_level:  startWoundedTweenUp()
+
+
+func startWoundedTweenUp():
+	
+	print("\nstartWoundedTweenUp()")
+	
+	if not HAS_TAKEN_DMG:  return
+	
+#	for segment_name in wounded_levels.keys():
+	for segment_name in segments_data.keys():
+		
+		print("\nup segment_name = ", segment_name)
+		
+#		var wounded_level = wounded_levels[segment_name]
+		var wounded_level = segments_data[segment_name]['wounded_level']
+		
+		print("\nup wounded_level = ", wounded_level)
+		
+		if not wounded_level:  continue
+		
+		if wounded_level != 'high':  continue
+		
+		$WoundedTweenUp.interpolate_property(
+#			find_node('%sImg' % [segment_name]),
+			segments_data[segment_name]['img_node'],
+			'modulate',
+			Color(1, 1, 1, 1),
+			WOUNDED_COLOR,
+			WOUNDED_MAP[wounded_level]['speed'],
+			0,
+			1
+		)
+		
+	$WoundedTweenUp.start()
+	
+#	if not wounded_level:  return
+#	$WoundedTweenUp.interpolate_property(
+#		$Sprite, 'modulate', Color(1, 1, 1, 1), WOUNDED_COLOR,
+#		WOUNDED_MAP[wounded_level]['speed'], 0, 1
+#	)
+#	$WoundedTweenUp.start()
+
+
+func startWoundedTweenDown():
+	
+	print("\nstartWoundedTweenDown()")
+	
+	if not HAS_TAKEN_DMG:  return
+	
+#	for segment_name in wounded_levels.keys():
+	for segment_name in segments_data.keys():
+		
+#		var wounded_level = wounded_levels[segment_name]
+		var wounded_level = segments_data[segment_name]['wounded_level']
+		
+		print("\nwounded_level = ", wounded_level)
+		
+		if not wounded_level:  continue
+		
+		if wounded_level != 'high':  continue
+		
+#		print("")
+		
+		$WoundedTweenDown.interpolate_property(
+#			find_node('%sImg' % [segment_name]),
+			segments_data[segment_name]['img_node'],
+			'modulate',
+			WOUNDED_COLOR,
+			Color(1, 1, 1, 1),
+			WOUNDED_MAP[wounded_level]['speed'],
+			0,
+			1
+		)
+		
+	$WoundedTweenDown.start()
+		
+#		print("\n   MADE IT HERE")
+	
+#	if not wounded_level:  return
+#	$WoundedTweenDown.interpolate_property(
+#		$Sprite, 'modulate', WOUNDED_COLOR, Color(1, 1, 1, 1),
+#		WOUNDED_MAP[wounded_level]['speed'], 0, 1
+#	)
+#	$WoundedTweenDown.start()
+
+
+func setWoundedLevels(_segment_name:String) -> void:
+	
+#	print("\n_segment_name = ", _segment_name)
+	
+	for level in WOUNDED_MAP.keys():
+		if (
+#			(segments_health[_segment_name] > SEGMENT_MAX_HEALTH * WOUNDED_MAP[level]['min']) and
+#			(segments_health[_segment_name] <= SEGMENT_MAX_HEALTH * WOUNDED_MAP[level]['max'])
+			(segments_data[_segment_name]['health'] > SEGMENT_MAX_HEALTH * WOUNDED_MAP[level]['min']) and
+			(segments_data[_segment_name]['health'] <= SEGMENT_MAX_HEALTH * WOUNDED_MAP[level]['max'])
+		):
+#			wounded_levels[_segment_name] = level
+			segments_data[_segment_name]['wounded_level'] = level
+			return
+	
+#	wounded_levels[_segment_name] = null
+	
+
+
 ####################################################################################################
 
 
@@ -295,8 +489,49 @@ func _on_CanGenNewTargetFromColTimer_timeout():
 	can_get_new_target_from_col = true
 
 
+func _on_WoundedTweenUp_tween_all_completed():
+	startWoundedTweenDown()
 
 
+func _on_WoundedTweenDown_tween_all_completed():
+	startWoundedTweenUp()
+
+
+
+
+
+
+"""
+2023-01-28
+TURNOVER NOTES:
+
+- I think I'm going to need to have 2 different sets of Tweens.  I'll TweenLowUp, TweenLowDown,
+TweenHighUp, and TweenHighDown.
+
+- I'm also going to need to setup a more advanced segment map.  The map will need to include
+references for health, wounded_level, col node, and img node.
+"""
+
+
+"""
+2023-01-24
+TURNOVER NOTES:
+
+- Thoughts on handling Bullet <> Enemy collision:
+	
+	- I currently have it setup for collision if the Enemy's root node is the collision body.  But
+	the problem is with Enemy02, how it has many different collision Areas.
+	
+	- I think it should work fine if I add an Area node to the Bullet scene that is parallel to the
+	bullet's Body.  Then the Area node handles collision with enemies that have many different
+	collision areas.  To do this, it will have to trigger a takeDmg() function from the parent of
+	the collided area, and pass it the name of the collided area and a damage value.
+	
+	- Bullet gets Area node parallel to Body node.
+	- Bullet's Area senses for collision with Enemies that have multiple collision Areas.
+	- Bullet's Area triggers takeDmg() in the parent of the collision Area, and passes it the name
+	of the collision Area and the damage value.
+"""
 
 
 """
@@ -331,6 +566,7 @@ into 2 enemy02s...  Need to develop mechanic of split.
 	- The Tail is the Enemy's weak point.  If the Tail is hit, there is the potential of killing the
 	entire Enemy.  How much damage is done when the Tail is hit 
 """
+
 
 
 
