@@ -34,10 +34,16 @@ shape = SubResource( 3 )
 wait_time = 2.0
 one_shot = true
 
-[node name="WoundedTweenUp" type="Tween" parent="."]
+[node name="WoundedTweenHighUp" type="Tween" parent="."]
 
-[node name="WoundedTweenDown" type="Tween" parent="."]
+[node name="WoundedTweenHighDown" type="Tween" parent="."]
+
+[node name="WoundedTweenLowUp" type="Tween" parent="."]
+
+[node name="WoundedTweenLowDown" type="Tween" parent="."]
 
 [connection signal="timeout" from="CanGenNewTargetFromColTimer" to="." method="_on_CanGenNewTargetFromColTimer_timeout"]
-[connection signal="tween_all_completed" from="WoundedTweenUp" to="." method="_on_WoundedTweenUp_tween_all_completed"]
-[connection signal="tween_all_completed" from="WoundedTweenDown" to="." method="_on_WoundedTweenDown_tween_all_completed"]
+[connection signal="tween_all_completed" from="WoundedTweenHighUp" to="." method="_on_WoundedTweenHighUp_tween_all_completed"]
+[connection signal="tween_all_completed" from="WoundedTweenHighDown" to="." method="_on_WoundedTweenHighDown_tween_all_completed"]
+[connection signal="tween_all_completed" from="WoundedTweenLowUp" to="." method="_on_WoundedTweenLowUp_tween_all_completed"]
+[connection signal="tween_all_completed" from="WoundedTweenLowDown" to="." method="_on_WoundedTweenLowDown_tween_all_completed"]

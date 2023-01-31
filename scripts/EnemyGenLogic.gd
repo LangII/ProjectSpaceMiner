@@ -76,7 +76,7 @@ func genEnemy02s() -> void:
 	
 	_enemies_.add_child(enemy_inst)
 	
-	enemy_inst.init(8)
+	enemy_inst.init(4)
 	
 	enemy_inst.global_position = Vector2(620, 450)
 

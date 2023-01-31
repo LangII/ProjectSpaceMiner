@@ -212,6 +212,7 @@ func copySegments() -> void:
 	
 #	print("\nsegments_health = ", segments_health)
 #	print("\nwounded_levels = ", wounded_levels)
+	print("\nsegments_data = ", segments_data)
 
 
 func initSegmentsMap() -> void:
@@ -352,7 +353,7 @@ func takeDmg(_node_took_dmg:Object, _dmg:int) -> void:
 	
 	HAS_TAKEN_DMG = true
 	
-#	print("_node_took_dmg = ", _node_took_dmg)
+	print("\n_node_took_dmg = ", _node_took_dmg)
 #	print("_dmg = ", _dmg)
 	
 	var segment_name = ''
@@ -368,118 +369,78 @@ func takeDmg(_node_took_dmg:Object, _dmg:int) -> void:
 	
 	setWoundedLevels(segment_name)
 	
-#	print("\nsegments_health = ", segments_health)
-#	print("\nwounded_levels = ", wounded_levels)
+#	print("")
+	for segment in segments_data.keys():
+		print(segment, " = ", segments_data[segment])
 	
-	startWoundedTweenUp()
+	startWoundedTweenHighUp()
+	startWoundedTweenLowUp()
 	
 #	health -= _dmg
 #	if health <= 0:  startQueueFreeSequence()
 #	setWoundedLevel()
-#	if wounded_level:  startWoundedTweenUp()
+#	if wounded_level:  startWoundedTweenHighUp()
 
 
-func startWoundedTweenUp():
-	
-	print("\nstartWoundedTweenUp()")
-	
+
+
+
+func startWoundedTweenHighUp() -> void:
 	if not HAS_TAKEN_DMG:  return
-	
-#	for segment_name in wounded_levels.keys():
 	for segment_name in segments_data.keys():
-		
-		print("\nup segment_name = ", segment_name)
-		
-#		var wounded_level = wounded_levels[segment_name]
 		var wounded_level = segments_data[segment_name]['wounded_level']
-		
-		print("\nup wounded_level = ", wounded_level)
-		
-		if not wounded_level:  continue
-		
 		if wounded_level != 'high':  continue
-		
-		$WoundedTweenUp.interpolate_property(
-#			find_node('%sImg' % [segment_name]),
-			segments_data[segment_name]['img_node'],
-			'modulate',
-			Color(1, 1, 1, 1),
-			WOUNDED_COLOR,
-			WOUNDED_MAP[wounded_level]['speed'],
-			0,
-			1
+		$WoundedTweenHighUp.interpolate_property(
+			segments_data[segment_name]['img_node'], 'modulate', Color(1, 1, 1, 1), WOUNDED_COLOR,
+			WOUNDED_MAP[wounded_level]['speed'], 0, 1
 		)
-		
-	$WoundedTweenUp.start()
-	
-#	if not wounded_level:  return
-#	$WoundedTweenUp.interpolate_property(
-#		$Sprite, 'modulate', Color(1, 1, 1, 1), WOUNDED_COLOR,
-#		WOUNDED_MAP[wounded_level]['speed'], 0, 1
-#	)
-#	$WoundedTweenUp.start()
+	$WoundedTweenHighUp.start()
 
 
-func startWoundedTweenDown():
-	
-	print("\nstartWoundedTweenDown()")
-	
+func startWoundedTweenHighDown():
 	if not HAS_TAKEN_DMG:  return
-	
-#	for segment_name in wounded_levels.keys():
 	for segment_name in segments_data.keys():
-		
-#		var wounded_level = wounded_levels[segment_name]
 		var wounded_level = segments_data[segment_name]['wounded_level']
-		
-		print("\nwounded_level = ", wounded_level)
-		
-		if not wounded_level:  continue
-		
 		if wounded_level != 'high':  continue
-		
-#		print("")
-		
-		$WoundedTweenDown.interpolate_property(
-#			find_node('%sImg' % [segment_name]),
-			segments_data[segment_name]['img_node'],
-			'modulate',
-			WOUNDED_COLOR,
-			Color(1, 1, 1, 1),
-			WOUNDED_MAP[wounded_level]['speed'],
-			0,
-			1
+		$WoundedTweenHighDown.interpolate_property(
+			segments_data[segment_name]['img_node'], 'modulate', WOUNDED_COLOR, Color(1, 1, 1, 1),
+			WOUNDED_MAP[wounded_level]['speed'], 0, 1
 		)
-		
-	$WoundedTweenDown.start()
-		
-#		print("\n   MADE IT HERE")
-	
-#	if not wounded_level:  return
-#	$WoundedTweenDown.interpolate_property(
-#		$Sprite, 'modulate', WOUNDED_COLOR, Color(1, 1, 1, 1),
-#		WOUNDED_MAP[wounded_level]['speed'], 0, 1
-#	)
-#	$WoundedTweenDown.start()
+	$WoundedTweenHighDown.start()
+
+
+func startWoundedTweenLowUp() -> void:
+	if not HAS_TAKEN_DMG:  return
+	for segment_name in segments_data.keys():
+		var wounded_level = segments_data[segment_name]['wounded_level']
+		if wounded_level != 'low':  continue
+		$WoundedTweenLowUp.interpolate_property(
+			segments_data[segment_name]['img_node'], 'modulate', Color(1, 1, 1, 1), WOUNDED_COLOR,
+			WOUNDED_MAP[wounded_level]['speed'], 0, 1
+		)
+	$WoundedTweenLowUp.start()
+
+
+func startWoundedTweenLowDown():
+	if not HAS_TAKEN_DMG:  return
+	for segment_name in segments_data.keys():
+		var wounded_level = segments_data[segment_name]['wounded_level']
+		if wounded_level != 'low':  continue
+		$WoundedTweenLowDown.interpolate_property(
+			segments_data[segment_name]['img_node'], 'modulate', WOUNDED_COLOR, Color(1, 1, 1, 1),
+			WOUNDED_MAP[wounded_level]['speed'], 0, 1
+		)
+	$WoundedTweenLowDown.start()
 
 
 func setWoundedLevels(_segment_name:String) -> void:
-	
-#	print("\n_segment_name = ", _segment_name)
-	
 	for level in WOUNDED_MAP.keys():
 		if (
-#			(segments_health[_segment_name] > SEGMENT_MAX_HEALTH * WOUNDED_MAP[level]['min']) and
-#			(segments_health[_segment_name] <= SEGMENT_MAX_HEALTH * WOUNDED_MAP[level]['max'])
 			(segments_data[_segment_name]['health'] > SEGMENT_MAX_HEALTH * WOUNDED_MAP[level]['min']) and
 			(segments_data[_segment_name]['health'] <= SEGMENT_MAX_HEALTH * WOUNDED_MAP[level]['max'])
 		):
-#			wounded_levels[_segment_name] = level
 			segments_data[_segment_name]['wounded_level'] = level
 			return
-	
-#	wounded_levels[_segment_name] = null
-	
 
 
 ####################################################################################################
@@ -489,12 +450,22 @@ func _on_CanGenNewTargetFromColTimer_timeout():
 	can_get_new_target_from_col = true
 
 
-func _on_WoundedTweenUp_tween_all_completed():
-	startWoundedTweenDown()
+func _on_WoundedTweenHighUp_tween_all_completed():
+	startWoundedTweenHighDown()
 
 
-func _on_WoundedTweenDown_tween_all_completed():
-	startWoundedTweenUp()
+func _on_WoundedTweenHighDown_tween_all_completed():
+	startWoundedTweenHighUp()
+
+
+func _on_WoundedTweenLowUp_tween_all_completed():
+	startWoundedTweenLowDown()
+
+
+func _on_WoundedTweenLowDown_tween_all_completed():
+	startWoundedTweenLowUp()
+
+
 
 
 
@@ -505,11 +476,15 @@ func _on_WoundedTweenDown_tween_all_completed():
 2023-01-28
 TURNOVER NOTES:
 
-- I think I'm going to need to have 2 different sets of Tweens.  I'll TweenLowUp, TweenLowDown,
+NEXT TO DO
+- I think I'm going to need to have 2 different sets of Tweens.  I'll need TweenLowUp, TweenLowDown,
 TweenHighUp, and TweenHighDown.
+NEXT TO DO
 
+DONE
 - I'm also going to need to setup a more advanced segment map.  The map will need to include
 references for health, wounded_level, col node, and img node.
+DONE
 """
 
 
@@ -566,6 +541,10 @@ into 2 enemy02s...  Need to develop mechanic of split.
 	- The Tail is the Enemy's weak point.  If the Tail is hit, there is the potential of killing the
 	entire Enemy.  How much damage is done when the Tail is hit 
 """
+
+
+
+
 
 
 
