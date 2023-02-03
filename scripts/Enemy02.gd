@@ -72,14 +72,14 @@ onready var COL_NEW_TARGET_ANGLE_EXPANSION = 15
 onready var collision = null
 
 onready var SEGMENT_MAX_HEALTH = 80.0
-#onready var segments_health = {}
 
+### WOUNDED_MAP is not 100% dynamic.  To add additional levels, you'll have to add additional
+### wounded tweens.
 onready var WOUNDED_MAP = {
 	'high': {'min': 0.0, 'max': 0.25, 'speed': 0.25},
 	'low': {'min': 0.25, 'max': 0.5, 'speed': 1.0}
 }
 onready var WOUNDED_COLOR = Color(1, 0.4, 0.4, 1)  # red
-#onready var wounded_levels = {}
 
 onready var HAS_TAKEN_DMG = false
 
@@ -94,7 +94,7 @@ func _ready() -> void:
 	pass
 
 
-func init(_segment_count:int) -> void:
+func init(_segment_count:int, _split_data_pack:Dictionary={}) -> void:
 	
 	updateVarsFromSegmentCount(_segment_count)
 	
@@ -104,11 +104,7 @@ func init(_segment_count:int) -> void:
 	
 	initSegmentsMap()
 	
-#	moveSegmentsToIgnored()
-	
 	$CanGenNewTargetFromColTimer.wait_time = CAN_GEN_NEW_TARGET_FROM_COL_DELAY
-	
-#	initSegmentsHealth()
 
 
 func _process(_delta:float) -> void:
@@ -174,45 +170,26 @@ func initSpine() -> void:
 
 func copySegments() -> void:
 	
-#	segments_health['Head'] = SEGMENT_MAX_HEALTH
-#	wounded_levels['Head'] = null	
-	
 	segments_data['Head'] = {
-		'health': SEGMENT_MAX_HEALTH,
-		'wounded_level': null,
-		'col_node': self,
-		'img_node': $HeadImg
+		'health': SEGMENT_MAX_HEALTH, 'wounded_level': null, 'col_node': self, 'img_node': $HeadImg
 	}
 	
 	for i in range(SEGMENT_COUNT, 0, -1):
+	
 		var segment = segment_scn.instance()
 		segment.name = 'Segment%02d' % [i]
 		segment.get_node('SegmentImg').name = 'Segment%02dImg' % [i]
 		add_child_below_node($HeadImg, segment)
-		
-#		segments_health[segment.name] = SEGMENT_MAX_HEALTH
-#		wounded_levels[segment.name] = null
-		
+	
 		segments_data[segment.name] = {
-			'health': SEGMENT_MAX_HEALTH,
-			'wounded_level': null,
-			'col_node': segment,
+			'health': SEGMENT_MAX_HEALTH, 'wounded_level': null, 'col_node': segment,
 			'img_node': segment.get_node('Segment%02dImg' % [i])
 		}
 	
-#	segments_health['Tail'] = SEGMENT_MAX_HEALTH
-#	wounded_levels['Tail'] = null
-	
 	segments_data['Tail'] = {
-		'health': SEGMENT_MAX_HEALTH,
-		'wounded_level': null,
-		'col_node': $Tail,
+		'health': SEGMENT_MAX_HEALTH, 'wounded_level': null, 'col_node': $Tail,
 		'img_node': $Tail/TailImg
 	}
-	
-#	print("\nsegments_health = ", segments_health)
-#	print("\nwounded_levels = ", wounded_levels)
-	print("\nsegments_data = ", segments_data)
 
 
 func initSegmentsMap() -> void:
@@ -244,11 +221,6 @@ func moveSegmentsToIgnored() -> void:
 		var segment_node = get_node(segment_name)
 		remove_child(segment_node)
 		$Ignored.add_child(segment_node)
-
-
-#func initSegmentsHealth() -> void:
-#	for _i in SEGMENT_COUNT:
-#		segments_health += [SEGMENT_MAX_HEALTH]
 
 
 ####################################################################################################
@@ -286,7 +258,6 @@ func moveSegmentsAlongSpine() -> void:
 
 
 func spinTail() -> void:
-#	$Ignored/Tail/TailImg.rotation_degrees += TAIL_SPIN_SPEED * tail_spin_dir
 	$Tail/TailImg.rotation_degrees += TAIL_SPIN_SPEED * tail_spin_dir
 
 
@@ -331,58 +302,19 @@ func genNewTargetFromCol(col:KinematicCollision2D) -> void:
 	target = global_position + Vector2(target_dist, 0).rotated(target_rot)
 
 
-#func hasDamagedSegment() -> bool:
-#	for segment_health in segments_health.values():
-#		if segment_health < SEGMENT_MAX_HEALTH:  return true
-#	return false
-#
-#
-#func hasWoundedSegment() -> bool:
-#	for wounded_level in wounded_levels.values():
-#		if wounded_level:  return true
-#	return false
-
-
 ####################################################################################################
 
 
-#func takeDmg(_dmg)
-
-
 func takeDmg(_node_took_dmg:Object, _dmg:int) -> void:
-	
 	HAS_TAKEN_DMG = true
-	
-	print("\n_node_took_dmg = ", _node_took_dmg)
-#	print("_dmg = ", _dmg)
-	
 	var segment_name = ''
-	if _node_took_dmg.name.begins_with('Segment'):
-		segment_name = _node_took_dmg.name
-	elif _node_took_dmg.name.begins_with('Enemy02'):
-		segment_name = 'Head'
-	elif _node_took_dmg.name == 'Tail':
-		segment_name = 'Tail'
-	
-#	segments_health[segment_name] -= _dmg
+	if _node_took_dmg.name.begins_with('Segment'):		segment_name = _node_took_dmg.name
+	elif _node_took_dmg.name.begins_with('Enemy02'):	segment_name = 'Head'
+	elif _node_took_dmg.name == 'Tail':					segment_name = 'Tail'
 	segments_data[segment_name]['health'] -= _dmg
-	
 	setWoundedLevels(segment_name)
-	
-#	print("")
-	for segment in segments_data.keys():
-		print(segment, " = ", segments_data[segment])
-	
 	startWoundedTweenHighUp()
 	startWoundedTweenLowUp()
-	
-#	health -= _dmg
-#	if health <= 0:  startQueueFreeSequence()
-#	setWoundedLevel()
-#	if wounded_level:  startWoundedTweenHighUp()
-
-
-
 
 
 func startWoundedTweenHighUp() -> void:
@@ -443,6 +375,70 @@ func setWoundedLevels(_segment_name:String) -> void:
 			return
 
 
+func getSplitDataPack() -> Dictionary:
+	var split_data_pack_ = {}
+	var spine_ = null
+	
+	"""
+	2023-02-02
+	TURNOVER NOTES:
+	
+	- When Enemy02 splits:
+		
+		- 2 major things have to happen:
+			
+			- The old Enemy02 needs to have its Head relocated to just after the split, and the rest
+			of its front section needs to be removed.  This will need to include changes to class
+			vars like 'spine', 'segments_map', and 'segments_data'.
+			
+			- The new Enemy02 needs to be spawned by accepting params of 'spine' and segments health.
+				
+				- Before spawning new Enemy02, old Enemy02 will need to collect and modify the
+				correct data for new Enemy02 to use.  This includes:
+					
+					- modified 'spine'
+					- segments location in spine (spine_i)
+					- segments health
+	"""
+	
+	return split_data_pack_
+
+
+func split() -> void:
+	
+	var new_head = 'Segment04'
+	
+	var new_head_i = segments_map['Segment04']['spine_i']
+	
+	var new_spine = spine.slice(segments_map['Segment04']['spine_i'], spine.size())
+	
+	var new_head_global_position = spine[segments_map['Segment04']['spine_i']]
+	
+	for segment_name in ['Segment01', 'Segment02', 'Segment03', 'Segment04']:
+		
+		get_node(segment_name).queue_free()
+		
+		segments_map.erase(segment_name)
+		
+		segments_data.erase(segment_name)
+	
+	for segment_name in segments_map.keys():
+		
+		segments_map[segment_name]['spine_i'] -= new_head_i
+	
+	spine = new_spine
+	
+	global_position = new_head_global_position
+
+	SPEED = util.normalize(
+		4, SEGMENT_COUNT_LOW, SEGMENT_COUNT_HIGH, SPEED_LOW, SPEED_HIGH
+	)
+	INNER_TURN_SHARPNESS = util.normalize(
+		4, SEGMENT_COUNT_LOW, SEGMENT_COUNT_HIGH, INNER_TURN_SHARPNESS_LOW,
+		INNER_TURN_SHARPNESS_HIGH
+	)
+
+
 ####################################################################################################
 
 
@@ -470,62 +466,9 @@ func _on_WoundedTweenLowDown_tween_all_completed():
 
 
 
-
-
-"""
-2023-01-28
-TURNOVER NOTES:
-
-NEXT TO DO
-- I think I'm going to need to have 2 different sets of Tweens.  I'll need TweenLowUp, TweenLowDown,
-TweenHighUp, and TweenHighDown.
-NEXT TO DO
-
-DONE
-- I'm also going to need to setup a more advanced segment map.  The map will need to include
-references for health, wounded_level, col node, and img node.
-DONE
-"""
-
-
-"""
-2023-01-24
-TURNOVER NOTES:
-
-- Thoughts on handling Bullet <> Enemy collision:
-	
-	- I currently have it setup for collision if the Enemy's root node is the collision body.  But
-	the problem is with Enemy02, how it has many different collision Areas.
-	
-	- I think it should work fine if I add an Area node to the Bullet scene that is parallel to the
-	bullet's Body.  Then the Area node handles collision with enemies that have many different
-	collision areas.  To do this, it will have to trigger a takeDmg() function from the parent of
-	the collided area, and pass it the name of the collided area and a damage value.
-	
-	- Bullet gets Area node parallel to Body node.
-	- Bullet's Area senses for collision with Enemies that have multiple collision Areas.
-	- Bullet's Area triggers takeDmg() in the parent of the collision Area, and passes it the name
-	of the collision Area and the damage value.
-"""
-
-
 """
 2023-01-21
 TURNOVER NOTES:
-
-- Need to create an init() to declare and generate number of segments.
-
-- Need to have enemy02 track ship.  When genNewTarget(), if distance to ship is less than VAR, make
-new target be global position of ship.  Also need to make sure that when distance to ship is less
-than VAR, that there is no TileMap between enemy02 and ship.
-
-- Start having interactions between ship and enemy02.  When enemy02 collides with ship, ship takes
-damage and gets knocked back.  When bullets collide with enemy02, enemy02 takes damage.
-
-- Need to figure out enemy02's health.  Each segment will have its own health.  As each segment is
-damaged, the individual segments will start flashing red to indicate damage taken.  If the tail is
-hit, the head takes damage.  If the head dies, the enemy02 dies.  If a segment dies, enemy02 splits
-into 2 enemy02s...  Need to develop mechanic of split.
 
 - Notes for health mechanics:
 	

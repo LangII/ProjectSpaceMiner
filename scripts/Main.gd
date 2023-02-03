@@ -38,16 +38,24 @@ func _process(_delta):
 		
 		var enemy = get_node('Gameplay/Enemies/Enemy02')
 		
-		enemy.target = Vector2(620, 1000)
+		enemy.split()
 		
-		print("\nname =                        ", enemy.name)
-		print("global_position =              ", enemy.global_position)
-		print("target =                       ", enemy.target)
-		print("is_touching_wall =             ", enemy.is_touching_wall)
-		print("can_get_new_target_from_col =  ", enemy.can_get_new_target_from_col)
-		print("angle_to_target =              ", enemy.angle_to_target)
-		print("is_approaching_target =        ", enemy.is_approaching_target)
-		print("angle_to_target_is_expanding = ", enemy.angle_to_target_is_expanding)
+#		print("\nenemy.spine =\n", enemy.spine)
+		
+#		print("\nenemy.segments_map =\n", enemy.segments_map)
+		
+#		print("\nenemy.segments_data =\n", enemy.segments_data)
+		
+#		enemy.target = Vector2(620, 1000)
+		
+#		print("\nname =                        ", enemy.name)
+#		print("global_position =              ", enemy.global_position)
+#		print("target =                       ", enemy.target)
+#		print("is_touching_wall =             ", enemy.is_touching_wall)
+#		print("can_get_new_target_from_col =  ", enemy.can_get_new_target_from_col)
+#		print("angle_to_target =              ", enemy.angle_to_target)
+#		print("is_approaching_target =        ", enemy.is_approaching_target)
+#		print("angle_to_target_is_expanding = ", enemy.angle_to_target_is_expanding)
 		
 #        var test_x = 10
 #        var test_y = 50
