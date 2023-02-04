@@ -96,6 +96,14 @@ func convTileMapPosToGlobalPos(tile_map_pos:Vector2, global_pos_type:String='mid
 	return global_pos
 
 
+func printWithTime(_msg:String) -> void:
+	print("%s:%03d|  %s" % [
+		Time.get_time_string_from_system(),
+		OS.get_system_time_msecs() - OS.get_system_time_secs() * 1_000,
+		_msg
+	])
+
+
 
 
 

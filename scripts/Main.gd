@@ -19,6 +19,9 @@ func _ready():
 #	print("\nvar01 = ", var01)
 #	print("var02 = ", var02)
 #
+#	print("\nTime.get_time_string_from_system() = ", Time.get_time_string_from_system())
+#	print("\nOS.get_system_time_msecs() - OS.get_system_time_secs()*1000 = ", OS.get_system_time_msecs() - OS.get_system_time_secs()*1000)
+
 	
 	
 #	return

@@ -216,11 +216,11 @@ func initSegmentsMap() -> void:
 	}
 
 
-func moveSegmentsToIgnored() -> void:
-	for segment_name in segments_map.keys():
-		var segment_node = get_node(segment_name)
-		remove_child(segment_node)
-		$Ignored.add_child(segment_node)
+#func moveSegmentsToIgnored() -> void:
+#	for segment_name in segments_map.keys():
+#		var segment_node = get_node(segment_name)
+#		remove_child(segment_node)
+#		$Ignored.add_child(segment_node)
 
 
 ####################################################################################################
@@ -318,6 +318,9 @@ func takeDmg(_node_took_dmg:Object, _dmg:int) -> void:
 
 
 func startWoundedTweenHighUp() -> void:
+	
+#	util.printWithTime("started startWoundedTweenHighUp()")
+	
 	if not HAS_TAKEN_DMG:  return
 	for segment_name in segments_data.keys():
 		var wounded_level = segments_data[segment_name]['wounded_level']
@@ -327,9 +330,14 @@ func startWoundedTweenHighUp() -> void:
 			WOUNDED_MAP[wounded_level]['speed'], 0, 1
 		)
 	$WoundedTweenHighUp.start()
+	
+#	util.printWithTime("finished startWoundedTweenHighUp()")
 
 
 func startWoundedTweenHighDown():
+	
+#	util.printWithTime("started startWoundedTweenHighDown()")
+	
 	if not HAS_TAKEN_DMG:  return
 	for segment_name in segments_data.keys():
 		var wounded_level = segments_data[segment_name]['wounded_level']
@@ -339,9 +347,14 @@ func startWoundedTweenHighDown():
 			WOUNDED_MAP[wounded_level]['speed'], 0, 1
 		)
 	$WoundedTweenHighDown.start()
+	
+#	util.printWithTime("finished startWoundedTweenHighDown()")
 
 
 func startWoundedTweenLowUp() -> void:
+	
+#	util.printWithTime("started startWoundedTweenLowUp()")
+	
 	if not HAS_TAKEN_DMG:  return
 	for segment_name in segments_data.keys():
 		var wounded_level = segments_data[segment_name]['wounded_level']
@@ -351,9 +364,14 @@ func startWoundedTweenLowUp() -> void:
 			WOUNDED_MAP[wounded_level]['speed'], 0, 1
 		)
 	$WoundedTweenLowUp.start()
+	
+#	util.printWithTime("finished startWoundedTweenLowUp()")
 
 
 func startWoundedTweenLowDown():
+	
+#	util.printWithTime("started startWoundedTweenLowDown()")
+	
 	if not HAS_TAKEN_DMG:  return
 	for segment_name in segments_data.keys():
 		var wounded_level = segments_data[segment_name]['wounded_level']
@@ -363,6 +381,8 @@ func startWoundedTweenLowDown():
 			WOUNDED_MAP[wounded_level]['speed'], 0, 1
 		)
 	$WoundedTweenLowDown.start()
+	
+#	util.printWithTime("finished startWoundedTweenLowDown()")
 
 
 func setWoundedLevels(_segment_name:String) -> void:
@@ -406,6 +426,11 @@ func getSplitDataPack() -> Dictionary:
 
 func split() -> void:
 	
+	SEGMENT_COUNT = 4
+	
+	segments_data['Head']['health'] = segments_data['Segment04']['health']
+	segments_data['Head']['wounded_level'] = segments_data['Segment04']['wounded_level']
+	
 	var new_head = 'Segment04'
 	
 	var new_head_i = segments_map['Segment04']['spine_i']
@@ -437,6 +462,31 @@ func split() -> void:
 		4, SEGMENT_COUNT_LOW, SEGMENT_COUNT_HIGH, INNER_TURN_SHARPNESS_LOW,
 		INNER_TURN_SHARPNESS_HIGH
 	)
+	
+	genNewTarget()
+	
+	$WoundedTweenHighUp.remove_all()
+	$WoundedTweenHighDown.remove_all()
+	$WoundedTweenLowUp.remove_all()
+	$WoundedTweenLowDown.remove_all()
+	
+	startWoundedTweenHighUp()
+	startWoundedTweenLowUp()
+	
+#	print("\nspine =\n", spine)
+#	print("\nsegments_map =\n", segments_map)
+#	print("\nsegments_data =\n", segments_data)
+	
+	"""
+	2023-02-03
+	- Having some odd behavior.  So far, everything with the split() seems to be working as expected.
+	But I'm struggling transfering the 'health' and 'wounded_level' of the old 'Segment' to the new
+	'Head'.
+		- The data seems to transfer ok.  But the red flashing 'wounded' display is odd.  If the old
+		'Segment' (new 'Head') had no 'wounded_level' before split(), then everything works good.
+		But if it did have a 'wounded_level' then the flashing tween will start for 1 second, but
+		the opposite flash effect will not continue.
+	"""
 
 
 ####################################################################################################
@@ -465,25 +515,6 @@ func _on_WoundedTweenLowDown_tween_all_completed():
 
 
 
-
-"""
-2023-01-21
-TURNOVER NOTES:
-
-- Notes for health mechanics:
-	
-	- Each Segment has its own individual Health.  In this statement the Head is considered a
-	Segment.
-	
-	- If the Head or the last Segment touching the Tail gets its Health reduced to 0, the number of
-	Segments the Enemy has is reduced by 1.
-	
-	- If a central Segment (not a Head and not the last Segment touching the Tail) gets its Health
-	reduced to 0, said central Segment will be eliminated and the Enemy will turn into 2 Enemies.
-	
-	- The Tail is the Enemy's weak point.  If the Tail is hit, there is the potential of killing the
-	entire Enemy.  How much damage is done when the Tail is hit 
-"""
 
 
 
