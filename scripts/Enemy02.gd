@@ -2,15 +2,17 @@
 extends KinematicBody2D
 
 onready var util = get_node('/root/Main/Utilities')
-onready var gameplay = get_node('/root/Main/Gameplay')
-onready var ship = get_node('/root/Main/Gameplay/Ship')
-onready var tilemap = get_node('/root/Main/Gameplay/TileMap')
+#onready var gameplay = get_node('/root/Main/Gameplay')
+#onready var ship = get_node('/root/Main/Gameplay/Ship')
+#onready var tilemap = get_node('/root/Main/Gameplay/TileMap')
+onready var _enemies_ = get_node('/root/Main/Gameplay/Enemies')
+
+onready var segment_scn = preload('res://scenes/Enemy02Segment.tscn')
+onready var enemy_02 = load('res://scenes/Enemy02.tscn')
 
 
 ####################################################################################################
 
-
-onready var segment_scn = preload('res://scenes/Enemy02Segment.tscn')
 
 onready var spine = []
 onready var segments_map = {}
@@ -18,7 +20,7 @@ onready var segments_map = {}
 onready var TAIL_SPIN_SPEED = 5
 onready var tail_spin_dir = util.getRandomItemFromArray([+1, -1])
 
-onready var SEGMENT_COUNT_LOW = 1
+onready var SEGMENT_COUNT_LOW = 0
 onready var SEGMENT_COUNT_HIGH = 21
 onready var SPEED_LOW = 100
 onready var SPEED_HIGH = 60
@@ -46,7 +48,8 @@ onready var SEGMENT_TO_TAIL_SPINE_COUNT = null
 onready var TOTAL_SPINE_COUNT = null
 
 """ TODO:  initial target to be randomly generated """
-onready var target = Vector2(620, 1000)
+#onready var target = Vector2(620, 1000)
+onready var target = Vector2()
 
 onready var dist_to_target = 0.0
 onready var prev_dist_to_target = 0.0
@@ -105,6 +108,28 @@ func init(_segment_count:int, _split_data_pack:Dictionary={}) -> void:
 	initSegmentsMap()
 	
 	$CanGenNewTargetFromColTimer.wait_time = CAN_GEN_NEW_TARGET_FROM_COL_DELAY
+	
+#	if not _split_data_pack:
+	genNewTarget()
+	
+	if _split_data_pack:
+		spine = _split_data_pack['spine']
+#		target = _split_data_pack['target']
+
+#		segments_data = _split_data_pack['segments_data']
+		
+		for segment_name in _split_data_pack['segments_data'].keys():
+			segments_data[segment_name]['health'] = _split_data_pack['segments_data'][segment_name]['health']
+			segments_data[segment_name]['wounded_level'] = _split_data_pack['segments_data'][segment_name]['wounded_level']
+		
+		for segment_name in segments_data.keys():
+			if segments_data[segment_name]['health'] < SEGMENT_MAX_HEALTH:
+				HAS_TAKEN_DMG = true
+				startWoundedTweenHighUp()
+				startWoundedTweenLowUp()
+				break
+#
+		print("\nsegments_data = ", segments_data)
 
 
 func _process(_delta:float) -> void:
@@ -395,51 +420,72 @@ func setWoundedLevels(_segment_name:String) -> void:
 			return
 
 
-func getSplitDataPack() -> Dictionary:
-	var split_data_pack_ = {}
-	var spine_ = null
+#func getSplitDataPack() -> Dictionary:
+#	var split_data_pack_ = {}
+#	var spine_ = null
+#
+#
+#	return split_data_pack_
+
+
+func split(_del_segment_name:String) -> void:
 	
 	"""
-	2023-02-02
-	TURNOVER NOTES:
+	2023-02-04
+	- Will need to make modifications for when _del_segment_name is the last segment (excluding Tail).
+	"""
 	
-	- When Enemy02 splits:
+	var del_segment_i = int(_del_segment_name.substr(7, 2))
+	
+	$WoundedTweenHighUp.remove_all()
+	$WoundedTweenHighDown.remove_all()
+	$WoundedTweenLowUp.remove_all()
+	$WoundedTweenLowDown.remove_all()
+	
+	$HeadImg.modulate = Color(1, 1, 1, 1)
+	
+	var front_enemy02_global_position = global_position
+	
+#	SEGMENT_COUNT = 4
+	SEGMENT_COUNT -= del_segment_i + 1
+	
+#	var new_head = 'Segment04'
+	var new_head = 'Segment%02d' % [del_segment_i + 1]
+	
+	var front_enemy02_segments_data = {}
+	
+#	for segment_name in ['Segment01', 'Segment02']:
+	for i in range(1, del_segment_i):
+		var segment_name = 'Segment%02d' % [i]
+	
+		front_enemy02_segments_data[segment_name] = segments_data[segment_name]
 		
-		- 2 major things have to happen:
-			
-			- The old Enemy02 needs to have its Head relocated to just after the split, and the rest
-			of its front section needs to be removed.  This will need to include changes to class
-			vars like 'spine', 'segments_map', and 'segments_data'.
-			
-			- The new Enemy02 needs to be spawned by accepting params of 'spine' and segments health.
-				
-				- Before spawning new Enemy02, old Enemy02 will need to collect and modify the
-				correct data for new Enemy02 to use.  This includes:
-					
-					- modified 'spine'
-					- segments location in spine (spine_i)
-					- segments health
-	"""
+#	front_enemy02_segments_data['Head'] = segments_data['Head']
+	front_enemy02_segments_data['Head'] = segments_data['Head'].duplicate(true)
 	
-	return split_data_pack_
-
-
-func split() -> void:
+	front_enemy02_segments_data['Tail'] = segments_data['Tail']
 	
-	SEGMENT_COUNT = 4
+#	segments_data['Head']['health'] = segments_data['Segment04']['health']
+#	segments_data['Head']['wounded_level'] = segments_data['Segment04']['wounded_level']
+	segments_data['Head']['health'] = segments_data[new_head]['health']
+	segments_data['Head']['wounded_level'] = segments_data[new_head]['wounded_level']
 	
-	segments_data['Head']['health'] = segments_data['Segment04']['health']
-	segments_data['Head']['wounded_level'] = segments_data['Segment04']['wounded_level']
+#	var new_head_i = segments_map['Segment04']['spine_i']
+	var new_head_i = segments_map[new_head]['spine_i']
 	
-	var new_head = 'Segment04'
+#	var new_spine = spine.slice(segments_map['Segment04']['spine_i'], spine.size())
+	var new_spine = spine.slice(segments_map[new_head]['spine_i'], spine.size())
 	
-	var new_head_i = segments_map['Segment04']['spine_i']
+#	var new_head_global_position = spine[segments_map['Segment04']['spine_i']]
+	var new_head_global_position = spine[segments_map[new_head]['spine_i']]
 	
-	var new_spine = spine.slice(segments_map['Segment04']['spine_i'], spine.size())
+#	var front_enemy02_spine = spine.slice(0, segments_map['Segment03']['spine_i'])
+	var front_enemy02_spine = spine.slice(0, segments_map[_del_segment_name]['spine_i'])
 	
-	var new_head_global_position = spine[segments_map['Segment04']['spine_i']]
 	
-	for segment_name in ['Segment01', 'Segment02', 'Segment03', 'Segment04']:
+#	for segment_name in ['Segment01', 'Segment02', 'Segment03', 'Segment04']:
+	for i in range(1, del_segment_i + 2):
+		var segment_name = 'Segment%02d' % [i]
 		
 		get_node(segment_name).queue_free()
 		
@@ -456,19 +502,22 @@ func split() -> void:
 	global_position = new_head_global_position
 
 	SPEED = util.normalize(
-		4, SEGMENT_COUNT_LOW, SEGMENT_COUNT_HIGH, SPEED_LOW, SPEED_HIGH
+		
+#		4, SEGMENT_COUNT_LOW, SEGMENT_COUNT_HIGH, SPEED_LOW, SPEED_HIGH
+		SEGMENT_COUNT, SEGMENT_COUNT_LOW, SEGMENT_COUNT_HIGH, SPEED_LOW, SPEED_HIGH
+	
 	)
 	INNER_TURN_SHARPNESS = util.normalize(
-		4, SEGMENT_COUNT_LOW, SEGMENT_COUNT_HIGH, INNER_TURN_SHARPNESS_LOW,
+	
+#		4, SEGMENT_COUNT_LOW, SEGMENT_COUNT_HIGH, INNER_TURN_SHARPNESS_LOW,
+		SEGMENT_COUNT, SEGMENT_COUNT_LOW, SEGMENT_COUNT_HIGH, INNER_TURN_SHARPNESS_LOW,
+	
 		INNER_TURN_SHARPNESS_HIGH
 	)
 	
-	genNewTarget()
+	var front_target = target
 	
-	$WoundedTweenHighUp.remove_all()
-	$WoundedTweenHighDown.remove_all()
-	$WoundedTweenLowUp.remove_all()
-	$WoundedTweenLowDown.remove_all()
+	genNewTarget()
 	
 	startWoundedTweenHighUp()
 	startWoundedTweenLowUp()
@@ -477,16 +526,23 @@ func split() -> void:
 #	print("\nsegments_map =\n", segments_map)
 #	print("\nsegments_data =\n", segments_data)
 	
-	"""
-	2023-02-03
-	- Having some odd behavior.  So far, everything with the split() seems to be working as expected.
-	But I'm struggling transfering the 'health' and 'wounded_level' of the old 'Segment' to the new
-	'Head'.
-		- The data seems to transfer ok.  But the red flashing 'wounded' display is odd.  If the old
-		'Segment' (new 'Head') had no 'wounded_level' before split(), then everything works good.
-		But if it did have a 'wounded_level' then the flashing tween will start for 1 second, but
-		the opposite flash effect will not continue.
-	"""
+	"""~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"""
+	
+	var split_data_pack = {
+		'spine': front_enemy02_spine,
+		'segments_data': front_enemy02_segments_data,
+		'target': target
+	}
+	
+	print("\nfront_enemy02_segments_data = ", front_enemy02_segments_data)
+	
+	var new_front_enemy_02 = enemy_02.instance()
+	_enemies_.add_child(new_front_enemy_02)
+	
+#	new_front_enemy_02.init(2, split_data_pack)
+	new_front_enemy_02.init(del_segment_i - 1, split_data_pack)
+	
+	new_front_enemy_02.global_position = front_enemy02_global_position
 
 
 ####################################################################################################

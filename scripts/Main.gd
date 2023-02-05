@@ -22,7 +22,10 @@ func _ready():
 #	print("\nTime.get_time_string_from_system() = ", Time.get_time_string_from_system())
 #	print("\nOS.get_system_time_msecs() - OS.get_system_time_secs()*1000 = ", OS.get_system_time_msecs() - OS.get_system_time_secs()*1000)
 
+#	print("test = ", 'Segment04'.substr(7, 2))
 	
+#	for i in range(1, 3):
+#		print("i = ", i)
 	
 #	return
 	
@@ -41,7 +44,7 @@ func _process(_delta):
 		
 		var enemy = get_node('Gameplay/Enemies/Enemy02')
 		
-		enemy.split()
+		enemy.split('Segment03')
 		
 #		print("\nenemy.spine =\n", enemy.spine)
 		
