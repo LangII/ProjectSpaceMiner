@@ -54,7 +54,7 @@ func start(pos, dir):
 
 
 func collidedWithTileMap(col):
-	var mod_normal = col.normal.clamped(COLLISION_NORMAL_CLAMP)
+	var mod_normal = col.normal.limit_length(COLLISION_NORMAL_CLAMP)
 	var tile_pos = tile_map.world_to_map(col.position - mod_normal)
 	tile_map_logic.tileTakesDmg(tile_pos, DMG)
 	endOfCollision()

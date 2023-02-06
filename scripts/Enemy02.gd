@@ -1,14 +1,45 @@
 
+"""
+NEXT TO DOS
+-----------
+
+2023-02-05
+
+- Next to do is link split() to takeDmg() (depending on node taking damage).
+
+- Then make it so if Head or last Segment takes damage to 0 health, split() does not occur.
+Instead, those single nodes get deleted.
+
+- Then trigger whole Enemy02 death from Tail death.
+
+- Then create drop sprites and initiate them.
+
+- Then make Enemy02 start to target Ship.
+
+- Then create functionality of Ship taking damage and being knocked back from collision with
+Enemy02 (all collisions including Head, all Segments, and Tail).
+
+
+LOW PRIORITY TO DOS
+-------------------
+
+2023-02-05
+
+- From split...
+
+	- Resulting Enemy02s have an inconsistent gap between segments (SPINE_TO_SPINE_DIST).
+
+	- Front Enemy02 should keep old Enemy02's target.  It does not.  After split(), both front and
+	back Enemy02s make dramatic turns to pursue new targets.
+"""
+
 extends KinematicBody2D
 
 onready var util = get_node('/root/Main/Utilities')
-#onready var gameplay = get_node('/root/Main/Gameplay')
-#onready var ship = get_node('/root/Main/Gameplay/Ship')
-#onready var tilemap = get_node('/root/Main/Gameplay/TileMap')
 onready var _enemies_ = get_node('/root/Main/Gameplay/Enemies')
 
 onready var segment_scn = preload('res://scenes/Enemy02Segment.tscn')
-onready var enemy_02 = load('res://scenes/Enemy02.tscn')
+onready var enemy02 = load('res://scenes/Enemy02.tscn')
 
 
 ####################################################################################################
@@ -20,13 +51,12 @@ onready var segments_map = {}
 onready var TAIL_SPIN_SPEED = 5
 onready var tail_spin_dir = util.getRandomItemFromArray([+1, -1])
 
-onready var SEGMENT_COUNT_LOW = 0
-onready var SEGMENT_COUNT_HIGH = 21
-onready var SPEED_LOW = 100
-onready var SPEED_HIGH = 60
-onready var INNER_TURN_SHARPNESS_LOW = 2.5
-onready var INNER_TURN_SHARPNESS_HIGH = 1.5
-
+onready var SEGMENT_COUNT_MIN = 0
+onready var SEGMENT_COUNT_MAX = 21
+onready var SPEED_MIN = 100
+onready var SPEED_MAX = 60
+onready var INNER_TURN_SHARPNESS_MIN = 2.5
+onready var INNER_TURN_SHARPNESS_MAX = 1.5
 onready var SEGMENT_COUNT = null
 onready var SPEED = null
 onready var INNER_TURN_SHARPNESS = null
@@ -48,7 +78,6 @@ onready var SEGMENT_TO_TAIL_SPINE_COUNT = null
 onready var TOTAL_SPINE_COUNT = null
 
 """ TODO:  initial target to be randomly generated """
-#onready var target = Vector2(620, 1000)
 onready var target = Vector2()
 
 onready var dist_to_target = 0.0
@@ -65,7 +94,6 @@ onready var NEW_TARGET_DIST_MIN = 200
 onready var NEW_TARGET_DIST_MAX = 400
 
 onready var is_touching_wall = false
-onready var prev_is_touching_wall = false
 onready var can_get_new_target_from_col = true
 
 onready var CAN_GEN_NEW_TARGET_FROM_COL_DELAY = 2
@@ -88,6 +116,9 @@ onready var HAS_TAKEN_DMG = false
 
 onready var segments_data = {}
 
+onready var LOWEST_SEGMENT_NAME = ''
+onready var HIGHEST_SEGMENT_NAME = ''
+
 
 ####################################################################################################
 
@@ -97,7 +128,7 @@ func _ready() -> void:
 	pass
 
 
-func init(_segment_count:int, _split_data_pack:Dictionary={}) -> void:
+func init(_segment_count:int, _from_split:bool=false, _spine:Array=[], _segments_data:Dictionary={}) -> void:
 	
 	updateVarsFromSegmentCount(_segment_count)
 	
@@ -109,27 +140,15 @@ func init(_segment_count:int, _split_data_pack:Dictionary={}) -> void:
 	
 	$CanGenNewTargetFromColTimer.wait_time = CAN_GEN_NEW_TARGET_FROM_COL_DELAY
 	
-#	if not _split_data_pack:
 	genNewTarget()
 	
-	if _split_data_pack:
-		spine = _split_data_pack['spine']
-#		target = _split_data_pack['target']
-
-#		segments_data = _split_data_pack['segments_data']
+	if _from_split:
 		
-		for segment_name in _split_data_pack['segments_data'].keys():
-			segments_data[segment_name]['health'] = _split_data_pack['segments_data'][segment_name]['health']
-			segments_data[segment_name]['wounded_level'] = _split_data_pack['segments_data'][segment_name]['wounded_level']
+		spine = _spine
 		
-		for segment_name in segments_data.keys():
-			if segments_data[segment_name]['health'] < SEGMENT_MAX_HEALTH:
-				HAS_TAKEN_DMG = true
-				startWoundedTweenHighUp()
-				startWoundedTweenLowUp()
-				break
-#
-		print("\nsegments_data = ", segments_data)
+		handleSegmentsDataFromSplitInit(_segments_data)
+	
+	setLowestHighestSegmentNames()
 
 
 func _process(_delta:float) -> void:
@@ -170,19 +189,13 @@ func _process(_delta:float) -> void:
 
 
 func updateVarsFromSegmentCount(_segment_count:int) -> void:
-	if _segment_count < SEGMENT_COUNT_LOW or _segment_count > SEGMENT_COUNT_HIGH:
+	if _segment_count < SEGMENT_COUNT_MIN or _segment_count > SEGMENT_COUNT_MAX:
 		util.throwError(
 			"Enemy02.updateVarsFromSegmentCount() arg _segment_count must be between %s and %s " %
-			[SEGMENT_COUNT_LOW, SEGMENT_COUNT_HIGH] + "inclusively."
+			[SEGMENT_COUNT_MIN, SEGMENT_COUNT_MAX] + "inclusively."
 		)
 	SEGMENT_COUNT = _segment_count
-	SPEED = util.normalize(
-		SEGMENT_COUNT, SEGMENT_COUNT_LOW, SEGMENT_COUNT_HIGH, SPEED_LOW, SPEED_HIGH
-	)
-	INNER_TURN_SHARPNESS = util.normalize(
-		SEGMENT_COUNT, SEGMENT_COUNT_LOW, SEGMENT_COUNT_HIGH, INNER_TURN_SHARPNESS_LOW,
-		INNER_TURN_SHARPNESS_HIGH
-	)
+	updateSpeedAndInnerTurnSharpness()
 
 
 func initSpine() -> void:
@@ -205,7 +218,7 @@ func copySegments() -> void:
 		segment.name = 'Segment%02d' % [i]
 		segment.get_node('SegmentImg').name = 'Segment%02dImg' % [i]
 		add_child_below_node($HeadImg, segment)
-	
+		
 		segments_data[segment.name] = {
 			'health': SEGMENT_MAX_HEALTH, 'wounded_level': null, 'col_node': segment,
 			'img_node': segment.get_node('Segment%02dImg' % [i])
@@ -241,14 +254,37 @@ func initSegmentsMap() -> void:
 	}
 
 
-#func moveSegmentsToIgnored() -> void:
-#	for segment_name in segments_map.keys():
-#		var segment_node = get_node(segment_name)
-#		remove_child(segment_node)
-#		$Ignored.add_child(segment_node)
+func handleSegmentsDataFromSplitInit(_segments_data:Dictionary) -> void:
+	for segment_name in _segments_data.keys():
+		# Only transfer 'health' and 'wounded_level' from _segments_data.  Node ref DO NOT get transfered.
+		segments_data[segment_name]['health'] = _segments_data[segment_name]['health']
+		segments_data[segment_name]['wounded_level'] = _segments_data[segment_name]['wounded_level']
+		if segments_data[segment_name]['health'] < SEGMENT_MAX_HEALTH:  HAS_TAKEN_DMG = true
+	if HAS_TAKEN_DMG:
+		startWoundedTweenHighUp()
+		startWoundedTweenLowUp()
+
+
+func setLowestHighestSegmentNames() -> void:
+	var segment_names = []
+	for segment_name in segments_data.keys():
+		if not segment_name in ['Head', 'Tail']:
+			segment_names += [segment_name]
+	LOWEST_SEGMENT_NAME = segment_names.min()
+	HIGHEST_SEGMENT_NAME = segment_names.max()
 
 
 ####################################################################################################
+
+
+func updateSpeedAndInnerTurnSharpness() -> void:
+	SPEED = util.normalize(
+		SEGMENT_COUNT, SEGMENT_COUNT_MIN, SEGMENT_COUNT_MAX, SPEED_MIN, SPEED_MAX
+	)
+	INNER_TURN_SHARPNESS = util.normalize(
+		SEGMENT_COUNT, SEGMENT_COUNT_MIN, SEGMENT_COUNT_MAX, INNER_TURN_SHARPNESS_MIN,
+		INNER_TURN_SHARPNESS_MAX
+	)
 
 
 func updateCurDir() -> void:
@@ -334,18 +370,21 @@ func takeDmg(_node_took_dmg:Object, _dmg:int) -> void:
 	HAS_TAKEN_DMG = true
 	var segment_name = ''
 	if _node_took_dmg.name.begins_with('Segment'):		segment_name = _node_took_dmg.name
-	elif _node_took_dmg.name.begins_with('Enemy02'):	segment_name = 'Head'
+	elif (
+		_node_took_dmg.name.begins_with('Enemy02')
+		or _node_took_dmg.name.begins_with('@Enemy02')
+	):													segment_name = 'Head'
 	elif _node_took_dmg.name == 'Tail':					segment_name = 'Tail'
 	segments_data[segment_name]['health'] -= _dmg
 	setWoundedLevels(segment_name)
 	startWoundedTweenHighUp()
 	startWoundedTweenLowUp()
+	if segment_name in ['Head', 'Tail', HIGHEST_SEGMENT_NAME]:  return
+	if segments_data[segment_name]['health'] <= 0:
+		split(segment_name)
 
 
 func startWoundedTweenHighUp() -> void:
-	
-#	util.printWithTime("started startWoundedTweenHighUp()")
-	
 	if not HAS_TAKEN_DMG:  return
 	for segment_name in segments_data.keys():
 		var wounded_level = segments_data[segment_name]['wounded_level']
@@ -355,14 +394,9 @@ func startWoundedTweenHighUp() -> void:
 			WOUNDED_MAP[wounded_level]['speed'], 0, 1
 		)
 	$WoundedTweenHighUp.start()
-	
-#	util.printWithTime("finished startWoundedTweenHighUp()")
 
 
 func startWoundedTweenHighDown():
-	
-#	util.printWithTime("started startWoundedTweenHighDown()")
-	
 	if not HAS_TAKEN_DMG:  return
 	for segment_name in segments_data.keys():
 		var wounded_level = segments_data[segment_name]['wounded_level']
@@ -372,14 +406,9 @@ func startWoundedTweenHighDown():
 			WOUNDED_MAP[wounded_level]['speed'], 0, 1
 		)
 	$WoundedTweenHighDown.start()
-	
-#	util.printWithTime("finished startWoundedTweenHighDown()")
 
 
 func startWoundedTweenLowUp() -> void:
-	
-#	util.printWithTime("started startWoundedTweenLowUp()")
-	
 	if not HAS_TAKEN_DMG:  return
 	for segment_name in segments_data.keys():
 		var wounded_level = segments_data[segment_name]['wounded_level']
@@ -389,14 +418,9 @@ func startWoundedTweenLowUp() -> void:
 			WOUNDED_MAP[wounded_level]['speed'], 0, 1
 		)
 	$WoundedTweenLowUp.start()
-	
-#	util.printWithTime("finished startWoundedTweenLowUp()")
 
 
 func startWoundedTweenLowDown():
-	
-#	util.printWithTime("started startWoundedTweenLowDown()")
-	
 	if not HAS_TAKEN_DMG:  return
 	for segment_name in segments_data.keys():
 		var wounded_level = segments_data[segment_name]['wounded_level']
@@ -406,8 +430,6 @@ func startWoundedTweenLowDown():
 			WOUNDED_MAP[wounded_level]['speed'], 0, 1
 		)
 	$WoundedTweenLowDown.start()
-	
-#	util.printWithTime("finished startWoundedTweenLowDown()")
 
 
 func setWoundedLevels(_segment_name:String) -> void:
@@ -420,14 +442,6 @@ func setWoundedLevels(_segment_name:String) -> void:
 			return
 
 
-#func getSplitDataPack() -> Dictionary:
-#	var split_data_pack_ = {}
-#	var spine_ = null
-#
-#
-#	return split_data_pack_
-
-
 func split(_del_segment_name:String) -> void:
 	
 	"""
@@ -437,6 +451,14 @@ func split(_del_segment_name:String) -> void:
 	
 	var del_segment_i = int(_del_segment_name.substr(7, 2))
 	
+	instFrontEnemy02FromSplit(_del_segment_name, del_segment_i)
+	
+	updatesFromSplit(del_segment_i)
+	
+	updateSpeedAndInnerTurnSharpness()
+	
+	genNewTarget()
+	
 	$WoundedTweenHighUp.remove_all()
 	$WoundedTweenHighDown.remove_all()
 	$WoundedTweenLowUp.remove_all()
@@ -444,105 +466,65 @@ func split(_del_segment_name:String) -> void:
 	
 	$HeadImg.modulate = Color(1, 1, 1, 1)
 	
-	var front_enemy02_global_position = global_position
-	
-#	SEGMENT_COUNT = 4
-	SEGMENT_COUNT -= del_segment_i + 1
-	
-#	var new_head = 'Segment04'
-	var new_head = 'Segment%02d' % [del_segment_i + 1]
-	
-	var front_enemy02_segments_data = {}
-	
-#	for segment_name in ['Segment01', 'Segment02']:
-	for i in range(1, del_segment_i):
-		var segment_name = 'Segment%02d' % [i]
-	
-		front_enemy02_segments_data[segment_name] = segments_data[segment_name]
-		
-#	front_enemy02_segments_data['Head'] = segments_data['Head']
-	front_enemy02_segments_data['Head'] = segments_data['Head'].duplicate(true)
-	
-	front_enemy02_segments_data['Tail'] = segments_data['Tail']
-	
-#	segments_data['Head']['health'] = segments_data['Segment04']['health']
-#	segments_data['Head']['wounded_level'] = segments_data['Segment04']['wounded_level']
-	segments_data['Head']['health'] = segments_data[new_head]['health']
-	segments_data['Head']['wounded_level'] = segments_data[new_head]['wounded_level']
-	
-#	var new_head_i = segments_map['Segment04']['spine_i']
-	var new_head_i = segments_map[new_head]['spine_i']
-	
-#	var new_spine = spine.slice(segments_map['Segment04']['spine_i'], spine.size())
-	var new_spine = spine.slice(segments_map[new_head]['spine_i'], spine.size())
-	
-#	var new_head_global_position = spine[segments_map['Segment04']['spine_i']]
-	var new_head_global_position = spine[segments_map[new_head]['spine_i']]
-	
-#	var front_enemy02_spine = spine.slice(0, segments_map['Segment03']['spine_i'])
-	var front_enemy02_spine = spine.slice(0, segments_map[_del_segment_name]['spine_i'])
-	
-	
-#	for segment_name in ['Segment01', 'Segment02', 'Segment03', 'Segment04']:
-	for i in range(1, del_segment_i + 2):
-		var segment_name = 'Segment%02d' % [i]
-		
-		get_node(segment_name).queue_free()
-		
-		segments_map.erase(segment_name)
-		
-		segments_data.erase(segment_name)
-	
-	for segment_name in segments_map.keys():
-		
-		segments_map[segment_name]['spine_i'] -= new_head_i
-	
-	spine = new_spine
-	
-	global_position = new_head_global_position
-
-	SPEED = util.normalize(
-		
-#		4, SEGMENT_COUNT_LOW, SEGMENT_COUNT_HIGH, SPEED_LOW, SPEED_HIGH
-		SEGMENT_COUNT, SEGMENT_COUNT_LOW, SEGMENT_COUNT_HIGH, SPEED_LOW, SPEED_HIGH
-	
-	)
-	INNER_TURN_SHARPNESS = util.normalize(
-	
-#		4, SEGMENT_COUNT_LOW, SEGMENT_COUNT_HIGH, INNER_TURN_SHARPNESS_LOW,
-		SEGMENT_COUNT, SEGMENT_COUNT_LOW, SEGMENT_COUNT_HIGH, INNER_TURN_SHARPNESS_LOW,
-	
-		INNER_TURN_SHARPNESS_HIGH
-	)
-	
-	var front_target = target
-	
-	genNewTarget()
-	
 	startWoundedTweenHighUp()
 	startWoundedTweenLowUp()
+
+
+func instFrontEnemy02FromSplit(_del_segment_name:String, _del_segment_i:int) -> void:
+	var new_front_segments_data = {}
+	for i in range(int(LOWEST_SEGMENT_NAME.substr(7, 2)), _del_segment_i):
+		var segment_name = 'Segment%02d' % [i]
+		new_front_segments_data[segment_name] = segments_data[segment_name]
+	new_front_segments_data['Head'] = segments_data['Head'].duplicate(true)
+	new_front_segments_data['Tail'] = segments_data['Tail']
+	var enemy02_inst = enemy02.instance()
+	_enemies_.add_child(enemy02_inst)
+	enemy02_inst.init(
+		_del_segment_i - 1,
+		true,
+		
+		# Giving a large buffer to end of slice for quick and dirty debug.
+		spine.slice(0, segments_map[_del_segment_name]['spine_i'] + 100),
+		
+		new_front_segments_data
+	)
+	enemy02_inst.global_position = global_position
+
+
+func updatesFromSplit(_del_segment_i:int) -> void:
 	
-#	print("\nspine =\n", spine)
-#	print("\nsegments_map =\n", segments_map)
-#	print("\nsegments_data =\n", segments_data)
+	SEGMENT_COUNT -= _del_segment_i + 1
+	var new_head_segment = 'Segment%02d' % [_del_segment_i + 1]
 	
-	"""~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"""
+	# Transfer health and wounded data from segment to new head.
+	segments_data['Head']['health'] = segments_data[new_head_segment]['health']
+	segments_data['Head']['wounded_level'] = segments_data[new_head_segment]['wounded_level']
 	
-	var split_data_pack = {
-		'spine': front_enemy02_spine,
-		'segments_data': front_enemy02_segments_data,
-		'target': target
-	}
+	# Save spine and pos data before making deletions on segments map and data.
+	var new_head_spine_i = segments_map[new_head_segment]['spine_i']
+	var new_spine = spine.slice(segments_map[new_head_segment]['spine_i'], spine.size())
+	var new_head_global_position = spine[segments_map[new_head_segment]['spine_i']]
 	
-	print("\nfront_enemy02_segments_data = ", front_enemy02_segments_data)
+	# Delete "front" section of segments.
+	for i in range(int(LOWEST_SEGMENT_NAME.substr(7, 2)), _del_segment_i + 2):
+		var segment_name = 'Segment%02d' % [i]
+		get_node(segment_name).queue_free()
+		segments_map.erase(segment_name)
+		segments_data.erase(segment_name)
 	
-	var new_front_enemy_02 = enemy_02.instance()
-	_enemies_.add_child(new_front_enemy_02)
+	var buffer_spine = []
+	for _i in range(50):
+		buffer_spine += [new_spine[-1]]
 	
-#	new_front_enemy_02.init(2, split_data_pack)
-	new_front_enemy_02.init(del_segment_i - 1, split_data_pack)
+	# Transfer saved spine and pos data to new "back" section of segments.
+	for segment_name in segments_map.keys():  segments_map[segment_name]['spine_i'] -= new_head_spine_i
 	
-	new_front_enemy_02.global_position = front_enemy02_global_position
+#	spine = new_spine
+	spine = new_spine + buffer_spine
+	
+	global_position = new_head_global_position
+	
+	setLowestHighestSegmentNames()
 
 
 ####################################################################################################

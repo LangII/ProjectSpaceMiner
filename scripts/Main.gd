@@ -8,23 +8,7 @@ func _ready():
 	################################################################################################
 	""" TESTING """
 	
-#	var var01 = 100
-#	var var02 = var01
-#
-#	print("\nvar01 = ", var01)
-#	print("var02 = ", var02)
-#
-#	var02 += 50
-#
-#	print("\nvar01 = ", var01)
-#	print("var02 = ", var02)
-#
-#	print("\nTime.get_time_string_from_system() = ", Time.get_time_string_from_system())
-#	print("\nOS.get_system_time_msecs() - OS.get_system_time_secs()*1000 = ", OS.get_system_time_msecs() - OS.get_system_time_secs()*1000)
-
-#	print("test = ", 'Segment04'.substr(7, 2))
-	
-#	for i in range(1, 3):
+#	for i in range(1, 5):
 #		print("i = ", i)
 	
 #	return
@@ -42,9 +26,21 @@ func _process(_delta):
 	
 	if Input.is_action_just_pressed('test'):
 		
-		var enemy = get_node('Gameplay/Enemies/Enemy02')
+		var enemies = get_node('Gameplay/Enemies')
 		
-		enemy.split('Segment03')
+		for enemy in enemies.get_children():
+			
+			print("\n\n\n%s:" % [enemy.name])
+			
+			print("\nenemy.spine =\n", enemy.spine)
+			
+			print("\nenemy.segments_map =\n", enemy.segments_map)
+			
+			print("\nenemy.segments_data =\n", enemy.segments_data)
+		
+#		var enemy = get_node('Gameplay/Enemies/Enemy02')
+		
+#		enemy.split('Segment03')
 		
 #		print("\nenemy.spine =\n", enemy.spine)
 		
