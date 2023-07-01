@@ -11,6 +11,22 @@ func _ready():
 #	for i in range(1, 5):
 #		print("i = ", i)
 	
+#	var angle = rad2deg(Vector2(0, 0).angle_to(Vector2(-1, -1)))
+#	print("\nangle = ", angle)
+#	print("\nVector2.RIGHT = ", Vector2.RIGHT)
+#	print("\nVector2.DOWN = ", Vector2.DOWN)
+#	print("\nVector2.RIGHT.angle() = ", rad2deg(Vector2.RIGHT.angle()))
+#	print("\nVector2.DOWN.angle() = ", rad2deg(Vector2.DOWN.angle()))
+#	print("\nVector2(1, 1).angle() = ", rad2deg(Vector2(1, 1).angle()))
+#	print("\nVector2(-1, -1).angle() = ", rad2deg(Vector2(-1, -1).angle()))
+#
+#	var util = $Utilities
+#	var enemy_pos = Vector2(1, 1)
+#	var ship_pos = Vector2(2, 1)
+#	var angle_to_ship = util.convAngleTo360Range(rad2deg((ship_pos - enemy_pos).angle()))
+#
+#	print("\nangle_to_ship = ", angle_to_ship)
+#
 #	return
 	
 	################################################################################################

@@ -5,19 +5,40 @@ NEXT TO DOS
 
 2023-02-05
 
+DONE
 - Next to do is link split() to takeDmg() (depending on node taking damage).
 
+DONE
 - Then make it so if Head or last Segment takes damage to 0 health, split() does not occur.
 Instead, those single nodes get deleted.
 
+DONE
 - Then trigger whole Enemy02 death from Tail death.
 
+DONE
 - Then create drop sprites and initiate them.
 
+DONE
 - Then make Enemy02 start to target Ship.
 
 - Then create functionality of Ship taking damage and being knocked back from collision with
 Enemy02 (all collisions including Head, all Segments, and Tail).
+
+2023-02-08
+
+- Regarding collision with Area nodes ^ ...  Will need to add an Area node to Ship.  Then have Ship be
+the scene that senses for collision with other Area nodes.  Use Bullet01 Area to Enemy02 Area
+collision as example.  Except instead of triggering damamge to Enemy02, trigger damage to Ship.
+
+2023-02-07
+
+- Add randomization to ship targeting.
+
+DONE
+- I think there might be a problem when an Enemy02 ends up being only a Head and a Tail and then the
+Head takes killing damage.  I'm not sure how the game will react.  But the way it should react is if
+the Head takes damage beyond 0 health (and only the Head and Tail exist, no Segments), then that
+damage should spill over to the Tail.
 
 
 LOW PRIORITY TO DOS
@@ -36,7 +57,9 @@ LOW PRIORITY TO DOS
 extends KinematicBody2D
 
 onready var util = get_node('/root/Main/Utilities')
+onready var gameplay = get_node('/root/Main/Gameplay')
 onready var _enemies_ = get_node('/root/Main/Gameplay/Enemies')
+onready var ship = get_node('/root/Main/Gameplay/Ship')
 
 onready var segment_scn = preload('res://scenes/Enemy02Segment.tscn')
 onready var enemy02 = load('res://scenes/Enemy02.tscn')
@@ -53,8 +76,12 @@ onready var tail_spin_dir = util.getRandomItemFromArray([+1, -1])
 
 onready var SEGMENT_COUNT_MIN = 0
 onready var SEGMENT_COUNT_MAX = 21
+
 onready var SPEED_MIN = 100
 onready var SPEED_MAX = 60
+#onready var SPEED_MIN = 40
+#onready var SPEED_MAX = 20
+
 onready var INNER_TURN_SHARPNESS_MIN = 2.5
 onready var INNER_TURN_SHARPNESS_MAX = 1.5
 onready var SEGMENT_COUNT = null
@@ -119,6 +146,14 @@ onready var segments_data = {}
 onready var LOWEST_SEGMENT_NAME = ''
 onready var HIGHEST_SEGMENT_NAME = ''
 
+onready var MIN_DIST_TO_SHIP_TO_TARGET = 1_000.0
+
+onready var CAN_DMG_SHIP_DELAY = 0.5
+onready var can_dmg_ship = true
+onready var DMG = 20.0
+onready var DMG_TO_SELF_MOD = 0.5
+onready var SHIP_COL_IMPULSE_MOD = 80.0
+
 
 ####################################################################################################
 
@@ -149,6 +184,8 @@ func init(_segment_count:int, _from_split:bool=false, _spine:Array=[], _segments
 		handleSegmentsDataFromSplitInit(_segments_data)
 	
 	setLowestHighestSegmentNames()
+	
+	$CanDmgShipTimer.wait_time = CAN_DMG_SHIP_DELAY
 
 
 func _process(_delta:float) -> void:
@@ -306,6 +343,16 @@ func handleCollision(_col:KinematicCollision2D) -> void:
 				can_get_new_target_from_col = false
 				$CanGenNewTargetFromColTimer.start()
 				genNewTargetFromCol(_col)
+				
+		elif _col.collider.name == 'Ship':
+			
+			can_dmg_ship = false
+			$CanDmgShipTimer.start()
+			ship.takeDmg(DMG)
+			ship.apply_central_impulse(_col.remainder * SHIP_COL_IMPULSE_MOD)
+			takeDmg(self, DMG * DMG_TO_SELF_MOD)
+			
+			gameplay.setEnemyColParticles(_col.position)
 
 
 func updateSpine() -> void:
@@ -348,8 +395,16 @@ func changeTurnDir() -> void:
 
 
 func genNewTarget() -> void:
+	
 	var target_dist = util.getRandomInt(NEW_TARGET_DIST_MIN, NEW_TARGET_DIST_MAX)
-	var target_angle = deg2rad(util.getRandomInt(0, 360))
+	
+	var target_angle = 0.0
+	var dist_to_ship = global_position.distance_to(ship.global_position)
+	if dist_to_ship <= MIN_DIST_TO_SHIP_TO_TARGET:
+		target_angle = (ship.global_position - global_position).angle()
+	else:
+		target_angle = deg2rad(util.getRandomInt(0, 360))
+	
 	target = global_position + Vector2(target_dist, 0).rotated(target_angle)
 
 
@@ -379,9 +434,26 @@ func takeDmg(_node_took_dmg:Object, _dmg:int) -> void:
 	setWoundedLevels(segment_name)
 	startWoundedTweenHighUp()
 	startWoundedTweenLowUp()
-	if segment_name in ['Head', 'Tail', HIGHEST_SEGMENT_NAME]:  return
+	
+#	if segment_name in ['Tail']:  return
+	
 	if segments_data[segment_name]['health'] <= 0:
-		split(segment_name)
+		
+		if segment_name == 'Tail':  tailDies()
+		
+		elif segment_name == 'Head':
+			
+			if SEGMENT_COUNT == 0:
+				
+				takeDmg(segments_data['Tail']['col_node'], abs(segments_data['Head']['health']))
+				
+			else:
+				
+				headDies()
+		
+		elif segment_name == HIGHEST_SEGMENT_NAME:  lastSegmentDies()
+		
+		else:  split(segment_name)
 
 
 func startWoundedTweenHighUp() -> void:
@@ -442,6 +514,77 @@ func setWoundedLevels(_segment_name:String) -> void:
 			return
 
 
+func tailDies() -> void:
+	for segment_name in segments_map.keys():
+		var drop_pos = spine[segments_map[segment_name]['spine_i']]
+		var drop_name = ''
+		if segment_name == 'Tail':  drop_name = 'enemy_02_c'
+		else:  drop_name = 'enemy_02_b'
+		gameplay.initDrop(drop_name, 1, drop_pos)
+	gameplay.initDrop('enemy_02_b', 1, global_position)
+	var grabbers_pos = global_position + Vector2(10, 0).rotated(deg2rad(cur_dir))
+	gameplay.initDrop('enemy_02_a', 1, grabbers_pos)
+	queue_free()
+
+
+func headDies() -> void:
+	
+	var drop_pos = global_position
+	
+	updatesFromSplit(int(LOWEST_SEGMENT_NAME.substr(7, 2)) - 1)
+	
+	updateSpeedAndInnerTurnSharpness()
+	
+#	genNewTarget()
+	
+	$WoundedTweenHighUp.remove_all()
+	$WoundedTweenHighDown.remove_all()
+	$WoundedTweenLowUp.remove_all()
+	$WoundedTweenLowDown.remove_all()
+	
+	$HeadImg.modulate = Color(1, 1, 1, 1)
+	
+	startWoundedTweenHighUp()
+	startWoundedTweenLowUp()
+	
+	gameplay.initDrop('enemy_02_b', 1, drop_pos)
+
+
+func lastSegmentDies() -> void:
+	
+	var last_segment_pos = spine[segments_map[HIGHEST_SEGMENT_NAME]['spine_i']]
+	
+	SEGMENT_COUNT -= 1
+	
+	get_node(HIGHEST_SEGMENT_NAME).queue_free()
+	segments_map.erase(HIGHEST_SEGMENT_NAME)
+	segments_data.erase(HIGHEST_SEGMENT_NAME)
+	
+	var second_to_last_segment_name = 'Segment%02d' % [int(HIGHEST_SEGMENT_NAME.substr(7, 2)) - 1]
+	
+	var new_tail_spine_i = segments_map[second_to_last_segment_name]['spine_i'] + SEGMENT_TO_TAIL_SPINE_COUNT
+	
+	segments_map['Tail']['spine_i'] = new_tail_spine_i
+	
+	updateSpeedAndInnerTurnSharpness()
+	
+#	genNewTarget()
+	
+	$WoundedTweenHighUp.remove_all()
+	$WoundedTweenHighDown.remove_all()
+	$WoundedTweenLowUp.remove_all()
+	$WoundedTweenLowDown.remove_all()
+	
+	$HeadImg.modulate = Color(1, 1, 1, 1)
+	
+	startWoundedTweenHighUp()
+	startWoundedTweenLowUp()
+	
+	setLowestHighestSegmentNames()
+	
+	gameplay.initDrop('enemy_02_b', 1, last_segment_pos)
+
+
 func split(_del_segment_name:String) -> void:
 	
 	"""
@@ -450,6 +593,8 @@ func split(_del_segment_name:String) -> void:
 	"""
 	
 	var del_segment_i = int(_del_segment_name.substr(7, 2))
+	
+	var drop_pos = spine[segments_map[_del_segment_name]['spine_i']]
 	
 	instFrontEnemy02FromSplit(_del_segment_name, del_segment_i)
 	
@@ -468,6 +613,8 @@ func split(_del_segment_name:String) -> void:
 	
 	startWoundedTweenHighUp()
 	startWoundedTweenLowUp()
+	
+	gameplay.initDrop('enemy_02_b', 1, drop_pos)
 
 
 func instFrontEnemy02FromSplit(_del_segment_name:String, _del_segment_i:int) -> void:
@@ -548,6 +695,10 @@ func _on_WoundedTweenLowUp_tween_all_completed():
 
 func _on_WoundedTweenLowDown_tween_all_completed():
 	startWoundedTweenLowUp()
+
+
+func _on_CanDmgShipTimer_timeout():
+	can_dmg_ship = true
 
 
 

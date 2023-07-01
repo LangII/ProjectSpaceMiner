@@ -28,8 +28,6 @@ texture = ExtResource( 4 )
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Tail"]
 shape = SubResource( 3 )
 
-[node name="Ignored" type="Node" parent="."]
-
 [node name="CanGenNewTargetFromColTimer" type="Timer" parent="."]
 wait_time = 2.0
 one_shot = true
@@ -42,8 +40,11 @@ one_shot = true
 
 [node name="WoundedTweenLowDown" type="Tween" parent="."]
 
+[node name="CanDmgShipTimer" type="Timer" parent="."]
+
 [connection signal="timeout" from="CanGenNewTargetFromColTimer" to="." method="_on_CanGenNewTargetFromColTimer_timeout"]
 [connection signal="tween_all_completed" from="WoundedTweenHighUp" to="." method="_on_WoundedTweenHighUp_tween_all_completed"]
 [connection signal="tween_all_completed" from="WoundedTweenHighDown" to="." method="_on_WoundedTweenHighDown_tween_all_completed"]
 [connection signal="tween_all_completed" from="WoundedTweenLowUp" to="." method="_on_WoundedTweenLowUp_tween_all_completed"]
 [connection signal="tween_all_completed" from="WoundedTweenLowDown" to="." method="_on_WoundedTweenLowDown_tween_all_completed"]
+[connection signal="timeout" from="CanDmgShipTimer" to="." method="_on_CanDmgShipTimer_timeout"]

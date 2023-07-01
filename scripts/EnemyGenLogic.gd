@@ -19,9 +19,14 @@ onready var enemy_02 = preload('res://scenes/Enemy02.tscn')
 onready var ENEMY_GEN_MAP = {
 	'ENEMY_01': {
 		'SWARM_ATTEMPTS_PER_BOTTOM_PERC': {
-			1.00: {'MIN': 5, 'MAX': 10},
-			0.50: {'MIN': 5, 'MAX': 10},
-			0.25: {'MIN': 5, 'MAX': 10}
+#			1.00: {'MIN': 5, 'MAX': 10},
+#			0.50: {'MIN': 5, 'MAX': 10},
+#			0.25: {'MIN': 5, 'MAX': 10}
+
+			1.00: {'MIN': 10, 'MAX': 20},
+			0.50: {'MIN': 10, 'MAX': 20},
+			0.25: {'MIN': 10, 'MAX': 20}
+
 		},
 		'WEIGHTED_COUNT_PER_SWARM': {'MIN': 2, 'MAX': 8},
 		'WEIGHTED_HOME_RADIUS': {'MIN': 4, 'MAX': 10},  # by tile
@@ -76,7 +81,7 @@ func genEnemy02s() -> void:
 	
 	_enemies_.add_child(enemy_inst)
 	
-	enemy_inst.init(8)
+	enemy_inst.init(10)
 	
 	enemy_inst.global_position = Vector2(620, 450)
 

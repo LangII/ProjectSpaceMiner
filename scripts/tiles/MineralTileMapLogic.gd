@@ -91,7 +91,7 @@ func setMineralTile(k, y, x, _dict, _type):
 func setMiniTileMapMineralPos(_x:int, _y:int, _buffer:int=1) -> void:
 	for y in range(max(_y - _buffer, 0), min(_y + _buffer, ctrl.tile_map_height - 1)):
 		for x in range(max(_x - _buffer, 0), min(_x + _buffer, ctrl.tile_map_width - 1)):
-			mini_tile_map.set_cell(x, y, 4)
+			mini_tile_map.set_cell(x, y, 5)
 
 
 

@@ -11,12 +11,18 @@ onready var mineral_01_texture = preload('res://sprites/tiles/mineral_01.png')
 onready var mineral_02_texture = preload('res://sprites/tiles/mineral_02.png')
 onready var mineral_03_texture = preload('res://sprites/tiles/mineral_03.png')
 onready var enemy_01_texture = preload('res://sprites/enemy_01_drop.png')
+onready var enemy_02_a_texture = preload('res://sprites/enemy_02_a_drop.png')
+onready var enemy_02_b_texture = preload('res://sprites/enemy_02_b_drop.png')
+onready var enemy_02_c_texture = preload('res://sprites/enemy_02_c_drop.png')
 
 onready var DROP_TEXTURE_MAP = {
 	'mineral_01': mineral_01_texture,
 	'mineral_02': mineral_02_texture,
 	'mineral_03': mineral_03_texture,
-	'enemy_01': enemy_01_texture
+	'enemy_01': enemy_01_texture,
+	'enemy_02_a': enemy_02_a_texture,
+	'enemy_02_b': enemy_02_b_texture,
+	'enemy_02_c': enemy_02_c_texture,
 }
 
 var TILE_MAP_LOGIC_SCN_REF = 'res://scenes/tiles/TileMapLogic.tscn'
@@ -24,10 +30,10 @@ var ENEMY_GEN_LOGIC_SCN_REF = 'res://scenes/EnemyGenLogic.tscn'
 var SHIP_SCN_REF = 'res://scenes/Ship.tscn'
 var HUD_SCN_REF = 'res://scenes/Hud.tscn'
 
-#onready var SEED = util.rng.randi()
+onready var SEED = util.rng.randi()
 #onready var SEED = hash('bender rules')
 #onready var SEED = 4057731354
-onready var SEED = 2099129296
+#onready var SEED = 2099129296
 
 var tile_map_logic = null
 var tile_map = null
@@ -46,14 +52,28 @@ var CAM_SHAKE_OFFSET_MOD = 200
 var CAM_SHAKE_TRAUMA_MOD = 2.2
 var CAM_SHAKE_MAX_OFFSET = 10
 
-#var mini_map_test = true
-var mini_map_test = false
+var mini_map_test = true
+#var mini_map_test = false
+
+
+
+
+var mini_tile_maps = []
+
+
+
 
 
 ####################################################################################################
 
 
 func _ready():
+	
+#	for pos in [
+#		Vector2(0, 0), Vector2(0, 210),
+##		[], [],
+##		[], [], [], [],
+#	]:
 	
 	print("SEED = ", SEED)
 	util.rng.seed = SEED
@@ -62,11 +82,17 @@ func _ready():
 	
 	addShip()
 	
-	addEnemies()
+#		addEnemies()
 	
 	addCamera()
 	
 	addHud()
+	
+	var mini_tile_map = get_node('MiniTileMap')
+	
+	mini_tile_map.global_position = Vector2(100, 100)
+	
+	print("\nmini_tile_map.global_position = ", mini_tile_map.global_position)
 	
 	if mini_map_test:
 		remove_child(hud)

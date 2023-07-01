@@ -189,3 +189,47 @@ func _on_CanTakeTerrainColDmgTimer_timeout():
 
 func _on_StunnedTimer_timeout():
 	is_stunned = false
+
+
+func _on_BodyColArea2D_area_entered(_area):
+	if (
+		_area.get_parent().get_parent().name == 'Enemies'
+		and _area.get_parent().name.begins_with('Enemy02')
+	):
+		
+		print("\n_area.name = ", _area.name)
+		
+		var enemy = _area.get_parent()
+		
+#		can_dmg_ship = false
+		enemy.can_dmg_ship = false
+		
+#		$CanDmgShipTimer.start()
+		enemy.get_node('CanDmgShipTimer').start()
+		
+#		ship.takeDmg(DMG)
+		takeDmg(enemy.DMG)
+		
+#		takeDmg(self, DMG * DMG_TO_SELF_MOD)
+		enemy.takeDmg(_area, enemy.DMG * enemy.DMG_TO_SELF_MOD)
+		
+		"""
+		2023-02-26
+		
+		- Need to create funcs:
+			
+			- For Ship's knock-back impulse:  Get "collision remainder".  Harder of the two.  Will
+			need to get Vector of Enemy Area to Ship Area and multiply it by a new modifier.
+			
+			- For Gameplay's collision particles:  Get "collision point".  Easier of the two.
+		"""
+		
+#		ship.apply_central_impulse(_col.remainder * SHIP_COL_IMPULSE_MOD)		<<<
+		
+#		gameplay.setEnemyColParticles(_col.position)							<<<
+		
+		
+		
+#		_area.get_parent().takeDmg(_area, DMG)
+#		colParticleDisplacementOnAreaCol()
+#		endOfCollision()
