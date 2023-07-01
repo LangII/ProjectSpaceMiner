@@ -20,7 +20,7 @@ MVP/V1 TO DOS:\
 \
 \
 \
-**Example pics of level generation (posted on 2023-  -  ):**\
+**Example pic of level generation (posted on 2023-06-30):**\
 \
 ![](level_gen_example_01.png)\
 \
