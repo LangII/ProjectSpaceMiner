@@ -4,16 +4,16 @@ extends 'res://scripts/tiles/BaseTileMapLogic.gd'
 
 var MINERAL_MAP = {
 	'mineral_01': {
-		'TILE_CODE': 0, 'TILE_LEVELS': [1], 'VEIN_ATTEMPTS': 100, 'DROP_VALUE_MIN': 1, 'DROP_VALUE_MAX': 3,
-		'VEIN_SIZE_MIN': 1, 'VEIN_SIZE_MAX': 8
+		'TILE_CODE': 0, 'TILE_LEVELS': [1], 'VEIN_ATTEMPTS': 250, 'DROP_VALUE_MIN': 1, 'DROP_VALUE_MAX': 3,
+		'VEIN_SIZE_MIN': 4, 'VEIN_SIZE_MAX': 12
 	},
 	'mineral_02': {
-		'TILE_CODE': 1, 'TILE_LEVELS': [1], 'VEIN_ATTEMPTS': 50, 'DROP_VALUE_MIN': 1, 'DROP_VALUE_MAX': 3,
-		'VEIN_SIZE_MIN': 1, 'VEIN_SIZE_MAX': 8
+		'TILE_CODE': 1, 'TILE_LEVELS': [1], 'VEIN_ATTEMPTS': 150, 'DROP_VALUE_MIN': 1, 'DROP_VALUE_MAX': 3,
+		'VEIN_SIZE_MIN': 2, 'VEIN_SIZE_MAX': 8
 	},
 	'mineral_03': {
-		'TILE_CODE': 2, 'TILE_LEVELS': [1], 'VEIN_ATTEMPTS': 50, 'DROP_VALUE_MIN': 1, 'DROP_VALUE_MAX': 3,
-		'VEIN_SIZE_MIN': 1, 'VEIN_SIZE_MAX': 8
+		'TILE_CODE': 2, 'TILE_LEVELS': [2], 'VEIN_ATTEMPTS': 150, 'DROP_VALUE_MIN': 1, 'DROP_VALUE_MAX': 3,
+		'VEIN_SIZE_MIN': 2, 'VEIN_SIZE_MAX': 8
 	},
 }
 
@@ -91,7 +91,7 @@ func setMineralTile(k, y, x, _dict, _type):
 func setMiniTileMapMineralPos(_x:int, _y:int, _buffer:int=1) -> void:
 	for y in range(max(_y - _buffer, 0), min(_y + _buffer, ctrl.tile_map_height - 1)):
 		for x in range(max(_x - _buffer, 0), min(_x + _buffer, ctrl.tile_map_width - 1)):
-			mini_tile_map.set_cell(x, y, 5)
+			mini_tile_map.set_cell(x, y, 4)
 
 
 

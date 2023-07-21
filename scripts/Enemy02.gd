@@ -1,57 +1,25 @@
 
 """
-NEXT TO DOS
------------
-
-2023-02-05
-
-DONE
-- Next to do is link split() to takeDmg() (depending on node taking damage).
-
-DONE
-- Then make it so if Head or last Segment takes damage to 0 health, split() does not occur.
-Instead, those single nodes get deleted.
-
-DONE
-- Then trigger whole Enemy02 death from Tail death.
-
-DONE
-- Then create drop sprites and initiate them.
-
-DONE
-- Then make Enemy02 start to target Ship.
-
-- Then create functionality of Ship taking damage and being knocked back from collision with
-Enemy02 (all collisions including Head, all Segments, and Tail).
-
-2023-02-08
-
-- Regarding collision with Area nodes ^ ...  Will need to add an Area node to Ship.  Then have Ship be
-the scene that senses for collision with other Area nodes.  Use Bullet01 Area to Enemy02 Area
-collision as example.  Except instead of triggering damamge to Enemy02, trigger damage to Ship.
-
-2023-02-07
-
-- Add randomization to ship targeting.
-
-DONE
-- I think there might be a problem when an Enemy02 ends up being only a Head and a Tail and then the
-Head takes killing damage.  I'm not sure how the game will react.  But the way it should react is if
-the Head takes damage beyond 0 health (and only the Head and Tail exist, no Segments), then that
-damage should spill over to the Tail.
-
-
+-------------------
 LOW PRIORITY TO DOS
 -------------------
 
 2023-02-05
 
-- From split...
+- From split()...
 
 	- Resulting Enemy02s have an inconsistent gap between segments (SPINE_TO_SPINE_DIST).
 
 	- Front Enemy02 should keep old Enemy02's target.  It does not.  After split(), both front and
 	back Enemy02s make dramatic turns to pursue new targets.
+	
+2023-07-08
+
+- From split()...
+
+	- When dealing with an Enemy02 that was the result of a previous split(), and the new Enemy02's
+	segment names do not start with 'Segment01', another split() will cause one of the resulting
+	Enemy02s to have too many segments.
 """
 
 extends KinematicBody2D
@@ -79,6 +47,15 @@ onready var SEGMENT_COUNT_MAX = 21
 
 onready var SPEED_MIN = 100
 onready var SPEED_MAX = 60
+
+"""
+2023-07-04
+- Shit this enemy is super buggy!!!
+- Need to look into why changing these speed vars causes a crash from a split due to some kind of
+misalignment with the spine (likely has to do with the init() and spine generation).
+"""
+#onready var SPEED_MIN = 60
+#onready var SPEED_MAX = 40
 #onready var SPEED_MIN = 40
 #onready var SPEED_MAX = 20
 
@@ -152,6 +129,7 @@ onready var CAN_DMG_SHIP_DELAY = 0.5
 onready var can_dmg_ship = true
 onready var DMG = 20.0
 onready var DMG_TO_SELF_MOD = 0.5
+
 onready var SHIP_COL_IMPULSE_MOD = 80.0
 
 
@@ -183,9 +161,11 @@ func init(_segment_count:int, _from_split:bool=false, _spine:Array=[], _segments
 		
 		handleSegmentsDataFromSplitInit(_segments_data)
 	
-	setLowestHighestSegmentNames()
+	setLowestHighestSegmentNames('init')
 	
 	$CanDmgShipTimer.wait_time = CAN_DMG_SHIP_DELAY
+	
+#	print("\ninit target = ", target)
 
 
 func _process(_delta:float) -> void:
@@ -302,13 +282,15 @@ func handleSegmentsDataFromSplitInit(_segments_data:Dictionary) -> void:
 		startWoundedTweenLowUp()
 
 
-func setLowestHighestSegmentNames() -> void:
+func setLowestHighestSegmentNames(_temp_from:String) -> void:
 	var segment_names = []
 	for segment_name in segments_data.keys():
 		if not segment_name in ['Head', 'Tail']:
 			segment_names += [segment_name]
 	LOWEST_SEGMENT_NAME = segment_names.min()
 	HIGHEST_SEGMENT_NAME = segment_names.max()
+	
+#	print("\n%s - from '%s()':\n\tLOWEST_SEGMENT_NAME = '%s'\n\tHIGHEST_SEGMENT_NAME = '%s'\n\tsegment_names = %s" % [name, _temp_from, LOWEST_SEGMENT_NAME, HIGHEST_SEGMENT_NAME, segment_names])
 
 
 ####################################################################################################
@@ -422,20 +404,32 @@ func genNewTargetFromCol(col:KinematicCollision2D) -> void:
 
 
 func takeDmg(_node_took_dmg:Object, _dmg:int) -> void:
+	
+	print("\n!!! START OF takeDmg() !!!")
+	
 	HAS_TAKEN_DMG = true
+	
 	var segment_name = ''
+	
 	if _node_took_dmg.name.begins_with('Segment'):		segment_name = _node_took_dmg.name
 	elif (
 		_node_took_dmg.name.begins_with('Enemy02')
 		or _node_took_dmg.name.begins_with('@Enemy02')
 	):													segment_name = 'Head'
 	elif _node_took_dmg.name == 'Tail':					segment_name = 'Tail'
+	
 	segments_data[segment_name]['health'] -= _dmg
 	setWoundedLevels(segment_name)
 	startWoundedTweenHighUp()
 	startWoundedTweenLowUp()
 	
 #	if segment_name in ['Tail']:  return
+	
+	
+	print("\n'%s':\n\tsegment_name (took dmg): = '%s'\n\tSEGMENT_COUNT = '%s'" % [name, segment_name, SEGMENT_COUNT])
+	
+	printDmg()
+	
 	
 	if segments_data[segment_name]['health'] <= 0:
 		
@@ -445,7 +439,9 @@ func takeDmg(_node_took_dmg:Object, _dmg:int) -> void:
 			
 			if SEGMENT_COUNT == 0:
 				
-				takeDmg(segments_data['Tail']['col_node'], abs(segments_data['Head']['health']))
+#				takeDmg(segments_data['Tail']['col_node'], abs(segments_data['Head']['health']))
+#				takeDmg(segments_data[LOWEST_SEGMENT_NAME]['col_node'], abs(segments_data['Head']['health']))
+				tailDies()
 				
 			else:
 				
@@ -531,7 +527,8 @@ func headDies() -> void:
 	
 	var drop_pos = global_position
 	
-	updatesFromSplit(int(LOWEST_SEGMENT_NAME.substr(7, 2)) - 1)
+	updatesFromSplit('headDies', int(LOWEST_SEGMENT_NAME.substr(7, 2)) - 1)
+#	updatesFromSplit(int(LOWEST_SEGMENT_NAME.substr(7, 2)))
 	
 	updateSpeedAndInnerTurnSharpness()
 	
@@ -560,9 +557,14 @@ func lastSegmentDies() -> void:
 	segments_map.erase(HIGHEST_SEGMENT_NAME)
 	segments_data.erase(HIGHEST_SEGMENT_NAME)
 	
-	var second_to_last_segment_name = 'Segment%02d' % [int(HIGHEST_SEGMENT_NAME.substr(7, 2)) - 1]
+	var new_tail_spine_i = SEGMENT_TO_TAIL_SPINE_COUNT
+	if SEGMENT_COUNT != 0:
+		var second_to_last_segment_name = 'Segment%02d' % [int(HIGHEST_SEGMENT_NAME.substr(7, 2)) - 1]
+		new_tail_spine_i += segments_map[second_to_last_segment_name]['spine_i']
 	
-	var new_tail_spine_i = segments_map[second_to_last_segment_name]['spine_i'] + SEGMENT_TO_TAIL_SPINE_COUNT
+#	print("\nsecond_to_last_segment_name = ", second_to_last_segment_name)
+#	print("\nsecond_to_last_segment_name = ", second_to_last_segment_name)
+	
 	
 	segments_map['Tail']['spine_i'] = new_tail_spine_i
 	
@@ -580,7 +582,7 @@ func lastSegmentDies() -> void:
 	startWoundedTweenHighUp()
 	startWoundedTweenLowUp()
 	
-	setLowestHighestSegmentNames()
+	setLowestHighestSegmentNames('lastSegmentDies')
 	
 	gameplay.initDrop('enemy_02_b', 1, last_segment_pos)
 
@@ -594,11 +596,22 @@ func split(_del_segment_name:String) -> void:
 	
 	var del_segment_i = int(_del_segment_name.substr(7, 2))
 	
+	
+	
+	"""
+	2023-07-04
+	- Looks like I fixed the bug that causes crashes during Enemy02 split().  But now there's a
+	"not the result I want" error.  Sometimes, during a split(), if you combine the 2 resulting
+	Enemy02s, you'll end up with more segments than the original Enemy02.
+	"""
+	
+	
+	
 	var drop_pos = spine[segments_map[_del_segment_name]['spine_i']]
 	
 	instFrontEnemy02FromSplit(_del_segment_name, del_segment_i)
 	
-	updatesFromSplit(del_segment_i)
+	updatesFromSplit('split', del_segment_i)
 	
 	updateSpeedAndInnerTurnSharpness()
 	
@@ -638,9 +651,79 @@ func instFrontEnemy02FromSplit(_del_segment_name:String, _del_segment_i:int) -> 
 	enemy02_inst.global_position = global_position
 
 
-func updatesFromSplit(_del_segment_i:int) -> void:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+func updatesFromSplit(_temp_from:String, _del_segment_i:int) -> void:
 	
-	SEGMENT_COUNT -= _del_segment_i + 1
+	print("\nupdateFromSplit() _temp_from = ", _temp_from)
+
+	var true_del_segment_i = 0
+	
+	if _temp_from == 'split':
+
+		var del_segment_name = 'Segment%02d' % [_del_segment_i]
+		print("\ndel_segment_name = ", del_segment_name)
+
+		print("\nsegments_data = ", segments_data)
+
+		var true_segment_names = segments_data.keys().slice(1, -2)
+		true_segment_names.sort()
+		print("\ntrue_segment_names = ", true_segment_names)
+
+		var true_segment_names_i = 1
+		for true_segment_name in true_segment_names:
+			if del_segment_name == true_segment_name:
+				true_del_segment_i = true_segment_names_i
+				break
+			true_segment_names_i += 1
+
+		print("\ntrue_del_segment_i = ", true_del_segment_i)
+
+		if not true_del_segment_i:  util.throwError("\n\\_(**)_/\n")
+	
+	elif _temp_from == 'headDies':
+		
+		true_del_segment_i = 0
+
+	"""
+	2023-07-04
+	This ^ is a problem.  '_del_segment_i' could be '6'.  But if it's the first or only segment then
+	this function behaves as if '6' is '1'.  '_del_segment_i' is treated as if it represents the
+	position of the '_del_segment' within 'segments_data'.
+	"""
+	
+	
+	
+	print("\n%s:" % [name])
+	print("\t_del_segment_i = ", _del_segment_i)
+	print("\tSEGMENT_COUNT (before) = ", SEGMENT_COUNT)
+	
+#	SEGMENT_COUNT -= _del_segment_i + 1
+	SEGMENT_COUNT -= true_del_segment_i + 1
+	
+	print("\tSEGMENT_COUNT (after) = ", SEGMENT_COUNT)
+	
+	
+	
 	var new_head_segment = 'Segment%02d' % [_del_segment_i + 1]
 	
 	# Transfer health and wounded data from segment to new head.
@@ -671,7 +754,39 @@ func updatesFromSplit(_del_segment_i:int) -> void:
 	
 	global_position = new_head_global_position
 	
-	setLowestHighestSegmentNames()
+	setLowestHighestSegmentNames('updatesFromSplit')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+####################################################################################################
+
+
+func printDmg() -> void:
+	print("\n'%s' dmg:" % [name])
+	print("\t'Head'     : %s" % [segments_data['Head']['health']])
+	var segment_names = segments_data.keys()
+	segment_names.sort()
+	for segment_name in segment_names:
+		if segment_name in ['Head', 'Tail']:  continue
+		print("\t'%s': %s" % [segment_name, segments_data[segment_name]['health']])
+	print("\t'Tail'     : %s" % [segments_data['Tail']['health']])
 
 
 ####################################################################################################

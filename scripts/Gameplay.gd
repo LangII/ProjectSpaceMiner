@@ -30,10 +30,10 @@ var ENEMY_GEN_LOGIC_SCN_REF = 'res://scenes/EnemyGenLogic.tscn'
 var SHIP_SCN_REF = 'res://scenes/Ship.tscn'
 var HUD_SCN_REF = 'res://scenes/Hud.tscn'
 
-onready var SEED = util.rng.randi()
+#onready var SEED = util.rng.randi()
 #onready var SEED = hash('bender rules')
 #onready var SEED = 4057731354
-#onready var SEED = 2099129296
+onready var SEED = 993845567
 
 var tile_map_logic = null
 var tile_map = null
@@ -52,16 +52,8 @@ var CAM_SHAKE_OFFSET_MOD = 200
 var CAM_SHAKE_TRAUMA_MOD = 2.2
 var CAM_SHAKE_MAX_OFFSET = 10
 
-var mini_map_test = true
-#var mini_map_test = false
-
-
-
-
-var mini_tile_maps = []
-
-
-
+#var mini_map_test = true
+var mini_map_test = false
 
 
 ####################################################################################################
@@ -82,17 +74,17 @@ func _ready():
 	
 	addShip()
 	
-#		addEnemies()
+	addEnemies()
 	
 	addCamera()
 	
 	addHud()
 	
-	var mini_tile_map = get_node('MiniTileMap')
-	
-	mini_tile_map.global_position = Vector2(100, 100)
-	
-	print("\nmini_tile_map.global_position = ", mini_tile_map.global_position)
+#	var mini_tile_map = get_node('MiniTileMap')
+#
+#	mini_tile_map.global_position = Vector2(100, 100)
+#
+#	print("\nmini_tile_map.global_position = ", mini_tile_map.global_position)
 	
 	if mini_map_test:
 		remove_child(hud)
@@ -127,7 +119,7 @@ func addEnemies():
 	enemy_gen_logic = load(ENEMY_GEN_LOGIC_SCN_REF).instance()
 	add_child(enemy_gen_logic)
 	
-#	enemy_gen_logic.genEnemy01s()
+	enemy_gen_logic.genEnemy01s()
 	enemy_gen_logic.genEnemy02s()
 
 

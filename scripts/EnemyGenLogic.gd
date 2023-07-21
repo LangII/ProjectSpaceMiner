@@ -25,10 +25,11 @@ onready var ENEMY_GEN_MAP = {
 
 			1.00: {'MIN': 10, 'MAX': 20},
 			0.50: {'MIN': 10, 'MAX': 20},
-			0.25: {'MIN': 10, 'MAX': 20}
+#			0.25: {'MIN': 10, 'MAX': 20}
 
 		},
-		'WEIGHTED_COUNT_PER_SWARM': {'MIN': 2, 'MAX': 8},
+#		'WEIGHTED_COUNT_PER_SWARM': {'MIN': 2, 'MAX': 4},
+		'WEIGHTED_COUNT_PER_SWARM': {'MIN': 1, 'MAX': 3},
 		'WEIGHTED_HOME_RADIUS': {'MIN': 4, 'MAX': 10},  # by tile
 		'WEIGHTED_NEAR_COORDS_DIST': {'MIN': 2, 'MAX': 8}  # by tile
 	}
@@ -77,13 +78,20 @@ func genEnemy01s() -> void:
 
 func genEnemy02s() -> void:
 	
-	var enemy_inst = enemy_02.instance()
+	for gen_data in [
+		{'segment_count': 6, 'start_pos': Vector2(800, 1900)},
+#		{'segment_count': 10, 'start_pos': Vector2(800, 1100)}
+	]:
 	
-	_enemies_.add_child(enemy_inst)
-	
-	enemy_inst.init(10)
-	
-	enemy_inst.global_position = Vector2(620, 450)
+		var enemy_inst = enemy_02.instance()
+		
+		_enemies_.add_child(enemy_inst)
+		
+		# looks like global position needs to be set before calling init()
+		enemy_inst.global_position = gen_data['start_pos']
+		
+		enemy_inst.init(gen_data['segment_count'])
+		
 
 
 ####################################################################################################

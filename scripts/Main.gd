@@ -42,17 +42,33 @@ func _process(_delta):
 	
 	if Input.is_action_just_pressed('test'):
 		
+		var stupid_temp_node = Node2D.new()
+		add_child(stupid_temp_node)
+		print("\nget_global_mouse_position() = ", stupid_temp_node.get_global_mouse_position())
+		stupid_temp_node.queue_free()
+		
 		var enemies = get_node('Gameplay/Enemies')
 		
-		for enemy in enemies.get_children():
-			
-			print("\n\n\n%s:" % [enemy.name])
-			
-			print("\nenemy.spine =\n", enemy.spine)
-			
-			print("\nenemy.segments_map =\n", enemy.segments_map)
-			
-			print("\nenemy.segments_data =\n", enemy.segments_data)
+#		var new_speed = 0
+#		if enemies.get_children()[0].SPEED == 0:  new_speed = 60
+#
+#		for enemy in enemies.get_children():  enemy.SPEED = new_speed
+#
+#		for enemy in enemies.get_children():
+#
+#			if not enemy.name.replace('@', '').begins_with('Enemy02'):  continue
+##
+#			print("\n%s:" % [enemy.name])
+#
+#			print("\tenemy.global_position = ", enemy.global_position)
+#
+#			print("\tenemy.target = ", enemy.target)
+#
+#			print("\nenemy.spine =\n", enemy.spine)
+#
+#			print("\nenemy.segments_map =\n", enemy.segments_map)
+#
+#			print("\nenemy.segments_data =\n", enemy.segments_data)
 		
 #		var enemy = get_node('Gameplay/Enemies/Enemy02')
 		
