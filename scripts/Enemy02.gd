@@ -1,5 +1,13 @@
 
 """
+------
+TO DOS
+------
+
+2023-07-21
+
+- In Ship.gd add functionality for handling knock back when the Ship collides with a middle segment.
+
 -------------------
 LOW PRIORITY TO DOS
 -------------------
