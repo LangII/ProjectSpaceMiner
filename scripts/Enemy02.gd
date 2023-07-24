@@ -1,13 +1,5 @@
 
 """
-------
-TO DOS
-------
-
-2023-07-21
-
-- In Ship.gd add functionality for handling knock back when the Ship collides with a middle segment.
-
 -------------------
 LOW PRIORITY TO DOS
 -------------------
@@ -413,7 +405,7 @@ func genNewTargetFromCol(col:KinematicCollision2D) -> void:
 
 func takeDmg(_node_took_dmg:Object, _dmg:int) -> void:
 	
-	print("\n!!! START OF takeDmg() !!!")
+#	print("\n!!! START OF takeDmg() !!!")
 	
 	HAS_TAKEN_DMG = true
 	
@@ -434,9 +426,9 @@ func takeDmg(_node_took_dmg:Object, _dmg:int) -> void:
 #	if segment_name in ['Tail']:  return
 	
 	
-	print("\n'%s':\n\tsegment_name (took dmg): = '%s'\n\tSEGMENT_COUNT = '%s'" % [name, segment_name, SEGMENT_COUNT])
+#	print("\n'%s':\n\tsegment_name (took dmg): = '%s'\n\tSEGMENT_COUNT = '%s'" % [name, segment_name, SEGMENT_COUNT])
 	
-	printDmg()
+#	printDmg()
 	
 	
 	if segments_data[segment_name]['health'] <= 0:
@@ -682,20 +674,20 @@ func instFrontEnemy02FromSplit(_del_segment_name:String, _del_segment_i:int) -> 
 
 func updatesFromSplit(_temp_from:String, _del_segment_i:int) -> void:
 	
-	print("\nupdateFromSplit() _temp_from = ", _temp_from)
+#	print("\nupdateFromSplit() _temp_from = ", _temp_from)
 
 	var true_del_segment_i = 0
 	
 	if _temp_from == 'split':
 
 		var del_segment_name = 'Segment%02d' % [_del_segment_i]
-		print("\ndel_segment_name = ", del_segment_name)
+#		print("\ndel_segment_name = ", del_segment_name)
 
-		print("\nsegments_data = ", segments_data)
+#		print("\nsegments_data = ", segments_data)
 
 		var true_segment_names = segments_data.keys().slice(1, -2)
 		true_segment_names.sort()
-		print("\ntrue_segment_names = ", true_segment_names)
+#		print("\ntrue_segment_names = ", true_segment_names)
 
 		var true_segment_names_i = 1
 		for true_segment_name in true_segment_names:
@@ -704,7 +696,7 @@ func updatesFromSplit(_temp_from:String, _del_segment_i:int) -> void:
 				break
 			true_segment_names_i += 1
 
-		print("\ntrue_del_segment_i = ", true_del_segment_i)
+#		print("\ntrue_del_segment_i = ", true_del_segment_i)
 
 		if not true_del_segment_i:  util.throwError("\n\\_(**)_/\n")
 	
@@ -721,14 +713,14 @@ func updatesFromSplit(_temp_from:String, _del_segment_i:int) -> void:
 	
 	
 	
-	print("\n%s:" % [name])
-	print("\t_del_segment_i = ", _del_segment_i)
-	print("\tSEGMENT_COUNT (before) = ", SEGMENT_COUNT)
+#	print("\n%s:" % [name])
+#	print("\t_del_segment_i = ", _del_segment_i)
+#	print("\tSEGMENT_COUNT (before) = ", SEGMENT_COUNT)
 	
 #	SEGMENT_COUNT -= _del_segment_i + 1
 	SEGMENT_COUNT -= true_del_segment_i + 1
 	
-	print("\tSEGMENT_COUNT (after) = ", SEGMENT_COUNT)
+#	print("\tSEGMENT_COUNT (after) = ", SEGMENT_COUNT)
 	
 	
 	

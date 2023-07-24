@@ -182,21 +182,10 @@ func tileDataLoop(func_ref:FuncRef, _k:bool=false, _kyx:bool=false) -> void:
 
 
 func setNoiseParams():
-	
 	noise.octaves = NOISE_OCTAVES
 	noise.period = NOISE_PERIOD
 	noise.persistence = NOISE_PERSISTENCE
 	noise.lacunarity = NOISE_LACUNARITY
-	
-#	var NOISE_OCTAVES = 3  # 1 = 3 = 9 (int) (edge distortion)
-#	var NOISE_PERIOD = 64  # 0.1 = 64 = 256 (float) (noise size)
-#	var NOISE_PERSISTENCE = 0.5  # 0 = 0.5 = 1 (float)
-#	var NOISE_LACUNARITY = 2  # 0.1 = 2 = 4 (float)
-
-#	noise.octaves = util.getRandomInt(4, 8)
-#	noise.period = util.getRandomFloat(50, 200)
-#	noise.persistence = util.getRandomFloat(0.25, 0.5)
-#	noise.lacunarity = util.getRandomFloat(2, 3)
 
 
 func initTileDataContainer():

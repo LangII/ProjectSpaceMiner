@@ -1,4 +1,28 @@
 
+"""
+-----
+TODOS
+-----
+
+- to clean:
+	- BaseTileMapLogic.gd		DONE
+	- FinalTileMapLogic.gd		DONE
+	- MineralTileMapLogic.gd	DONE
+	- Bullet01.gd				DONE
+	- Controls.gd				DONE
+	- Data.gd					DONE
+	- Drop.gd					DONE
+	- Enemy01.gd				DONE
+	- Enemy02.gd
+	- EnemyGenLogic.gd
+	- Gameplay.gd
+	- Hud.gd					DONE
+	- HudDropDisplay.gd			DONE
+	- Main.gd
+	- Ship.gd
+	- Utilities.gd				DONE
+"""
+
 extends Node
 
 var gameplay

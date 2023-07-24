@@ -296,36 +296,3 @@ func _on_WoundedTweenDown_tween_all_completed():
 func _on_LifeEndParticlesLifeTimeTimer_timeout():
 	queue_free()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -27,52 +27,52 @@ onready var vel = Vector2()
 
 
 func _ready():
-    
-    setExitTweenScale()
-    setExitTweenAlpha()
-    $ExitTweenDelayTimer.wait_time = EXIT_TWEEN_DELAY_SECS
-    $ExitTweenDurationTimer.wait_time = EXIT_TWEEN_DURATION_SECS
-    
-    LINEAR_SPEED = util.getRandomInt(LIN_SPEED_MIN, LIN_SPEED_MAX)
-    DIRECTION = util.getRandomInt(0, 360)
-    vel = Vector2(LINEAR_SPEED, 0).rotated(deg2rad(DIRECTION))
-    ROTATION_SPEED = util.getRandomFloat(ROT_SPEED_MIN, ROT_SPEED_MAX)
-    
-    apply_central_impulse(vel)
+	
+	setExitTweenScale()
+	setExitTweenAlpha()
+	$ExitTweenDelayTimer.wait_time = EXIT_TWEEN_DELAY_SECS
+	$ExitTweenDurationTimer.wait_time = EXIT_TWEEN_DURATION_SECS
+	
+	LINEAR_SPEED = util.getRandomInt(LIN_SPEED_MIN, LIN_SPEED_MAX)
+	DIRECTION = util.getRandomInt(0, 360)
+	vel = Vector2(LINEAR_SPEED, 0).rotated(deg2rad(DIRECTION))
+	ROTATION_SPEED = util.getRandomFloat(ROT_SPEED_MIN, ROT_SPEED_MAX)
+	
+	apply_central_impulse(vel)
 
 func _process(_delta):
-    
-    $Sprite.rotation_degrees += ROTATION_SPEED
+	
+	$Sprite.rotation_degrees += ROTATION_SPEED
 
 
 ####################################################################################################
 
 
 func setExitTweenScale():
-    $ExitTweenScale.interpolate_property(
-        $Sprite, 'scale', $Sprite.scale, $Sprite.scale * EXIT_TWEEN_SCALE, EXIT_TWEEN_DURATION_SECS, 0, 2
-    )
+	$ExitTweenScale.interpolate_property(
+		$Sprite, 'scale', $Sprite.scale, $Sprite.scale * EXIT_TWEEN_SCALE, EXIT_TWEEN_DURATION_SECS, 0, 2
+	)
 
 
 func setExitTweenAlpha():
-    $ExitTweenAlpha.interpolate_property(
-        $Sprite, 'modulate', $Sprite.modulate, Color(1, 1, 1, 0), EXIT_TWEEN_DURATION_SECS, 0, 2
-    )
+	$ExitTweenAlpha.interpolate_property(
+		$Sprite, 'modulate', $Sprite.modulate, Color(1, 1, 1, 0), EXIT_TWEEN_DURATION_SECS, 0, 2
+	)
 
 
 func shipSensed():
-    $ExitTweenDelayTimer.start()
+	$ExitTweenDelayTimer.start()
 
 
 ####################################################################################################
 
 
 func _on_ExitTweenDelayTimer_timeout():
-    gameplay.dropCollected(DROP_TYPE, DROP_VALUE)
-    $ExitTweenScale.start()
-    $ExitTweenAlpha.start()
-    $ExitTweenDurationTimer.start()
+	gameplay.dropCollected(DROP_TYPE, DROP_VALUE)
+	$ExitTweenScale.start()
+	$ExitTweenAlpha.start()
+	$ExitTweenDurationTimer.start()
 
 
 func _on_ExitTweenDurationTimer_timeout():
-    queue_free()
+	queue_free()

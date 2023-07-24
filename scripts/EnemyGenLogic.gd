@@ -79,7 +79,7 @@ func genEnemy01s() -> void:
 func genEnemy02s() -> void:
 	
 	for gen_data in [
-		{'segment_count': 20, 'start_pos': Vector2(800, 1900)},
+		{'segment_count': 20, 'start_pos': Vector2(800, 300)},
 #		{'segment_count': 10, 'start_pos': Vector2(800, 1100)}
 	]:
 	

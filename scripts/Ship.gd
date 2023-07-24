@@ -39,6 +39,8 @@ var prev_frame_dir = 0
 var STUNNED_DELAY = 0.5
 var is_stunned = false
 
+var ENEMY_AREA_COL_STRENGTH_MOD = 280
+
 
 ####################################################################################################
 
@@ -197,7 +199,6 @@ func _on_BodyColArea2D_area_entered(_area):
 		and _area.get_parent().name.begins_with('Enemy02')
 	):
 		
-		print("\n_area.name = ", _area.name)
 		
 		var enemy = _area.get_parent()
 		
@@ -223,6 +224,17 @@ func _on_BodyColArea2D_area_entered(_area):
 			
 			- For Gameplay's collision particles:  Get "collision point".  Easier of the two.
 		"""
+		
+		print("\n_area.name = ", _area.name)
+		print("ship.global_position = ", global_position)
+		print("_area.global_position = ", _area.global_position)
+		
+		var col_vector = _area.global_position - global_position
+		print("col_vector = ", col_vector)
+		
+		applied_force = -col_vector * ENEMY_AREA_COL_STRENGTH_MOD
+		
+		gameplay.setEnemyColParticles(global_position + (col_vector * 0.5))
 		
 #		ship.apply_central_impulse(_col.remainder * SHIP_COL_IMPULSE_MOD)		<<<
 		
