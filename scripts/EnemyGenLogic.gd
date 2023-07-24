@@ -18,20 +18,23 @@ onready var enemy_02 = preload('res://scenes/Enemy02.tscn')
 
 onready var ENEMY_GEN_MAP = {
 	'ENEMY_01': {
-		'SWARM_ATTEMPTS_PER_BOTTOM_PERC': {
-#			1.00: {'MIN': 5, 'MAX': 10},
-#			0.50: {'MIN': 5, 'MAX': 10},
-#			0.25: {'MIN': 5, 'MAX': 10}
-
-			1.00: {'MIN': 10, 'MAX': 20},
-			0.50: {'MIN': 10, 'MAX': 20},
-#			0.25: {'MIN': 10, 'MAX': 20}
-
+		'SPAWN_ATTEMPTS_PER_BOTTOM_PERC': {
+			1.00: {'MIN': 5, 'MAX': 10},
+			0.50: {'MIN': 5, 'MAX': 10},
+			0.25: {'MIN': 5, 'MAX': 10}
 		},
-#		'WEIGHTED_COUNT_PER_SWARM': {'MIN': 2, 'MAX': 4},
-		'WEIGHTED_COUNT_PER_SWARM': {'MIN': 1, 'MAX': 3},
-		'WEIGHTED_HOME_RADIUS': {'MIN': 4, 'MAX': 10},  # by tile
-		'WEIGHTED_NEAR_COORDS_DIST': {'MIN': 2, 'MAX': 8}  # by tile
+		'NEAR_COORDS_DIST': {'MIN': 2, 'MAX': 8},  # by tile
+		'HOME_RADIUS': {'MIN': 4, 'MAX': 10},  # by tile
+		'COUNT_PER_SWARM': {'MIN': 2, 'MAX': 4},
+	},
+	'ENEMY_02': {
+		'SPAWN_ATTEMPTS_PER_BOTTOM_PERC': {
+			1.00: {'MIN': 2, 'MAX': 5},
+			0.50: {'MIN': 2, 'MAX': 5},
+			0.25: {'MIN': 2, 'MAX': 5},
+		},
+		'NEAR_COORDS_DIST': {'MIN': 4, 'MAX': 8},  # by tile
+		'SEGMENT_COUNT': {'MIN': 4, 'MAX': 20},
 	}
 }
 
@@ -42,8 +45,7 @@ onready var ENEMY_GEN_MAP = {
 func genEnemy01s() -> void:
 	
 	var gen_map = ENEMY_GEN_MAP['ENEMY_01']
-	var spawn_weight = util.getRandomFloat(0.0, 1.0)
-	var attempting_coords = getAttemptingCoords(gen_map['SWARM_ATTEMPTS_PER_BOTTOM_PERC'], spawn_weight)
+	var attempting_coords = getAttemptingCoords(gen_map['SPAWN_ATTEMPTS_PER_BOTTOM_PERC'])
 	
 	var success_spawn_coords = []    
 	for coord in attempting_coords:
@@ -51,10 +53,9 @@ func genEnemy01s() -> void:
 		var attempt_y = coord[0]
 		var attempt_x = coord[1]
 		
-		var near_coords_dist = int(round(util.normalize(
-			spawn_weight, 0, 1, gen_map['WEIGHTED_NEAR_COORDS_DIST']['MIN'],
-			gen_map['WEIGHTED_NEAR_COORDS_DIST']['MAX']
-		)))
+		var near_coords_dist = util.getRandomInt(
+			gen_map['NEAR_COORDS_DIST']['MIN'], gen_map['NEAR_COORDS_DIST']['MAX']
+		)
 		
 		var near_coords = getNearCoords(attempt_x, attempt_y, near_coords_dist)
 		
@@ -63,14 +64,12 @@ func genEnemy01s() -> void:
 		
 		success_spawn_coords += [[attempt_y, attempt_x]]
 		
-		var count_per_swarm = int(round(util.normalize(
-			spawn_weight, 0, 1, gen_map['WEIGHTED_COUNT_PER_SWARM']['MIN'],
-			gen_map['WEIGHTED_COUNT_PER_SWARM']['MAX']
-		)))
-		var home_radius = int(round(util.normalize(
-			spawn_weight, 0, 1, gen_map['WEIGHTED_HOME_RADIUS']['MIN'],
-			gen_map['WEIGHTED_HOME_RADIUS']['MAX']
-		)))
+		var count_per_swarm = util.getRandomInt(
+			gen_map['COUNT_PER_SWARM']['MIN'], gen_map['COUNT_PER_SWARM']['MAX']
+		)
+		var home_radius = util.getRandomInt(
+			gen_map['HOME_RADIUS']['MIN'], gen_map['HOME_RADIUS']['MAX']
+		)
 		
 		setEnemy01Swarm(attempt_x, attempt_y, count_per_swarm, home_radius)
 		setMiniTileMapEnemyPos(attempt_x, attempt_y)
@@ -78,26 +77,66 @@ func genEnemy01s() -> void:
 
 func genEnemy02s() -> void:
 	
-	for gen_data in [
-		{'segment_count': 20, 'start_pos': Vector2(800, 300)},
-#		{'segment_count': 10, 'start_pos': Vector2(800, 1100)}
-	]:
+	var gen_map = ENEMY_GEN_MAP['ENEMY_02']
+	var attempting_coords = getAttemptingCoords(gen_map['SPAWN_ATTEMPTS_PER_BOTTOM_PERC'])
 	
+	var success_spawn_coords = []    
+	for coord in attempting_coords:
+		
+		var attempt_y = coord[0]
+		var attempt_x = coord[1]
+		
+		var near_coords_dist = util.getRandomInt(
+			gen_map['NEAR_COORDS_DIST']['MIN'], gen_map['NEAR_COORDS_DIST']['MAX']
+		)
+		
+		var near_coords = getNearCoords(attempt_x, attempt_y, near_coords_dist)
+		
+		if isNearSolidTiles(near_coords):  continue
+		if isTooCloseToOtherSpawn(near_coords, success_spawn_coords):  continue
+		
+		success_spawn_coords += [[attempt_y, attempt_x]]
+		
+		var segment_count = util.getRandomInt(
+			gen_map['SEGMENT_COUNT']['MIN'], gen_map['SEGMENT_COUNT']['MAX']
+		)
+		
+		var enemy_pos = Vector2(attempt_x * tile_map.cell_size[0], attempt_y * tile_map.cell_size[0])
+		
 		var enemy_inst = enemy_02.instance()
-		
 		_enemies_.add_child(enemy_inst)
+		enemy_inst.global_position = enemy_pos
+		enemy_inst.init(segment_count)
 		
-		# looks like global position needs to be set before calling init()
-		enemy_inst.global_position = gen_data['start_pos']
+		setMiniTileMapEnemyPos(attempt_x, attempt_y)
 		
-		enemy_inst.init(gen_data['segment_count'])
+#		var enemy_inst = enemy_01.instance()
+#		enemy_inst.global_position = enemy_pos
+#		enemy_inst.HOME_POS = enemy_pos
+#		enemy_inst.HOME_RADIUS_BY_TILE = _home_radius_tile
+#		_enemies_.add_child(enemy_inst)
+		
+	
+#	for gen_data in [
+#		{'segment_count': 20, 'start_pos': Vector2(800, 300)},
+##		{'segment_count': 10, 'start_pos': Vector2(800, 1100)}
+#	]:
+#
+#		var enemy_inst = enemy_02.instance()
+#
+#		_enemies_.add_child(enemy_inst)
+#
+#		# looks like global position needs to be set before calling init()
+#		enemy_inst.global_position = gen_data['start_pos']
+#
+#		enemy_inst.init(gen_data['segment_count'])
 		
 
 
 ####################################################################################################
 
 
-func getAttemptingCoords(_per_bottom_perc_dict:Dictionary, _weight) -> Array:
+func getAttemptingCoords(_per_bottom_perc_dict:Dictionary) -> Array:
 	var attempting_coords = []
 	for perc in _per_bottom_perc_dict.keys():
 		var attempts_count = util.getRandomInt(
@@ -149,7 +188,8 @@ func setEnemy01Swarm(_home_x_tile:int, _home_y_tile:int, _enemy_count:int, _home
 		_enemies_.add_child(enemy_inst)
 
 
-
+#func setEnemy02() -> void:
+	
 
 
 

@@ -33,7 +33,7 @@ var HUD_SCN_REF = 'res://scenes/Hud.tscn'
 #onready var SEED = util.rng.randi()
 #onready var SEED = hash('bender rules')
 #onready var SEED = 4057731354
-onready var SEED = 993845567
+onready var SEED = 2926405890
 
 var tile_map_logic = null
 var tile_map = null
@@ -119,7 +119,7 @@ func addEnemies():
 	enemy_gen_logic = load(ENEMY_GEN_LOGIC_SCN_REF).instance()
 	add_child(enemy_gen_logic)
 	
-#	enemy_gen_logic.genEnemy01s()
+	enemy_gen_logic.genEnemy01s()
 	enemy_gen_logic.genEnemy02s()
 
 
