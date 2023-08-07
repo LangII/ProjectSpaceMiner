@@ -44,6 +44,13 @@ onready var ENEMY_GEN_MAP = {
 
 func genEnemy01s() -> void:
 	
+#	""" for manual placement testing """
+#	for x in [
+#		{'x': 30, 'y': 15, 'count': 1, 'home_radius':8},
+#	]:  genEnemy01Swarm(x['x'], x['y'], x['count'], x['home_radius'])
+	
+	return
+	
 	var gen_map = ENEMY_GEN_MAP['ENEMY_01']
 	var attempting_coords = getAttemptingCoords(gen_map['SPAWN_ATTEMPTS_PER_BOTTOM_PERC'])
 	
@@ -71,11 +78,18 @@ func genEnemy01s() -> void:
 			gen_map['HOME_RADIUS']['MIN'], gen_map['HOME_RADIUS']['MAX']
 		)
 		
-		setEnemy01Swarm(attempt_x, attempt_y, count_per_swarm, home_radius)
+		genEnemy01Swarm(attempt_x, attempt_y, count_per_swarm, home_radius)
 		setMiniTileMapEnemyPos(attempt_x, attempt_y)
 
 
 func genEnemy02s() -> void:
+	
+	""" for manual placement testing """
+	for x in [
+		{'pos': Vector2(600, 250), 'segment_count': 20},
+	]:  genEnemy02(x['pos'], x['segment_count'])
+	
+	return
 	
 	var gen_map = ENEMY_GEN_MAP['ENEMY_02']
 	var attempting_coords = getAttemptingCoords(gen_map['SPAWN_ATTEMPTS_PER_BOTTOM_PERC'])
@@ -103,34 +117,9 @@ func genEnemy02s() -> void:
 		
 		var enemy_pos = Vector2(attempt_x * tile_map.cell_size[0], attempt_y * tile_map.cell_size[0])
 		
-		var enemy_inst = enemy_02.instance()
-		_enemies_.add_child(enemy_inst)
-		enemy_inst.global_position = enemy_pos
-		enemy_inst.init(segment_count)
+		genEnemy02(enemy_pos, segment_count)
 		
 		setMiniTileMapEnemyPos(attempt_x, attempt_y)
-		
-#		var enemy_inst = enemy_01.instance()
-#		enemy_inst.global_position = enemy_pos
-#		enemy_inst.HOME_POS = enemy_pos
-#		enemy_inst.HOME_RADIUS_BY_TILE = _home_radius_tile
-#		_enemies_.add_child(enemy_inst)
-		
-	
-#	for gen_data in [
-#		{'segment_count': 20, 'start_pos': Vector2(800, 300)},
-##		{'segment_count': 10, 'start_pos': Vector2(800, 1100)}
-#	]:
-#
-#		var enemy_inst = enemy_02.instance()
-#
-#		_enemies_.add_child(enemy_inst)
-#
-#		# looks like global position needs to be set before calling init()
-#		enemy_inst.global_position = gen_data['start_pos']
-#
-#		enemy_inst.init(gen_data['segment_count'])
-		
 
 
 ####################################################################################################
@@ -178,7 +167,7 @@ func setMiniTileMapEnemyPos(_x:int, _y:int, _buffer:int=1) -> void:
 			mini_tile_map.set_cell(x, y, 5)
 
 
-func setEnemy01Swarm(_home_x_tile:int, _home_y_tile:int, _enemy_count:int, _home_radius_tile:int) -> void:
+func genEnemy01Swarm(_home_x_tile:int, _home_y_tile:int, _enemy_count:int, _home_radius_tile:int) -> void:
 	var enemy_pos = Vector2(_home_x_tile * tile_map.cell_size[0], _home_y_tile * tile_map.cell_size[0])
 	for i in _enemy_count:
 		var enemy_inst = enemy_01.instance()
@@ -188,8 +177,16 @@ func setEnemy01Swarm(_home_x_tile:int, _home_y_tile:int, _enemy_count:int, _home
 		_enemies_.add_child(enemy_inst)
 
 
-#func setEnemy02() -> void:
-	
+func genEnemy02(
+	_pos:Vector2, _segment_count:int, _from_split:bool=false, _spine:Array=[],
+	_segments_data:Dictionary={}
+) -> void:
+	var enemy_inst = enemy_02.instance()
+	_enemies_.add_child(enemy_inst)
+	enemy_inst.global_position = _pos
+	enemy_inst.init(_segment_count, _from_split, _spine, _segments_data)
+
+
 
 
 

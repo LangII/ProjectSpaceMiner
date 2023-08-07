@@ -142,8 +142,7 @@ func loopThroughColContacts(state):
 
 
 func getTerrainColDmgFromDataPack(data_pack) -> float:
-	var col_dmg = MAX_TERRAIN_COL_DMG * data_pack['speed_damp'] * data_pack['col_angle_damp'] * (1.0 - PHYSICAL_ARMOR)
-	return col_dmg
+	return  MAX_TERRAIN_COL_DMG * data_pack['speed_damp'] * data_pack['col_angle_damp'] * (1.0 - PHYSICAL_ARMOR)
 
 
 ####################################################################################################
@@ -165,6 +164,10 @@ func shoot():
 
 
 func takeDmg(_dmg):
+	
+	print("\nShip takeDmg()")
+	print("_dmg = ", _dmg)
+	
 	health -= _dmg
 	hud.updateHealthValues(health)
 	is_stunned = true
@@ -194,54 +197,40 @@ func _on_StunnedTimer_timeout():
 
 
 func _on_BodyColArea2D_area_entered(_area):
-	if (
-		_area.get_parent().get_parent().name == 'Enemies'
-		and _area.get_parent().name.begins_with('Enemy02')
-	):
+	
+	var area_is_enemy = _area.get_parent().get_parent().name == 'Enemies'
+	if area_is_enemy:
 		
-		
-		var enemy = _area.get_parent()
-		
-#		can_dmg_ship = false
-		enemy.can_dmg_ship = false
-		
-#		$CanDmgShipTimer.start()
-		enemy.get_node('CanDmgShipTimer').start()
-		
-#		ship.takeDmg(DMG)
-		takeDmg(enemy.DMG)
-		
-#		takeDmg(self, DMG * DMG_TO_SELF_MOD)
-		enemy.takeDmg(_area, enemy.DMG * enemy.DMG_TO_SELF_MOD)
-		
-		"""
-		2023-02-26
-		
-		- Need to create funcs:
+		var enemy_type = _area.get_parent().name.left(7)
+		match enemy_type:
 			
-			- For Ship's knock-back impulse:  Get "collision remainder".  Harder of the two.  Will
-			need to get Vector of Enemy Area to Ship Area and multiply it by a new modifier.
-			
-			- For Gameplay's collision particles:  Get "collision point".  Easier of the two.
-		"""
-		
-		print("\n_area.name = ", _area.name)
-		print("ship.global_position = ", global_position)
-		print("_area.global_position = ", _area.global_position)
-		
-		var col_vector = _area.global_position - global_position
-		print("col_vector = ", col_vector)
-		
-		applied_force = -col_vector * ENEMY_AREA_COL_STRENGTH_MOD
-		
-		gameplay.setEnemyColParticles(global_position + (col_vector * 0.5))
-		
-#		ship.apply_central_impulse(_col.remainder * SHIP_COL_IMPULSE_MOD)		<<<
-		
-#		gameplay.setEnemyColParticles(_col.position)							<<<
-		
-		
-		
-#		_area.get_parent().takeDmg(_area, DMG)
-#		colParticleDisplacementOnAreaCol()
-#		endOfCollision()
+			'Enemy02':
+				handleEnemy02AreaCol(_area)
+
+
+func handleEnemy02AreaCol(_area) -> void:
+	# get relevant vars
+	var enemy = _area.get_parent()
+	# cancel if recently damaged ship
+	if not enemy.can_dmg_ship:  return
+	# update vars
+	enemy.can_dmg_ship = false
+	enemy.get_node('CanDmgShipTimer').start()
+	# trigger takeDmgs
+	takeDmg(enemy.DMG)
+	enemy.takeDmg(_area, enemy.DMG * enemy.DMG_TO_SELF_MOD)
+	# handle collision physics and particles
+	var col_vector = _area.global_position - global_position
+	applied_force = -col_vector * ENEMY_AREA_COL_STRENGTH_MOD
+	gameplay.setEnemyColParticles(global_position + (col_vector * 0.5))
+
+
+
+
+
+
+
+
+
+
+

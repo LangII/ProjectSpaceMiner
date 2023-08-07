@@ -32,7 +32,6 @@ var HUD_SCN_REF = 'res://scenes/Hud.tscn'
 
 #onready var SEED = util.rng.randi()
 #onready var SEED = hash('bender rules')
-#onready var SEED = 4057731354
 onready var SEED = 2926405890
 
 var tile_map_logic = null
@@ -61,12 +60,6 @@ var mini_map_test = false
 
 func _ready():
 	
-#	for pos in [
-#		Vector2(0, 0), Vector2(0, 210),
-##		[], [],
-##		[], [], [], [],
-#	]:
-	
 	print("SEED = ", SEED)
 	util.rng.seed = SEED
 	
@@ -80,12 +73,6 @@ func _ready():
 	
 	addHud()
 	
-#	var mini_tile_map = get_node('MiniTileMap')
-#
-#	mini_tile_map.global_position = Vector2(100, 100)
-#
-#	print("\nmini_tile_map.global_position = ", mini_tile_map.global_position)
-	
 	if mini_map_test:
 		remove_child(hud)
 		remove_child(ship)
@@ -98,6 +85,7 @@ func _ready():
 
 
 func _process(delta):
+	
 	if cam_shake_trauma:
 		cam_shake_trauma = max(cam_shake_trauma - (CAM_SHAKE_DECAY * delta), 0)
 		shakeCam()

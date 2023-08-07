@@ -70,6 +70,16 @@ func getRandomBool(_true_perc:float=0.50) -> bool:
 	return getRandomItemFromArrayWithWeights([true, false], [_true_perc, 1.0 - _true_perc])
 
 
+func getSumFromArray(_array:Array) -> float:
+	var array_sum = 0.0
+	for each in _array:  array_sum += each
+	return array_sum
+
+
+func getAvgFromArray(_array:Array) -> float:
+	return getSumFromArray(_array) / _array.size()
+
+
 func convAngleTo360Range(_angle:float) -> float:
 	if _angle >= 0:  return _angle
 	else:  return (_angle * -1) + 180

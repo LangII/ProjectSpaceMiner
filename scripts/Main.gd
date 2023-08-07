@@ -14,8 +14,9 @@ TODOS
 	- Drop.gd					DONE
 	- Enemy01.gd				DONE
 	- Enemy02.gd
-	- EnemyGenLogic.gd
-	- Gameplay.gd
+	- Enemy03.gd				DONE
+	- EnemyGenLogic.gd			DONE
+	- Gameplay.gd				DONE
 	- Hud.gd					DONE
 	- HudDropDisplay.gd			DONE
 	- Main.gd
@@ -66,10 +67,14 @@ func _process(_delta):
 	
 	if Input.is_action_just_pressed('test'):
 		
-		var stupid_temp_node = Node2D.new()
-		add_child(stupid_temp_node)
-		print("\nget_global_mouse_position() = ", stupid_temp_node.get_global_mouse_position())
-		stupid_temp_node.queue_free()
+		var test_title_msg = "TEST ACTION PRESSED"
+		var title_bracket = "-".repeat(len(test_title_msg))
+		print("\n\n\n%s\n%s\n%s" % [title_bracket, test_title_msg, title_bracket])
+		
+		var get_mouse_pos_temp_node = Node2D.new()
+		add_child(get_mouse_pos_temp_node)
+		print("\nget_global_mouse_position() = ", get_mouse_pos_temp_node.get_global_mouse_position())
+		get_mouse_pos_temp_node.queue_free()
 		
 		var enemies = get_node('Gameplay/Enemies')
 		
@@ -77,11 +82,17 @@ func _process(_delta):
 #		if enemies.get_children()[0].SPEED == 0:  new_speed = 60
 #
 #		for enemy in enemies.get_children():  enemy.SPEED = new_speed
-#
-#		for enemy in enemies.get_children():
-#
-#			if not enemy.name.replace('@', '').begins_with('Enemy02'):  continue
-##
+
+		for enemy in enemies.get_children():
+			
+			if not enemy.name.replace('@', '').begins_with('Enemy02'):  continue
+			
+			enemy.printDmg()
+			
+			enemy.printDebugReview()
+			
+			enemy.printFullSegmentsDataNMap()
+
 #			print("\n%s:" % [enemy.name])
 #
 #			print("\tenemy.global_position = ", enemy.global_position)
