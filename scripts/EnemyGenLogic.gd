@@ -49,7 +49,7 @@ func genEnemy01s() -> void:
 #		{'x': 30, 'y': 15, 'count': 1, 'home_radius':8},
 #	]:  genEnemy01Swarm(x['x'], x['y'], x['count'], x['home_radius'])
 	
-	return
+#	return
 	
 	var gen_map = ENEMY_GEN_MAP['ENEMY_01']
 	var attempting_coords = getAttemptingCoords(gen_map['SPAWN_ATTEMPTS_PER_BOTTOM_PERC'])
@@ -84,12 +84,12 @@ func genEnemy01s() -> void:
 
 func genEnemy02s() -> void:
 	
-	""" for manual placement testing """
-	for x in [
-		{'pos': Vector2(600, 250), 'segment_count': 20},
-	]:  genEnemy02(x['pos'], x['segment_count'])
+#	""" for manual placement testing """
+#	for x in [
+#		{'pos': Vector2(600, 250), 'segment_count': 20},
+#	]:  genEnemy02(x['pos'], x['segment_count'])
 	
-	return
+#	return
 	
 	var gen_map = ENEMY_GEN_MAP['ENEMY_02']
 	var attempting_coords = getAttemptingCoords(gen_map['SPAWN_ATTEMPTS_PER_BOTTOM_PERC'])

@@ -15,12 +15,12 @@ TODOS
 	- Enemy01.gd				DONE
 	- Enemy02.gd
 	- Enemy03.gd				DONE
-	- EnemyGenLogic.gd			DONE
+	- EnemyGenLogic.gd
 	- Gameplay.gd				DONE
 	- Hud.gd					DONE
 	- HudDropDisplay.gd			DONE
 	- Main.gd
-	- Ship.gd
+	- Ship.gd					DONE
 	- Utilities.gd				DONE
 """
 

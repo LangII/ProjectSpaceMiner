@@ -8,63 +8,15 @@ LOW PRIORITY TO DOS
 
 - From split()...
 
-	- Resulting Enemy02s have an inconsistent gap between segments (SPINE_TO_SPINE_DIST).
-		
-		- Possible reason:  After a split(), the back half (the half that keeps
-		the old segment names) doesn't appear to receive an update to SPINE_TO_SPINE_DIST.
-
 	- Front Enemy02 should keep old Enemy02's target.  It does not.  After split(), both front and
 	back Enemy02s make dramatic turns to pursue new targets.
-	
-2023-07-08
-
-- From split()...
-
-	- When dealing with an Enemy02 that was the result of a previous split(), and the new Enemy02's
-	segment names do not start with 'Segment01', another split() will cause one of the resulting
-	Enemy02s to have too many segments.
 
 -----
-SPLIT BEHAVIOR NOTES
+NOTES
 -----
-
-Bugs:
-- After 2nd split() of old Enemy, the produced Enemies have too many segments.
-
-Types of Segments:
-x = Tail
-o = Segment
-C = Head
-
-xC
-xOC
-xOOC
-xOOOC
-
-Rules:
-- An Enemy has to have 1 Tail and 1 Head, and can have 0 to 20 Segments (inclusive).
-Dead Segment Rules:
-- If a Head dies:  The Enemy's Head deletes and the next Segment becomes the new Head.
-- If the last Segment before the Tail dies:  The last Segment before the Tail deletes and the next
-Segment becomes the new Tail.
-
-IF tail dies OR (NO segments AND head dies) THEN all dead
-x??? OR xC = all dead
-^        ^
-
-IF segments >= 1 AND (head dies OR first segment dies) THEN 
-x?OC OR x?OC = x?C
-   ^      ^
-
-IF 
-xO?C = x?C
- ^
-
-x?O?C = x?C AND x?C
-  ^
 
 SEGMENT DIES BEHAVIOR
-	IF tail dies 				THEN all dies
+	IF tail dies THEN all dies
 	IF 0 segments:
 		IF head dies THEN all dies
 	IF 1 segment:
@@ -75,16 +27,6 @@ SEGMENT DIES BEHAVIOR
 		IF first segment dies THEN first segment dies
 		IF last segment dies THEN last segment dies
 		IF any other segment dies THEN that segment dies AND split
-
-
-
------
-TODOS
------
-
-- To fix the current issue of resulting Enemies from a split() having too many segments, I will
-make it so that after a split(), both resulting Enemies have segment names that start with
-'Segment01', i.e. no resulting Enemy keeps its old segment names.
 """
 
 extends KinematicBody2D
@@ -115,7 +57,6 @@ onready var SPEED_MAX = 60
 
 """
 2023-07-04
-- Shit this enemy is super buggy!!!
 - Need to look into why changing these speed vars causes a crash from a split due to some kind of
 misalignment with the spine (likely has to do with the init() and spine generation).
 """
@@ -155,7 +96,8 @@ onready var prev_angle_to_target = 0.0
 onready var angle_to_target_is_expanding = null
 onready var is_approaching_target = null
 
-### if this value is too low (20 gave me problems) then enemy02 sometimes ends in an infinite movement loop
+### if this value is too low (20 gave me problems) then enemy02 sometimes ends in an infinite
+### movement loop
 onready var GEN_NEW_TARGET_WITHIN_DIST = 40
 
 onready var NEW_TARGET_DIST_MIN = 200
@@ -205,7 +147,9 @@ func _ready() -> void:
 	pass
 
 
-func init(_segment_count:int, _from_split:bool=false, _spine:Array=[], _segments_data:Dictionary={}) -> void:
+func init(
+	_segment_count:int, _from_split:bool=false, _spine:Array=[], _segments_data:Dictionary={}
+) -> void:
 	
 	updateVarsFromSegmentCount(_segment_count)
 	
@@ -379,13 +323,7 @@ func handleCollision(_col:KinematicCollision2D) -> void:
 				$CanGenNewTargetFromColTimer.start()
 				genNewTargetFromCol(_col)
 		'Ship':
-			
-			print("\ncan_dmg_ship = ", can_dmg_ship)
-			
 			if not can_dmg_ship:  return
-			
-			print("damaging ship")
-			
 			can_dmg_ship = false
 			$CanDmgShipTimer.start()
 			ship.takeDmg(DMG)
@@ -454,29 +392,6 @@ func genNewTargetFromCol(col:KinematicCollision2D) -> void:
 	target = global_position + Vector2(target_dist, 0).rotated(target_rot)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ####################################################################################################
 
 
@@ -490,32 +405,6 @@ func takeDmg(_node_took_dmg:Object, _dmg:int) -> void:
 	startWoundedTweenLowUp()
 	# handle "dead" segments
 	if segments_data[segment_name]['health'] <= 0:
-		
-		
-		
-		print("")
-		print("Enemy02 segment dies:\nname = '%s'\nsegment_name = '%s'" % [name, segment_name])
-#		print("\tSEGMENT_COUNT = ", SEGMENT_COUNT)
-#		print("\tHIGHEST_SEGMENT_NAME = ", HIGHEST_SEGMENT_NAME)
-#		print("\tLOWEST_SEGMENT_NAME = ", LOWEST_SEGMENT_NAME)
-		
-		
-		
-		"""
-		SEGMENT DIES BEHAVIOR
-			IF tail dies 				THEN all dies
-			IF 0 segments:
-				IF head dies THEN all dies
-			IF 1 segment:
-				IF head dies THEN only segment dies
-				IF only segment dies THEN only segment dies
-			IF 2 or more segments:
-				IF head dies THEN first segment dies
-				IF first segment dies THEN first segment dies
-				IF last segment dies THEN last segment dies
-				IF any other segment dies THEN that segment dies AND split
-		"""
-		
 		if segment_name == 'Tail':  tailDies()
 		elif SEGMENT_COUNT == 0:
 			if segment_name == 'Head':  tailDies()
@@ -527,15 +416,6 @@ func takeDmg(_node_took_dmg:Object, _dmg:int) -> void:
 			elif segment_name == LOWEST_SEGMENT_NAME:  headDies()
 			elif segment_name == HIGHEST_SEGMENT_NAME:  lastSegmentDies()
 			else:  split(segment_name)
-		
-#		if segment_name == 'Tail':  tailDies()
-#		elif segment_name == 'Head':
-#			if SEGMENT_COUNT == 0:  tailDies()
-#			else:  headDies()
-#		elif segment_name == HIGHEST_SEGMENT_NAME:  lastSegmentDies()
-##		elif segment_name == LOWEST_SEGMENT_NAME:  firstSegmentDies()
-#		else:  split(segment_name)
-
 
 
 func getSegmentNameFromSegmentObj(_segment_obj:Object) -> String:
@@ -643,148 +523,23 @@ func lastSegmentDies() -> void:
 	gameplay.initDrop('enemy_02_b', 1, spine[segments_map[HIGHEST_SEGMENT_NAME]['spine_i']])
 
 
-
-
-
-
-
-#func firstSegmentDies() -> void:
-#	pass
-
-
-
-
-
-
-
-
 func split(_del_segment_name:String) -> void:
 	var del_segment_i = int(_del_segment_name.substr(7, 2))
 	# have to collect 'drop_pos' now before updatesFromSplit()
 	var drop_pos = spine[segments_map[_del_segment_name]['spine_i']]
 	instanceFrontEnemy02FromSplit(_del_segment_name, del_segment_i)
 	updatesFromSplit('split', del_segment_i)
-	segmentDiesSubSequence('split')
+	segmentDiesSubSequence()
 	gameplay.initDrop('enemy_02_b', 1, drop_pos)
-
-
-#func updatesFromSplit(_initiated_by:String, _del_segment_i:int) -> void:
-#
-#	SEGMENT_COUNT -= getSegmentCountChange(_initiated_by, _del_segment_i)
-#
-#	var new_head_segment = 'Segment%02d' % [_del_segment_i + 1]
-#
-#	# Transfer health and wounded data from segment to new head.
-#	segments_data['Head']['health'] = segments_data[new_head_segment]['health']
-#	segments_data['Head']['wounded_level'] = segments_data[new_head_segment]['wounded_level']
-#
-#	# Save spine and pos data before making deletions on segments map and data.
-#	var new_spine = spine.slice(segments_map[new_head_segment]['spine_i'], spine.size())
-#	var new_head_global_position = spine[segments_map[new_head_segment]['spine_i']]
-#	var new_head_spine_i = segments_map[new_head_segment]['spine_i']
-#
-#	deleteFrontSectionOfSegments(_del_segment_i)
-#
-#	# Transfer saved spine and pos data to new "back" section of segments.
-#	for segment_name in segments_map.keys():  segments_map[segment_name]['spine_i'] -= new_head_spine_i
-#
-#	var buffer_spine = []
-#	for _i in range(50):  buffer_spine += [new_spine[-1]]
-#	spine = new_spine + buffer_spine
-#
-#	global_position = new_head_global_position
-#
-#	setLowestHighestSegmentNames('updatesFromSplit')
-#
-#
-#func getSegmentCountChange(_initiated_by:String, _del_segment_i:int) -> int:
-#	var segment_count_change_ = null
-#	if _initiated_by == 'split':
-#		var true_segment_names = segments_data.keys().slice(1, -2)
-#		true_segment_names.sort()
-#		var true_segment_names_i = 1
-#		for true_segment_name in true_segment_names:
-#			if 'Segment%02d' % [_del_segment_i] == true_segment_name:
-#				segment_count_change_ = true_segment_names_i
-#				break
-#			true_segment_names_i += 1
-#		if not segment_count_change_:  util.throwError("\n\\_(**)_/\n")
-#	elif _initiated_by == 'headDies':
-#		segment_count_change_ = 0
-#	segment_count_change_ += 1
-#	return segment_count_change_
-#
-#
-#func deleteFrontSectionOfSegments(_del_segment_i:int) -> void:
-#	for i in range(int(LOWEST_SEGMENT_NAME.substr(7, 2)), _del_segment_i + 2):
-#		var segment_name = 'Segment%02d' % [i]
-#		get_node(segment_name).queue_free()
-#		segments_map.erase(segment_name)
-#		segments_data.erase(segment_name)
-
-
-
 
 
 func updatesFromSplit(_temp_from:String, _del_segment_i:int) -> void:
 	
-#	print("\nupdateFromSplit() _temp_from = ", _temp_from)
-	
-	var true_del_segment_i = 0
-	
-	if _temp_from == 'split':
-
-		var del_segment_name = 'Segment%02d' % [_del_segment_i]
-#		print("\ndel_segment_name = ", del_segment_name)
-
-#		print("\nsegments_data = ", segments_data)
-
-		var true_segment_names = segments_data.keys().slice(1, -2)
-		true_segment_names.sort()
-#		print("\ntrue_segment_names = ", true_segment_names)
-
-		var true_segment_names_i = 1
-		for true_segment_name in true_segment_names:
-			if del_segment_name == true_segment_name:
-				true_del_segment_i = true_segment_names_i
-				break
-			true_segment_names_i += 1
-
-#		print("\ntrue_del_segment_i = ", true_del_segment_i)
-
-		if not true_del_segment_i:  util.throwError("\n\\_(**)_/\n")
-	
-	elif _temp_from == 'headDies':
+	var true_del_segment_i = null
+	if _temp_from == 'split':  true_del_segment_i = getTrueDelSegmentI(_del_segment_i)
+	elif _temp_from == 'headDies':  true_del_segment_i = 0
 		
-		true_del_segment_i = 0
-
-	"""
-	2023-07-04
-	This ^ is a problem.  '_del_segment_i' could be '6'.  But if it's the first or only segment then
-	this function behaves as if '6' is '1'.  '_del_segment_i' is treated as if it represents the
-	position of the '_del_segment' within 'segments_data'.
-	"""
-	
-	
-	
-#	print("\n%s:" % [name])
-#	print("\t_del_segment_i = ", _del_segment_i)
-#	print("\tSEGMENT_COUNT (before) = ", SEGMENT_COUNT)
-	
-#	SEGMENT_COUNT -= _del_segment_i + 1
 	SEGMENT_COUNT -= true_del_segment_i + 1
-	
-#	print("\tSEGMENT_COUNT (after) = ", SEGMENT_COUNT)
-	
-	
-	
-#	""" update SPINE_TO_SPINE_DIST """
-#	var temp_speed = util.normalize(
-#		SEGMENT_COUNT, SEGMENT_COUNT_MIN, SEGMENT_COUNT_MAX, SPEED_MIN, SPEED_MAX
-#	)
-#	SPINE_TO_SPINE_DIST = temp_speed / (SPEED_TO_DIST_MODIFIER * 1.00)
-	
-	
 	
 	var new_head_segment = 'Segment%02d' % [_del_segment_i + 1]
 	
@@ -811,7 +566,6 @@ func updatesFromSplit(_temp_from:String, _del_segment_i:int) -> void:
 	# Transfer saved spine and pos data to new "back" section of segments.
 	for segment_name in segments_map.keys():  segments_map[segment_name]['spine_i'] -= new_head_spine_i
 	
-#	spine = new_spine
 	spine = new_spine + buffer_spine
 	
 	global_position = new_head_global_position
@@ -819,13 +573,33 @@ func updatesFromSplit(_temp_from:String, _del_segment_i:int) -> void:
 	setLowestHighestSegmentNames('updatesFromSplit')
 	
 	genNewTarget()
-	
-#	updateSegmentNamesForBackEnemy02FromSplit()
 
 
+func getTrueDelSegmentI(_del_segment_i:int) -> int:
+	"""
+	true_del_segment_i is needed to fix a stupid mistake.  del_segment_name is the name of the
+	segment being deleted.  So, del_segment_i is the suffix number of the segment name.  Well,
+	del_segment_i was used to represent the number of segments from the Head the delete segment was.
+	This was a mistake because one of the Enemy02 resulting from a split() has a set of segment
+	names that do not start with '01'.  So, in that case del_segment_i would not represent the
+	number of segments from the Head.  To conclude, true_del_segment_i represents the number of
+	segments from the head.
+	"""
+	var true_del_segment_i_ = null
+	var del_segment_name = 'Segment%02d' % [_del_segment_i]
+	var true_segment_names = segments_data.keys().slice(1, -2)
+	true_segment_names.sort()
+	var true_segment_names_i = 1
+	for true_segment_name in true_segment_names:
+		if del_segment_name == true_segment_name:
+			true_del_segment_i_ = true_segment_names_i
+			break
+		true_segment_names_i += 1
+	if not true_del_segment_i_:  util.throwError("\n\\_(**)_/\n")
+	return true_del_segment_i_
 
-func segmentDiesSubSequence(_temp_from:String='') -> void:
-	if _temp_from != 'split':  updateSpeedAndInnerTurnSharpness()
+
+func segmentDiesSubSequence() -> void:
 	$WoundedTweenHighUp.remove_all()
 	$WoundedTweenHighDown.remove_all()
 	$WoundedTweenLowUp.remove_all()
@@ -836,34 +610,7 @@ func segmentDiesSubSequence(_temp_from:String='') -> void:
 
 
 func instanceFrontEnemy02FromSplit(_del_segment_name:String, _del_segment_i:int) -> void:
-	
-	""" trying out getting "true" del_segment_i """
-	var true_del_segment_i = 0
-#	if _temp_from == 'split':
-	var true_del_segment_name = 'Segment%02d' % [_del_segment_i]
-#		print("\ndel_segment_name = ", del_segment_name)
-#		print("\nsegments_data = ", segments_data)
-	var true_segment_names = segments_data.keys().slice(1, -2)
-	true_segment_names.sort()
-#		print("\ntrue_segment_names = ", true_segment_names)
-	var true_segment_names_i = 1
-	for true_segment_name in true_segment_names:
-		if true_del_segment_name == true_segment_name:
-			true_del_segment_i = true_segment_names_i
-			break
-		true_segment_names_i += 1
-#		print("\ntrue_del_segment_i = ", true_del_segment_i)
-	if not true_del_segment_i:  util.throwError("\n\\_(**)_/\n")
-#	elif _temp_from == 'headDies':
-#		true_del_segment_i = 0
-	
-	_del_segment_i = true_del_segment_i
-	
-	print("\nstarted instanceFrontEnemy02FromSplit()")
-	print("Enemy02.name = ", name)
-	print("_del_segment_name = ", _del_segment_name)
-	print("_del_segment_i = ", _del_segment_i)
-	
+	_del_segment_i = getTrueDelSegmentI(_del_segment_i)
 	var new_front_segments_data = {}
 	for i in range(int(LOWEST_SEGMENT_NAME.substr(7, 2)), _del_segment_i):
 		var segment_name = 'Segment%02d' % [i]
@@ -876,10 +623,6 @@ func instanceFrontEnemy02FromSplit(_del_segment_name:String, _del_segment_i:int)
 		spine.slice(0, segments_map[_del_segment_name]['spine_i'] + 200),
 		new_front_segments_data
 	)
-
-
-#func updateSegmentNamesForBackEnemy02FromSplit() -> void:
-#	return
 
 
 ####################################################################################################
