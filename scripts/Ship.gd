@@ -41,6 +41,8 @@ var is_stunned = false
 
 var ENEMY_AREA_COL_STRENGTH_MOD = 280
 
+var CONTROL_TYPE = 'shuffle_board'  # 'classic_asteroids' or 'shuffle_board'
+
 
 ####################################################################################################
 
@@ -56,12 +58,19 @@ func _ready():
 	$DropPickUp/CollisionShape2D.shape.radius = DROP_PICK_UP_RADIUS
 
 
+#func _process(_delta):
+#
+#	autoRotate()
+
+
 func _physics_process(_delta):
 	
 	$Turret.look_at(get_global_mouse_position())
 	$Turret.rotate(deg2rad(90))
 	
 	if Input.is_action_pressed('left_click') and can_shoot:  shoot()
+	
+#	autoRotate()
 
 
 func _integrate_forces(state):
@@ -70,22 +79,39 @@ func _integrate_forces(state):
 	
 	setPrevFrameDir(state)
 	
-	applyMoveAcc()
+	match CONTROL_TYPE:
+		
+		'classic_asteroids':
+			
+			applyMoveAccCA()
+
+			applyMoveMaxSpeed()
+
+			applySpinAcc()
+
+			applySpinDamp()
+
+			applySpinMaxSpeed()
 	
-	applyMoveMaxSpeed()
-	
-	applySpinAcc()
-	
-	applySpinDamp()
-	
-	applySpinMaxSpeed()
+		'shuffle_board':
+			
+			applyMoveAccSB()
+			
+			applyMoveMaxSpeed()
+			
+			autoRotate()
 
 
 ####################################################################################################
 """ _integrate_forces FUNCS """
 
 
-func applyMoveAcc():
+func setPrevFrameDir(state):
+	prev_frame_dir = rad2deg(state.linear_velocity.angle())
+	prev_frame_dir = prev_frame_dir if prev_frame_dir > 0 else 360 + prev_frame_dir
+
+
+func applyMoveAccCA():
 	if Input.is_action_pressed('up') and Input.is_action_pressed('down') and not is_stunned:
 		applied_force = Vector2()
 		linear_damp = 5
@@ -120,9 +146,45 @@ func applySpinMaxSpeed():
 	if abs(angular_velocity) > SPIN_MAX_SPEED:  applied_torque = angular_velocity * -SPIN_MAX_SPEED_RESISTANCE
 
 
-func setPrevFrameDir(state):
-	prev_frame_dir = rad2deg(state.linear_velocity.angle())
-	prev_frame_dir = prev_frame_dir if prev_frame_dir > 0 else 360 + prev_frame_dir
+func applyMoveAccSB() -> void:
+	if is_stunned:  return
+	if (
+		(Input.is_action_pressed('up') and Input.is_action_pressed('down'))
+		or (Input.is_action_pressed('left') and Input.is_action_pressed('right'))
+	):
+		applied_force = Vector2()
+		linear_damp = 5
+	elif Input.is_action_pressed('up') and Input.is_action_pressed('left'):
+		applied_force = Vector2(0, -MOVE_ACC).rotated(deg2rad(-45))
+		linear_damp = 0
+	elif Input.is_action_pressed('up') and Input.is_action_pressed('right'):
+		applied_force = Vector2(0, -MOVE_ACC).rotated(deg2rad(45))
+		linear_damp = 0
+	elif Input.is_action_pressed('down') and Input.is_action_pressed('left'):
+		applied_force = Vector2(0, -MOVE_ACC).rotated(deg2rad(-135))
+		linear_damp = 0
+	elif Input.is_action_pressed('down') and Input.is_action_pressed('right'):
+		applied_force = Vector2(0, -MOVE_ACC).rotated(deg2rad(135))
+		linear_damp = 0
+	elif Input.is_action_pressed('up'):
+		applied_force = Vector2(0, -MOVE_ACC)
+		linear_damp = 0
+	elif Input.is_action_pressed('down'):
+		applied_force = Vector2(0, -MOVE_ACC).rotated(deg2rad(180))
+		linear_damp = 0
+	elif Input.is_action_pressed('left'):
+		applied_force = Vector2(0, -MOVE_ACC).rotated(deg2rad(-90))
+		linear_damp = 0
+	elif Input.is_action_pressed('right'):
+		applied_force = Vector2(0, -MOVE_ACC).rotated(deg2rad(90))
+		linear_damp = 0
+	else:
+		applied_force = Vector2()
+		linear_damp = 0
+
+
+func autoRotate() -> void:
+	$Body.look_at(global_position + Vector2(0, 1).rotated(deg2rad(prev_frame_dir)))
 
 
 func loopThroughColContacts(state):
