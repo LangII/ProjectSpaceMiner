@@ -15,6 +15,7 @@ onready var _enemies_ = gameplay.get_node('Enemies')
 
 onready var enemy_01 = preload('res://scenes/Enemy01.tscn')
 onready var enemy_02 = preload('res://scenes/Enemy02.tscn')
+onready var enemy_03 = preload('res://scenes/Enemy03.tscn')
 
 onready var ENEMY_GEN_MAP = {
 	'ENEMY_01': {
@@ -49,7 +50,7 @@ func genEnemy01s() -> void:
 #		{'x': 30, 'y': 15, 'count': 1, 'home_radius':8},
 #	]:  genEnemy01Swarm(x['x'], x['y'], x['count'], x['home_radius'])
 	
-#	return
+	return
 	
 	var gen_map = ENEMY_GEN_MAP['ENEMY_01']
 	var attempting_coords = getAttemptingCoords(gen_map['SPAWN_ATTEMPTS_PER_BOTTOM_PERC'])
@@ -89,7 +90,7 @@ func genEnemy02s() -> void:
 #		{'pos': Vector2(600, 250), 'segment_count': 20},
 #	]:  genEnemy02(x['pos'], x['segment_count'])
 	
-#	return
+	return
 	
 	var gen_map = ENEMY_GEN_MAP['ENEMY_02']
 	var attempting_coords = getAttemptingCoords(gen_map['SPAWN_ATTEMPTS_PER_BOTTOM_PERC'])
@@ -120,6 +121,13 @@ func genEnemy02s() -> void:
 		genEnemy02(enemy_pos, segment_count)
 		
 		setMiniTileMapEnemyPos(attempt_x, attempt_y)
+
+
+func genEnemy03s() -> void:
+	
+	var enemy_inst = enemy_03.instance()
+	enemy_inst.global_position = Vector2(550, 2590)
+	_enemies_.add_child(enemy_inst)
 
 
 ####################################################################################################

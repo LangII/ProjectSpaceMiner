@@ -28,7 +28,6 @@ orbit_velocity = 0.0
 orbit_velocity_random = 0.0
 
 [node name="Ship" type="RigidBody2D"]
-position = Vector2( 356.296, 277.837 )
 collision_layer = 2
 collision_mask = 19
 physics_material_override = SubResource( 1 )

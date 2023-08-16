@@ -109,11 +109,13 @@ func addEnemies():
 	
 	enemy_gen_logic.genEnemy01s()
 	enemy_gen_logic.genEnemy02s()
+	enemy_gen_logic.genEnemy03s()
 
 
 func addShip():
 	ship = load(SHIP_SCN_REF).instance()
 	add_child(ship)
+	ship.global_position = Vector2(420, 2600)
 
 
 func addCamera():

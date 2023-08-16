@@ -76,22 +76,26 @@ func _process(_delta):
 		print("\nget_global_mouse_position() = ", get_mouse_pos_temp_node.get_global_mouse_position())
 		get_mouse_pos_temp_node.queue_free()
 		
-		var enemies = get_node('Gameplay/Enemies')
+		var ship = get_node('Gameplay/Ship')
+		
+		print("\nship.prev_frame_dir = ", ship.prev_frame_dir)
+		
+#		var enemies = get_node('Gameplay/Enemies')
 		
 #		var new_speed = 0
 #		if enemies.get_children()[0].SPEED == 0:  new_speed = 60
 #
 #		for enemy in enemies.get_children():  enemy.SPEED = new_speed
 
-		for enemy in enemies.get_children():
-			
-			if not enemy.name.replace('@', '').begins_with('Enemy02'):  continue
-			
-			enemy.printDmg()
-			
-			enemy.printDebugReview()
-			
-			enemy.printFullSegmentsDataNMap()
+#		for enemy in enemies.get_children():
+#
+#			if not enemy.name.replace('@', '').begins_with('Enemy02'):  continue
+#
+#			enemy.printDmg()
+#
+#			enemy.printDebugReview()
+#
+#			enemy.printFullSegmentsDataNMap()
 
 #			print("\n%s:" % [enemy.name])
 #

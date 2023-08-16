@@ -1,4 +1,25 @@
 
+
+"""
+-------------------
+LOW PRIORITY TO DOS
+-------------------
+
+2023-08-11
+
+- Improve 'shuffle_board' Body rotation visuals.
+	
+	- When going from complete stop, lerp rotation animation to replace instantanious rotation.
+		- Maybe work out some kind of rotation delay if rotation is too fast.  To handle all fast or
+		instantanious rotations.
+	
+	- Add thrust particles.
+		- Add particles for linear thrust and rotation thrust.
+		- Maybe should add particles for 'classic_asteroids' also.  Or maybe make particles that
+		work with both.
+"""
+
+
 extends RigidBody2D
 
 onready var util = get_node('/root/Main/Utilities')
@@ -58,19 +79,12 @@ func _ready():
 	$DropPickUp/CollisionShape2D.shape.radius = DROP_PICK_UP_RADIUS
 
 
-#func _process(_delta):
-#
-#	autoRotate()
-
-
 func _physics_process(_delta):
 	
 	$Turret.look_at(get_global_mouse_position())
 	$Turret.rotate(deg2rad(90))
 	
 	if Input.is_action_pressed('left_click') and can_shoot:  shoot()
-	
-#	autoRotate()
 
 
 func _integrate_forces(state):
