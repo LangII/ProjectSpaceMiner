@@ -73,8 +73,12 @@ func _process(_delta):
 		
 		var get_mouse_pos_temp_node = Node2D.new()
 		add_child(get_mouse_pos_temp_node)
-		print("\nget_global_mouse_position() = ", get_mouse_pos_temp_node.get_global_mouse_position())
+		var global_mouse_position = get_mouse_pos_temp_node.get_global_mouse_position()
+		print("\nglobal_mouse_position = ", global_mouse_position)
 		get_mouse_pos_temp_node.queue_free()
+		
+		var mouse_pos_tile = get_node('Gameplay/TileMap').world_to_map(global_mouse_position)
+		print("mouse_pos_tile = ", mouse_pos_tile)
 		
 		var ship = get_node('Gameplay/Ship')
 		

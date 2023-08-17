@@ -150,7 +150,7 @@ func _process(_delta:float):
 					
 					can_change_col_ray = true
 					
-					printColVars()
+#					printColVars()
 					
 #					$FloatingTerrainCol.disabled = true
 #					$WalkingTerrainCol.disabled = false
@@ -164,8 +164,8 @@ func _process(_delta:float):
 		
 		'rotating':
 			
-			print("\ncur_rotated_enough_ray.name           = ", cur_rotated_enough_ray.name)
-			print("cur_rotated_enough_ray.is_colliding() = ", cur_rotated_enough_ray.is_colliding())
+#			print("\ncur_rotated_enough_ray.name           = ", cur_rotated_enough_ray.name)
+#			print("cur_rotated_enough_ray.is_colliding() = ", cur_rotated_enough_ray.is_colliding())
 #			if hasRotatedEnough():
 #			cur_rotated_enough_ray.force_raycast_update()
 				
@@ -173,7 +173,7 @@ func _process(_delta:float):
 				
 #				print("HAS ROTATED ENOUGH")
 				updateColVars()
-				printColVars()
+#				printColVars()
 #				return
 #				updateCurRotateAround()
 #				updateCurRotatedEnoughRay()
