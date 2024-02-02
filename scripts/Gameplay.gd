@@ -219,8 +219,24 @@ func setShipShootBulletParticles(_pos, _rot):
 	$ShipShootBulletParticles2D.restart()
 
 
-
-
+func checkForEnemy03ToFloating(_tile_destroyed:String) -> void:
+	for enemy in $Enemies.get_children():
+		if util.nodeIsScene(enemy, 'Enemy03'):
+			if enemy.cur_holding_tile == null:  return
+			var enemy_cur_holding_tiles = [
+				'%s,%s' % [enemy.cur_holding_tile.y, 		enemy.cur_holding_tile.x],		# center
+				'%s,%s' % [enemy.cur_holding_tile.y - 1,	enemy.cur_holding_tile.x],		# sides \/
+				'%s,%s' % [enemy.cur_holding_tile.y + 1,	enemy.cur_holding_tile.x],
+				'%s,%s' % [enemy.cur_holding_tile.y, 		enemy.cur_holding_tile.x - 1],
+				'%s,%s' % [enemy.cur_holding_tile.y, 		enemy.cur_holding_tile.x + 1],
+				'%s,%s' % [enemy.cur_holding_tile.y - 1,	enemy.cur_holding_tile.x - 1],	# corners \/
+				'%s,%s' % [enemy.cur_holding_tile.y - 1,	enemy.cur_holding_tile.x + 1],
+				'%s,%s' % [enemy.cur_holding_tile.y + 1,	enemy.cur_holding_tile.x - 1],
+				'%s,%s' % [enemy.cur_holding_tile.y + 1,	enemy.cur_holding_tile.x + 1],
+			]
+			for enemy_cur_holding_tile in enemy_cur_holding_tiles:
+				if enemy_cur_holding_tile == _tile_destroyed:
+					enemy.setMoveStateToFloating()
 
 
 

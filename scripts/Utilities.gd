@@ -85,7 +85,7 @@ func convAngleTo360Range(_angle:float) -> float:
 	else:  return (_angle * -1) + 180
 
 
-func convTileMapPosToGlobalPos(tile_map_pos:Vector2, global_pos_type:String='middle') -> Vector2:
+func convTileMapPosToGlobalPos(tile_map_pos:Vector2, global_pos_type:String='center') -> Vector2:
 	var global_pos = data.tiles['%s,%s' % [tile_map_pos.y, tile_map_pos.x]]['global_pos_center']
 	global_pos = Vector2(global_pos[0], global_pos[1])
 	var width_adjust = ctrl.tile_width / 2
@@ -96,7 +96,7 @@ func convTileMapPosToGlobalPos(tile_map_pos:Vector2, global_pos_type:String='mid
 		'top':          adjust = {'x': 0,             'y': -height_adjust}
 		'top_right':    adjust = {'x': +width_adjust, 'y': -height_adjust}
 		'center_left':  adjust = {'x': -width_adjust, 'y': 0             }
-		'middle':       adjust = {'x': 0,             'y': 0             }
+		'center':       adjust = {'x': 0,             'y': 0             }
 		'center_right': adjust = {'x': +width_adjust, 'y': 0             }
 		'bottom_left':  adjust = {'x': -width_adjust, 'y': +height_adjust}
 		'bottom':       adjust = {'x': 0,             'y': +height_adjust}
@@ -112,6 +112,10 @@ func printWithTime(_msg:String) -> void:
 		OS.get_system_time_msecs() - OS.get_system_time_secs() * 1_000,
 		_msg
 	])
+
+
+func nodeIsScene(_node:Node, _scene:String) -> bool:
+	return _node.name.replace('@', '').begins_with(_scene)
 
 
 

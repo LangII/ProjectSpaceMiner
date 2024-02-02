@@ -1,4 +1,20 @@
 
+
+"""
+
+-------------------
+LOW PRIORITY TO DOS
+-------------------
+
+2024-01-31
+While testing for Enemy03 development, I wanted there to be no Mineral generation.  So I set all
+VEIN_SIZE_MIN and VEIN_SIZE_MAX values to 0.  There was an odd result.  There was a dramatic decrease
+in Mineral generation, however the unexpected behavior was that there were still a couple here and
+there that were generated.  Investigate why.
+
+"""
+
+
 extends 'res://scripts/tiles/BaseTileMapLogic.gd'
 
 

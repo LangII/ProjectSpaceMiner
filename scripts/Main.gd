@@ -4,24 +4,22 @@
 TODOS
 -----
 
-- to clean:
-	- BaseTileMapLogic.gd		DONE
-	- FinalTileMapLogic.gd		DONE
-	- MineralTileMapLogic.gd	DONE
-	- Bullet01.gd				DONE
-	- Controls.gd				DONE
-	- Data.gd					DONE
-	- Drop.gd					DONE
-	- Enemy01.gd				DONE
-	- Enemy02.gd
-	- Enemy03.gd				DONE
-	- EnemyGenLogic.gd
-	- Gameplay.gd				DONE
-	- Hud.gd					DONE
-	- HudDropDisplay.gd			DONE
-	- Main.gd
-	- Ship.gd					DONE
-	- Utilities.gd				DONE
+- Enemy03
+
+-----
+NOTES
+-----
+
+2023-08-20
+- Thoughts for Enemy04:  Kamikaze.  They fly around fairly aimlessly, but if Ship is within range,
+they target Ship and try to fly into it causing large explosion.  The balance is that they're flying
+is very irradic.  Every other second they should target some other random point.  Or they're turning
+is in small amounts so if 1 to 2 seconds before Enemy04 hits you you move away then Enemy04 will
+miss wildly.  Basically the idea is that this enemy is a wild card.  Most people will sort of fear
+this enemy but the end result should be that the enemy typically misses more times than it hits.
+Maybe it can have 2 different defense states:  1 where it's just wondering around and it's defense
+is super high.  But then the other is when it sees the Ship, then turns into kamikaze mode and can
+be killed in 1 hit.
 """
 
 extends Node

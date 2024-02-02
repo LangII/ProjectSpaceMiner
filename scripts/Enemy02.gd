@@ -11,6 +11,9 @@ LOW PRIORITY TO DOS
 	- Front Enemy02 should keep old Enemy02's target.  It does not.  After split(), both front and
 	back Enemy02s make dramatic turns to pursue new targets.
 
+2024-01-31
+look into having LifeEndParticles2D like Enemy01
+
 -----
 NOTES
 -----
@@ -62,8 +65,6 @@ misalignment with the spine (likely has to do with the init() and spine generati
 """
 #onready var SPEED_MIN = 60
 #onready var SPEED_MAX = 40
-#onready var SPEED_MIN = 40
-#onready var SPEED_MAX = 20
 
 onready var INNER_TURN_SHARPNESS_MIN = 2.5
 onready var INNER_TURN_SHARPNESS_MAX = 1.5
@@ -215,7 +216,7 @@ func updateVarsFromSegmentCount(_segment_count:int) -> void:
 	if _segment_count < SEGMENT_COUNT_MIN or _segment_count > SEGMENT_COUNT_MAX:
 		util.throwError(
 			"Enemy02.updateVarsFromSegmentCount() arg _segment_count must be between %s and %s " %
-			[SEGMENT_COUNT_MIN, SEGMENT_COUNT_MAX] + "inclusively."
+			[SEGMENT_COUNT_MIN, SEGMENT_COUNT_MAX] + " inclusively."
 		)
 	SEGMENT_COUNT = _segment_count
 	updateSpeedAndInnerTurnSharpness()

@@ -504,6 +504,7 @@ func tileDestroyed(k):
 			data.tiles[k]['mineral_type'], data.tiles[k]['mineral_drop_value'],
 			data.tiles[k]['global_pos_center']
 		)
+	gameplay.checkForEnemy03ToFloating(k)
 
 
 func areaTileUpdateFromCol(k):

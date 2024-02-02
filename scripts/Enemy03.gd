@@ -20,6 +20,65 @@ BEHAVIOR NOTES
 	- ship is in range
 	- ready
 	- 
+
+-----
+TODOS
+-----
+
+2023-08-20
+
+DONE
+- Add nodes and code to allow for rolling 'left'.
+
+DONE
+- Add alternate between roll left and roll right behavior.
+
+DONE
+- Add rotation to float.
+
+DONE
+- Add behavior for 'rolling' -> 'floating' when dependent terrain is destroyed.
+	
+	DONE
+	- cur_dependent_tiles = list of tiles that Enemy03 is currently dependent on
+	
+	DONE
+	- whenever a tile is broken, get all cur_dependent_tiles for all enemy_03s
+	
+	DONE
+	- if the broken tile is in one of those lists, then trigger that enemy_03 to 'floating' state
+
+(
+	2024-01-30
+	DONE
+	test and clean up all previous DONEs
+)
+
+- Add damage exchange behavior for when Ship and Enemy03 (body to body) collide.
+
+- Add turret for missiles.
+
+- Use shooting of Ship to add shooting to Enemy03.  Maybe for now just have it shoot Bullet01.
+
+- Upgrade from Bullet01 to Bullet02, a slow moving homing AOE.
+
+- Have ship bullets damage Enemy03.
+
+- Add control to not allow Enemy03 to walk up the sky walls (hashed blocks).
+
+2024-01-31
+Under the current state, while it is cool behavior to make it so that the Ship can trigger an
+Enemy03 into 'floating' move_state by destroying holding tile(s), it gives the Ship an advantage
+over Enemy03.  Part of the defense of Enemy03 is it's rapid back-and-forth movement while wall
+crawling.  When in the 'floating' move_state there is no longer that defensive movement.  So, to
+counter this I'll make it so that while in 'floating' move_state Enemy03 has an increase in defense.
+
+-----
+OTHER
+-----
+
+- One problem with the current method of "rolling" is that I don't know how to make the roll speed
+adjustable.
 """
 
 
@@ -30,36 +89,8 @@ onready var gameplay = get_node('/root/Main/Gameplay')
 onready var ship = get_node('/root/Main/Gameplay/Ship')
 onready var tilemap = get_node('/root/Main/Gameplay/TileMap')
 
-var move_state = ''
-var move_vector = Vector2()
-
-#var WALK_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315, 360]
-#var WALK_ANGLE_TOLERANCE = 20
-
-#var ROT_NODE_MAP = {
-#	$RotPosA: {
-#		'next_pos_node':	{'right': $RotPosD,			'left': $RotPosB},
-#		'col_ray':			{'right': $ColRayARight,	'left': $ColRayALeft}
-#	},
-#	$RotPosB: {
-#		'next_pos_node':	{'right': $RotPosA,			'left': $RotPosC},
-#		'col_ray':			{'right': $ColRayBRight,	'left': $ColRayBLeft}
-#	},
-#	$RotPosC: {
-#		'next_pos_node':	{'right': $RotPosB,			'left': $RotPosD},
-#		'col_ray':			{'right': $ColRayCRight,	'left': $ColRayCLeft}
-#	},
-#	$RotPosD: {
-#		'next_pos_node':	{'right': $RotPosC,			'left': $RotPosA},
-#		'col_ray':			{'right': $ColRayDRight,	'left': $ColRayDLeft}
-#	}
-#}
-
-"""
-TURNOER NOTES:
-- I think it might be the map that's so wrong.  The Enemy03's rotation seems to coordinatedly skip
-corners during rotation.  ^|_(**)_|^
-"""
+#onready var mineral_tilemap = get_node('/root/Main/Gameplay/MineralTileMap')
+#var cur_holding_min_tile = null
 
 var ROT_NODE_MAP = {
 	'RotPosA': {
@@ -80,225 +111,149 @@ var ROT_NODE_MAP = {
 	}
 }
 
+var move_state = ''  # 'floating' or 'rolling'
+
 var cur_rotate_around_node = null
 var cur_rotate_around_pos = Vector2()
-var cur_rotate_dir = ''
+var cur_roll_dir = ''
+var cur_roll_dir_mod = 0
 var cur_rotated_enough_ray = null
 
-var can_change_col_ray = true
+var FLOATING_LINEAR_SPEED_MIN = 10.0
+var FLOATING_LINEAR_SPEED_MAX = 100.0
+var FLOATING_ROTATE_SPEED_MIN = 0.01
+var FLOATING_ROTATE_SPEED_MAX = 0.2
+
+var ROLLING_CHANGE_DIR_CHANCE_MIN = 0.001  # perc
+var ROLLING_CHANGE_DIR_CHANCE_MAX = 0.300  # perc
+
+var ROLLING_MOV_MOD = 0.08
+var ROLLING_ROT_MOD = 4.0
+
+var floating_linear_speed = 0.0
+var floating_linear_dir = 0.0
+var floating_move_vector = Vector2()
+var floating_rotate_speed = 0.0
+var floating_rotate_dir = ''
+var floating_rotate_dir_mod = 0
+
+onready var cur_holding_tile = null
 
 
 ####################################################################################################
 
 
-func _ready():
+func _ready() -> void:
 	
-	move_state = 'floating'
-#	move_state = 'testing'
+	setMoveStateToFloating()
 	
-#	$WalkingTerrainCol.disabled = true
-	
-	move_vector = Vector2(0, 100)
-	
-	rotate(deg2rad(10))
-	
-#	rotate_around = $RotPosD.global_position
+	# TEST
+	floating_linear_dir = 0.0
+	floating_move_vector = Vector2(floating_linear_speed, 0).rotated(deg2rad(floating_linear_dir))
 
 
-var d = 0.0
-
-func _process(_delta:float):
-#func _physics_process(_delta:float):
-	
-#	print("\ncur_rotate_around_node.name = ", cur_rotate_around_node.name if cur_rotate_around_node else null)
-#	print("cur_rotated_enough_ray.name = ", cur_rotated_enough_ray.name if cur_rotated_enough_ray else null)
-	
-#	d += _delta
+func _process(_delta:float) -> void:
 	
 	match move_state:
 		
 		'floating':
 			
-			var col = move_and_collide(move_vector * _delta, false)
+			rotate(floating_rotate_dir_mod * floating_rotate_speed)
+			
+			var col = move_and_collide(floating_move_vector * _delta, false)
 			
 			if col:
 				
 				if col.collider == tilemap:
 					
-#					print("\ncol.position = ", col.position)
-					
-#					print("collided with tilemap")
-					
-#					rotateToWalkFromCol(col.position)
-					
-					# ignore terrain col while walking
-					set_collision_mask_bit(1, false)
-					
-					smallRotateAfterTerrainCol(col.position)
-					
-					move_state = 'rotating'
-					
-#					rotate_around = $RotPosD.global_position
-#					cur_rotate_around = col.position
-					cur_rotate_around_node = getClosestRotPosNode(col.position)
-					
-					cur_rotate_around_pos = cur_rotate_around_node.global_position
-					
-					cur_rotate_dir = 'right'
-					
-					cur_rotated_enough_ray = get_node(ROT_NODE_MAP[cur_rotate_around_node.name]['col_ray'][cur_rotate_dir])
-					
-					can_change_col_ray = true
-					
-#					printColVars()
-					
-#					$FloatingTerrainCol.disabled = true
-#					$WalkingTerrainCol.disabled = false
-					
-#					var crap_speed = 5000.0
-#					global_position = Vector2(
-#						sin(crap_speed) * global_position.distance_to(rotate_around),
-#						cos(crap_speed) * global_position.distance_to(rotate_around)
-#					) + rotate_around
-					
+					setMoveStateToRolling(col.position)
 		
-		'rotating':
+		'rolling':
 			
-#			print("\ncur_rotated_enough_ray.name           = ", cur_rotated_enough_ray.name)
-#			print("cur_rotated_enough_ray.is_colliding() = ", cur_rotated_enough_ray.is_colliding())
-#			if hasRotatedEnough():
-#			cur_rotated_enough_ray.force_raycast_update()
+			if cur_rotated_enough_ray.is_colliding():
 				
-			if cur_rotated_enough_ray.is_colliding() and can_change_col_ray:
+				setCurHoldingTile()
 				
-#				print("HAS ROTATED ENOUGH")
-				updateColVars()
-#				printColVars()
-#				return
-#				updateCurRotateAround()
-#				updateCurRotatedEnoughRay()
-#				cur_rotate_around_node = get_node(ROT_NODE_MAP[cur_rotate_around_node.name]['next_pos_node'][cur_rotate_dir])
-#				cur_rotate_around_pos = cur_rotate_around_node.global_position
-#				cur_rotated_enough_ray = get_node(ROT_NODE_MAP[cur_rotate_around_node.name]['col_ray'][cur_rotate_dir])
-#				can_change_col_ray = false
-#				$CanChangeColRayTimer.start()
-#
-			global_position = cur_rotate_around_pos + (global_position - cur_rotate_around_pos).rotated(0.02)
-#			look_at(cur_rotate_around_pos)
-			rotate(deg2rad(1))
+				if util.getRandomBool(
+					util.getRandomFloat(
+						ROLLING_CHANGE_DIR_CHANCE_MIN,
+						ROLLING_CHANGE_DIR_CHANCE_MAX
+					)
+				):
+					
+					changeCurRollDir()
+					
+					setCurRotatedEnoughRay()
+				
+				else:
+				
+					updateColVars()
 			
-#			var rot_speed = -1.0
-#			d += _delta
-#			d = 1
-#			var sin_ = sin(rot_speed * d) * global_position.distance_to(rotate_around)
-#			var cos_ = cos(rot_speed * d) * global_position.distance_to(rotate_around)
-#			print("sin_ = ", sin_)
-#			print("cos_ = ", cos_)
-#			global_position = Vector2(
-#				sin(rot_speed * d) * global_position.distance_to(rotate_around),
-#				cos(rot_speed * d) * global_position.distance_to(rotate_around)
-#			) + rotate_around
-#			print("cur_rotate_around_node = ", cur_rotate_around_node)
-			
-			
-		
-		'passive':
-			
-			pass
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#		'testing':
-#
-#			var rot_speed = 2.0
-#
-##			var sin_var = sin(rot_speed * _delta)
-##			print("sin_var = ", sin_var)
-#
-#			d += _delta
-#
-#			global_position = Vector2(
-##				sin(rot_speed * _delta) * global_position.distance_to(rotate_around),
-#				sin(rot_speed * d) * global_position.distance_to(rotate_around),
-##				cos(rot_speed * _delta) * global_position.distance_to(rotate_around)
-#				cos(rot_speed * d) * global_position.distance_to(rotate_around)
-#			) + rotate_around
-#
-#			look_at(rotate_around)
-#			rotate(deg2rad(90 + 45))
+			handleRollingMovement()
 
 
 ####################################################################################################
 
 
-func updateColVars() -> void:
-	cur_rotate_around_node = get_node(ROT_NODE_MAP[cur_rotate_around_node.name]['next_pos_node'][cur_rotate_dir])
+func setMoveStateToFloating() -> void:
+	move_state = 'floating'
+	floating_linear_speed = util.getRandomFloat(FLOATING_LINEAR_SPEED_MIN, FLOATING_LINEAR_SPEED_MAX)
+	floating_linear_dir = util.getRandomFloat(0.0, 360.0)
+	floating_move_vector = Vector2(floating_linear_speed, 0).rotated(deg2rad(floating_linear_dir))
+	floating_rotate_speed = util.getRandomFloat(FLOATING_ROTATE_SPEED_MIN, FLOATING_ROTATE_SPEED_MAX)
+	floating_rotate_dir = util.getRandomItemFromArray(['left', 'right'])
+	floating_rotate_dir_mod = -1 if floating_rotate_dir == 'left' else +1
+	set_collision_mask_bit(1, true)
+	cur_holding_tile = null
+
+
+func setMoveStateToRolling(_col_position:Vector2) -> void:
+	set_collision_mask_bit(1, false)  # ignore terrain col while walking
+	smallRotateAfterTerrainCol(_col_position)
+	move_state = 'rolling'
+	cur_rotate_around_node = getClosestRotPosNode(_col_position)
 	cur_rotate_around_pos = cur_rotate_around_node.global_position
-	cur_rotated_enough_ray = get_node(ROT_NODE_MAP[cur_rotate_around_node.name]['col_ray'][cur_rotate_dir])
-	
-	can_change_col_ray = false
-	$CanChangeColRayTimer.start()
+	cur_roll_dir = util.getRandomItemFromArray(['left', 'right'])
+	cur_roll_dir_mod = -1 if cur_roll_dir == 'left' else +1
+	setCurRotatedEnoughRay()
+
+
+func setCurRotatedEnoughRay() -> void:
+	cur_rotated_enough_ray = get_node(ROT_NODE_MAP[cur_rotate_around_node.name]['col_ray'][cur_roll_dir])
+
+
+func handleRollingMovement() -> void:
+	global_position = (
+		cur_rotate_around_pos
+		+ (global_position - cur_rotate_around_pos).rotated(cur_roll_dir_mod * ROLLING_MOV_MOD)
+	)
+	rotate(deg2rad(cur_roll_dir_mod * ROLLING_ROT_MOD))
+
+
+func updateColVars() -> void:
+	cur_rotate_around_node = get_node(ROT_NODE_MAP[cur_rotate_around_node.name]['next_pos_node'][cur_roll_dir])
+	cur_rotate_around_pos = cur_rotate_around_node.global_position
+	cur_rotated_enough_ray = get_node(ROT_NODE_MAP[cur_rotate_around_node.name]['col_ray'][cur_roll_dir])
 
 
 func printColVars() -> void:
 	print("\ncur_rotate_around_node = ", cur_rotate_around_node.name)
 	print("cur_rotate_around_pos  = ", cur_rotate_around_pos)
-	print("cur_rotate_dir         = ", cur_rotate_dir)
+	print("cur_roll_dir           = ", cur_roll_dir)
 	print("cur_rotated_enough_ray = ", cur_rotated_enough_ray.name)
 
 
 func smallRotateAfterTerrainCol(_col_pos:Vector2) -> void:
-	
 	var closest_rot_pos_node_name = getClosestRotPosNode(_col_pos).name
-#	print("closest_rot_pos_node_name = ", closest_rot_pos_node_name)
-	
 	var closest_rot_pos_v = global_position - getClosestRotPosNode(_col_pos).global_position
 	var col_pos_v = global_position - _col_pos
 	var angle_to = closest_rot_pos_v.angle_to(col_pos_v)
 	rotate(angle_to)
 
 
-func hasRotatedEnough() -> bool:
-	
-#	print("\nstarted hasRotatedEnough()")
-	
-	if not cur_rotated_enough_ray.is_colliding():  return false
-	
-#	print("cur_rotated_enough_ray.get_collision_point() = ", cur_rotated_enough_ray.get_collision_point())
-	
-	var dist_to_tilemap = cur_rotated_enough_ray.global_position.distance_to(cur_rotated_enough_ray.get_collision_point())
-	
-#	print("dist_to_tilemap = ", dist_to_tilemap)
-	
-	if dist_to_tilemap < 2.0:  return true
-	
-	return false
-
-
 func getClosestRotPosNode(_pos:Vector2) -> Node:
 	var closest_rot_pos_node_ = null
 	var rot_pos_nodes = ROT_NODE_MAP.keys()
-	
-#	print("rot_pos_nodes = ", rot_pos_nodes)
-	
 	var dists = [
 		$RotPosA.global_position.distance_to(_pos), $RotPosB.global_position.distance_to(_pos),
 		$RotPosC.global_position.distance_to(_pos), $RotPosD.global_position.distance_to(_pos)
@@ -307,17 +262,54 @@ func getClosestRotPosNode(_pos:Vector2) -> Node:
 	return closest_rot_pos_node_
 
 
-#func rotateToWalkFromCol(_col_pos:Vector2) -> void:
-#
-#	# left = 0, right = 180, down = 270, up = 90
-#	var col_angle = util.convAngleTo360Range(rad2deg(global_position.angle_to_point(_col_pos)))
-#	print("col_angle = ", col_angle)
-#
-#	return
+func changeCurRollDir() -> void:
+	cur_roll_dir = 'left' if cur_roll_dir == 'right' else 'right'
+	cur_roll_dir_mod = -1 if cur_roll_dir_mod == +1 else +1
+
+
+func setCurHoldingTile() -> void:
+	cur_holding_tile = tilemap.world_to_map(cur_rotated_enough_ray.get_collision_point())
+
+
+
+func takeDmg(_node_took_dmg:Object, _dmg:int) -> void:
+	return
 
 
 
 
 
-func _on_CanChangeColRayTimer_timeout():
-	can_change_col_ray = true
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
