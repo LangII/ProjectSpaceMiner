@@ -161,31 +161,26 @@ var WOUNDED_MAP = {
 var WOUNDED_COLOR = Color(1, 0.4, 0.4, 1)  # red
 var wounded_level = null
 
+var turret_rot_speed = 2
+onready var turret = get_node('TurretNonSpatial/TurretPivot')
+
 var TURRET_ROT_SPEED_MIN = 2
 var TURRET_ROT_SPEED_MAX = 6
 var CAN_SHOOT_BULLET_DELAY = 2.0
 var can_shoot_bullet = true
 
-#var turret_to_rotate_around_node_angle_dif = 0
-#var prev_turret_to_rotate_around_node_angle_dif = 0
-#var turret_is_rotating_towards_rotate_around_node = false
-
+var turret_rot_dir = 0
 var turret_rot_speed_dir = +1
 
-#var turret_rot_state = 'passed_air_mid'  # or 'hit_air_edge'
-
-#var dif_between_turret_and_rotate_node = 0.0
-#var prev_dif_between_turret_and_rotate_node = 0.0
-
-var WALL_DETECTION_COL_RAYS_MAP = [
-	{'node': 'WallDetectionNonSpatial/WallDetectionPos/ColRayL',	'dir': 'left',			'dir_deg': 0},
-	{'node': 'WallDetectionNonSpatial/WallDetectionPos/ColRayTL',	'dir': 'top_left',		'dir_deg': 45},
-	{'node': 'WallDetectionNonSpatial/WallDetectionPos/ColRayT',	'dir': 'top',			'dir_deg': 90},
-	{'node': 'WallDetectionNonSpatial/WallDetectionPos/ColRayTR',	'dir': 'top_right',		'dir_deg': 135},
-	{'node': 'WallDetectionNonSpatial/WallDetectionPos/ColRayR',	'dir': 'right',			'dir_deg': 180},
-	{'node': 'WallDetectionNonSpatial/WallDetectionPos/ColRayBR',	'dir': 'bottom_right',	'dir_deg': 225},
-	{'node': 'WallDetectionNonSpatial/WallDetectionPos/ColRayB',	'dir': 'bottom',		'dir_deg': 270},
-	{'node': 'WallDetectionNonSpatial/WallDetectionPos/ColRayBL',	'dir': 'bottom_left',	'dir_deg': 315},
+onready var WALL_DETECTION_COL_RAYS_MAP = [
+	{'node': get_node('WallDetectionNonSpatial/WallDetectionPos/ColRayL'),	'dir': 'left',			'dir_deg': 0},
+	{'node': get_node('WallDetectionNonSpatial/WallDetectionPos/ColRayTL'),	'dir': 'top_left',		'dir_deg': 45},
+	{'node': get_node('WallDetectionNonSpatial/WallDetectionPos/ColRayT'),	'dir': 'top',			'dir_deg': 90},
+	{'node': get_node('WallDetectionNonSpatial/WallDetectionPos/ColRayTR'),	'dir': 'top_right',		'dir_deg': 135},
+	{'node': get_node('WallDetectionNonSpatial/WallDetectionPos/ColRayR'),	'dir': 'right',			'dir_deg': 180},
+	{'node': get_node('WallDetectionNonSpatial/WallDetectionPos/ColRayBR'),	'dir': 'bottom_right',	'dir_deg': 225},
+	{'node': get_node('WallDetectionNonSpatial/WallDetectionPos/ColRayB'),	'dir': 'bottom',		'dir_deg': 270},
+	{'node': get_node('WallDetectionNonSpatial/WallDetectionPos/ColRayBL'),	'dir': 'bottom_left',	'dir_deg': 315},
 ]
 
 var wall_detection_dir = ''
@@ -260,7 +255,7 @@ func _process(_delta:float) -> void:
 	
 	setNonSpatialsPos()
 	
-	rotateTurret()
+	handleTurretRotation()
 
 
 ####################################################################################################
@@ -347,195 +342,44 @@ func setNonSpatialsPos() -> void:
 	$WallDetectionNonSpatial/WallDetectionPos.global_position = global_position
 
 
-func rotateTurret() -> void:
-	
-	var turret_rot_speed = 2
-	
-	var turret = $TurretNonSpatial/TurretPivot
-	
+func handleTurretRotation() -> void:
+	# continuous turret movement
 	turret.rotate(deg2rad(turret_rot_speed * turret_rot_speed_dir))
-	
-	var turret_rot_dir = int(turret.rotation_degrees) % 360
-	
-#	if turret_rot_dir in [0, 90, 180, 270]:
-#		print("\nturret_rot_dir = ", turret_rot_dir)
-	
+	turret_rot_dir = int(turret.rotation_degrees) % 360
+	# handle when turret needs to change directions
 	if move_state == 'rolling':
-		
-		var rotate_around_node_dir = util.convAngleTo360Range2(
-			rad2deg(global_position.angle_to_point(cur_rotate_around_pos))
-		)
-		
-		print("")
-		print("turret_rot_speed_dir                          = ", turret_rot_speed_dir)
-		print("turret_rot_dir                                = ", turret_rot_dir)
-#		print("rotate_around_node_dir                        = ", rotate_around_node_dir)
-		
-		var turret_rot_dif_mod = 45
-		var turret_is_pointing_away_from_wall = null
-		
-#		prev_dif_between_turret_and_rotate_node = dif_between_turret_and_rotate_node
-#
-#		dif_between_turret_and_rotate_node = abs(turret_rot_dir - rotate_around_node_dir)
-#		if dif_between_turret_and_rotate_node > 180:
-#			dif_between_turret_and_rotate_node = abs(360 - dif_between_turret_and_rotate_node)
-##		print("prev_dif_between_turret_and_rotate_node       = ", prev_dif_between_turret_and_rotate_node)
-##		print("dif_between_turret_and_rotate_node            = ", dif_between_turret_and_rotate_node)
-#
-#		if dif_between_turret_and_rotate_node < turret_rot_dif_mod:
-#			turret_is_pointing_away_from_wall = false
-#		else:
-#			turret_is_pointing_away_from_wall = true
-#
-#		var turret_is_rotating_towards_wall = null
-#		if prev_dif_between_turret_and_rotate_node > dif_between_turret_and_rotate_node:
-#			turret_is_rotating_towards_wall = true
-#			$TurretNonSpatial/TurretPivot/TurretSprite.modulate = WOUNDED_COLOR
-#		else:
-#			turret_is_rotating_towards_wall = false
-#			$TurretNonSpatial/TurretPivot/TurretSprite.modulate = Color(1, 1, 1, 1)
-##		print("turret_is_rotating_towards_wall               = ", turret_is_rotating_towards_wall)
-		
-		for map in WALL_DETECTION_COL_RAYS_MAP:
-			if get_node(map['node']).is_colliding():
-				wall_detection_dir = map['dir']
-				wall_detection_dir_deg = map['dir_deg']
-				break
-		
-#		if $WallDetectionNonSpatial/WallDetectionPos/ColRayR.is_colliding():
-#			wall_detection_dir = 'right'
-#			wall_detection_dir_deg = 180
-#		elif $WallDetectionNonSpatial/WallDetectionPos/ColRayTR.is_colliding():
-#			wall_detection_dir = 'top_right'
-#			wall_detection_dir_deg = 135
-#		elif $WallDetectionNonSpatial/WallDetectionPos/ColRayT.is_colliding():
-#			wall_detection_dir = 'top'
-#			wall_detection_dir_deg = 90
-#		elif $WallDetectionNonSpatial/WallDetectionPos/ColRayTL.is_colliding():
-#			wall_detection_dir = 'top_left'
-#			wall_detection_dir_deg = 45
-#		elif $WallDetectionNonSpatial/WallDetectionPos/ColRayL.is_colliding():
-#			wall_detection_dir = 'left'
-#			wall_detection_dir_deg = 0
-#		elif $WallDetectionNonSpatial/WallDetectionPos/ColRayBL.is_colliding():
-#			wall_detection_dir = 'bottom_left'
-#			wall_detection_dir_deg = 315
-#		elif $WallDetectionNonSpatial/WallDetectionPos/ColRayB.is_colliding():
-#			wall_detection_dir = 'bottom'
-#			wall_detection_dir_deg = 270
-#		elif $WallDetectionNonSpatial/WallDetectionPos/ColRayBR.is_colliding():
-#			wall_detection_dir = 'bottom_right'
-#			wall_detection_dir_deg = 225
-
-		print("wall_detection_dir                            = ", wall_detection_dir)
-		print("wall_detection_dir_deg                        = ", wall_detection_dir_deg)
-		
-		"""
-		TODO:
-		- variables to get
-		
-			- turret_is_near_wall
-				- determine if the turret is within 90 deg of wall_detection_dir_deg
-				- the tricky part is it has to account for the cross over from 0 to 360
-					- maybe i should write a util function just for that
-			
-			- turret_is_rot_towards_wall
-				- 
-		- then make it so turret will change direction ONLY IF not turret_is_near_wall and not
-		turret_is_rot_towards_wall
-		"""
-		
-		prev_turret_wall_deg_dif = turret_wall_deg_dif
-		
-		turret_wall_deg_dif = util.anglesDif(turret_rot_dir, wall_detection_dir_deg)
-		print("turret_wall_deg_dif                           = ", turret_wall_deg_dif)
-		
-		turret_is_near_wall = turret_wall_deg_dif < TURRET_IS_NEAR_WALL_MIN
-		print("turret_is_near_wall                           = ", turret_is_near_wall)
-		
-		turret_is_rot_towards_wall = prev_turret_wall_deg_dif > turret_wall_deg_dif
-		print("turret_is_rot_towards_wall                    = ", turret_is_rot_towards_wall)
-		
+		setWallDetectionVars()
+		setWallDegDifVars()
+		setTurretIsVars()
 		if turret_is_near_wall and turret_is_rot_towards_wall:  turret_rot_speed_dir *= -1
-		
-#		if turret_is_rotating_towards_wall and turret_is_pointing_away_from_wall:
-#		else:
 
-#			if turret_rot_speed_dir == +1:
-#				if dif_between_turret_and_rotate_node < 90:
-#					turret_rot_speed_dir = -1
-#			elif turret_rot_speed_dir == -1:
-#				if dif_between_turret_and_rotate_node < 90:
-#					turret_rot_speed_dir = +1
-		
-#		var mod = 90
-		
-#		var turret_is_pointing_away_from_wall = null
-#		if (
-#			(turret_rot_dir + 360) < (rotate_around_node_dir + 360) - mod
-#			and (turret_rot_dir + 360) > (rotate_around_node_dir + 360) + mod
-#		):
-#			turret_is_pointing_away_from_wall = true
-#		else:
-#			turret_is_pointing_away_from_wall = false
-#		print("turret_is_pointing_away_from_wall             = ", turret_is_pointing_away_from_wall)
-		
-#		var mod = 10
-#
-#		if (
-#			(turret_rot_dir + 360) < (rotate_around_node_dir + 360) - 90
-#			and (turret_rot_dir + 360) > (rotate_around_node_dir + 360) + 90
-#		):
-#			if turret_rot_speed_dir == +1:
-#				if (turret_rot_dir + 360) > ((rotate_around_node_dir + 360) - mod):
-#					turret_rot_speed_dir = -1
-#
-#			elif turret_rot_speed_dir == -1:
-#				if (turret_rot_dir + 360) < ((rotate_around_node_dir + 360) + mod):
-#					turret_rot_speed_dir = +1
-#
-		
-#		var rotate_around_node_dir_8th_nearest = util.roundToNearestCustom(
-#			rotate_around_node_dir,
-#			[0,	45,	90,	135, 180, 225, 270,	315, 360]
-#		)
-#		print("rotate_around_node_dir_8th_nearest            = ", rotate_around_node_dir_8th_nearest)
-		
-#		prev_turret_to_rotate_around_node_angle_dif = turret_to_rotate_around_node_angle_dif
-#		turret_to_rotate_around_node_angle_dif = abs((turret_rot_dir + 360) - (rotate_around_node_dir + 360))
-#		print("turret_to_rotate_around_node_angle_dif        = ", turret_to_rotate_around_node_angle_dif)
-		
-#		if prev_turret_to_rotate_around_node_angle_dif > turret_to_rotate_around_node_angle_dif:
-#			turret_is_rotating_towards_rotate_around_node = true
-#		else:
-#			turret_is_rotating_towards_rotate_around_node = false
-#		print("turret_is_rotating_towards_rotate_around_node = ", turret_is_rotating_towards_rotate_around_node)
-		
-#		var MOD = 90
-#
-#		if (
-#			(turret_rot_dir + 360) > (rotate_around_node_dir + 360 - MOD)
-#			and (turret_rot_dir + 360) <= (rotate_around_node_dir + 360 + MOD)
-#		):
-#			print("    YES ", global_position)
-			
-#			var turret_to_rotate_around_node_angle_dif = 0
-#			var turret_is_rotating_towards_rotate_around_node = false
-			
-#			if turret_is_rotating_towards_rotate_around_node:  turret_rot_speed_dir *= -1
-#
-#		else:
-#			print("")
-	
-	"""
-	2024-02-04
-	need to come up with a good way to ensure that when the turret turns the direction of its
-	rotation 
-	"""
-	
-#	print("turret_rot_speed_dir = ", turret_rot_speed_dir)
-	
-	return
+
+func setWallDetectionVars() -> void:
+	for map in WALL_DETECTION_COL_RAYS_MAP:
+		if map['node'].is_colliding():
+			wall_detection_dir = map['dir']
+			wall_detection_dir_deg = map['dir_deg']
+			break
+
+
+func setWallDegDifVars() -> void:
+	prev_turret_wall_deg_dif = turret_wall_deg_dif
+	turret_wall_deg_dif = util.anglesDif(turret_rot_dir, wall_detection_dir_deg)
+
+
+func setTurretIsVars() -> void:
+	turret_is_near_wall = turret_wall_deg_dif < TURRET_IS_NEAR_WALL_MIN
+	turret_is_rot_towards_wall = prev_turret_wall_deg_dif > turret_wall_deg_dif
+
+
+func printTurretVars() -> void:		
+	print("turret_rot_speed_dir			= ", turret_rot_speed_dir)
+	print("turret_rot_dir				= ", turret_rot_dir)
+	print("wall_detection_dir			= ", wall_detection_dir)
+	print("wall_detection_dir_deg		= ", wall_detection_dir_deg)
+	print("turret_wall_deg_dif			= ", turret_wall_deg_dif)
+	print("turret_is_near_wall			= ", turret_is_near_wall)
+	print("turret_is_rot_towards_wall	= ", turret_is_rot_towards_wall)
 
 
 ####################################################################################################
