@@ -85,6 +85,11 @@ func convAngleTo360Range(_angle:float) -> float:
 	else:  return (_angle * -1) + 180
 
 
+func convAngleTo360Range2(_angle:float) -> float:
+	if _angle >= 0:  return _angle
+	else:  return (180 - (_angle * -1)) + 180
+
+
 func convTileMapPosToGlobalPos(tile_map_pos:Vector2, global_pos_type:String='center') -> Vector2:
 	var global_pos = data.tiles['%s,%s' % [tile_map_pos.y, tile_map_pos.x]]['global_pos_center']
 	global_pos = Vector2(global_pos[0], global_pos[1])
@@ -116,6 +121,23 @@ func printWithTime(_msg:String) -> void:
 
 func nodeIsScene(_node:Node, _scene:String) -> bool:
 	return _node.name.replace('@', '').begins_with(_scene)
+
+
+func roundToNearestCustom(rounding:float, round_to:Array) -> float:
+	var nearest = round_to[0]
+	var nearest_dif = abs(rounding - nearest)
+	for round_to_each in round_to:
+		var dif = abs(rounding - round_to_each)
+		if dif < nearest_dif:
+			nearest = round_to_each
+			nearest_dif = dif
+	return nearest
+
+
+func anglesDif(_angle_1:float, _angle_2:float) -> float:
+#	var dif = abs(_angle_1 - _angle_2) % 360
+	var dif = fmod(abs(_angle_1 - _angle_2), 360)
+	return min(dif, 360 - dif)
 
 
 

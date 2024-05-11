@@ -1,9 +1,29 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://scripts/Enemy03.gd" type="Script" id=1]
 [ext_resource path="res://sprites/enemy_03_body.png" type="Texture" id=2]
+[ext_resource path="res://sprites/enemy_03_turret.png" type="Texture" id=3]
 
 [sub_resource type="CircleShape2D" id=1]
+
+[sub_resource type="Gradient" id=4]
+colors = PoolColorArray( 1, 0, 0, 1, 1, 1, 1, 1 )
+
+[sub_resource type="GradientTexture" id=3]
+gradient = SubResource( 4 )
+
+[sub_resource type="ParticlesMaterial" id=5]
+flag_disable_z = true
+direction = Vector3( 0, 0, 0 )
+spread = 180.0
+gravity = Vector3( 0, 0, 0 )
+initial_velocity = 24.0
+initial_velocity_random = 1.0
+orbit_velocity = 0.0
+orbit_velocity_random = 0.0
+scale = 3.0
+scale_random = 1.0
+color_ramp = SubResource( 3 )
 
 [node name="Enemy03" type="KinematicBody2D"]
 collision_layer = 16
@@ -12,8 +32,19 @@ script = ExtResource( 1 )
 [node name="Col" type="CollisionShape2D" parent="."]
 shape = SubResource( 1 )
 
-[node name="Body" type="Sprite" parent="."]
+[node name="Sprite" type="Sprite" parent="."]
 texture = ExtResource( 2 )
+
+[node name="TurretNonSpatial" type="Node" parent="."]
+
+[node name="TurretPivot" type="Position2D" parent="TurretNonSpatial"]
+
+[node name="TurretSprite" type="Sprite" parent="TurretNonSpatial/TurretPivot"]
+position = Vector2( -5, 0 )
+texture = ExtResource( 3 )
+
+[node name="BulletSpawn" type="Position2D" parent="TurretNonSpatial/TurretPivot"]
+position = Vector2( -18, 0 )
 
 [node name="RotPosA" type="Position2D" parent="."]
 position = Vector2( -7, -7 )
@@ -74,3 +105,75 @@ position = Vector2( -7, -7 )
 enabled = true
 cast_to = Vector2( -2, 0 )
 collide_with_areas = true
+
+[node name="WoundedTweenUp" type="Tween" parent="."]
+
+[node name="WoundedTweenDown" type="Tween" parent="."]
+
+[node name="CanDmgShipTimer" type="Timer" parent="."]
+
+[node name="LifeEndParticles2D" type="Particles2D" parent="."]
+emitting = false
+amount = 30
+one_shot = true
+explosiveness = 0.49
+process_material = SubResource( 5 )
+
+[node name="LifeEndParticlesLifeTimeTimer" type="Timer" parent="."]
+
+[node name="WallDetectionNonSpatial" type="Node" parent="."]
+
+[node name="WallDetectionPos" type="Node2D" parent="WallDetectionNonSpatial"]
+
+[node name="ColRayR" type="RayCast2D" parent="WallDetectionNonSpatial/WallDetectionPos"]
+enabled = true
+cast_to = Vector2( 9, 0 )
+collide_with_areas = true
+
+[node name="ColRayTR" type="RayCast2D" parent="WallDetectionNonSpatial/WallDetectionPos"]
+rotation = -0.785398
+enabled = true
+cast_to = Vector2( 9, 0 )
+collide_with_areas = true
+
+[node name="ColRayT" type="RayCast2D" parent="WallDetectionNonSpatial/WallDetectionPos"]
+rotation = -1.5708
+enabled = true
+cast_to = Vector2( 9, 0 )
+collide_with_areas = true
+
+[node name="ColRayTL" type="RayCast2D" parent="WallDetectionNonSpatial/WallDetectionPos"]
+rotation = -2.35619
+enabled = true
+cast_to = Vector2( 9, 0 )
+collide_with_areas = true
+
+[node name="ColRayL" type="RayCast2D" parent="WallDetectionNonSpatial/WallDetectionPos"]
+rotation = 3.14159
+enabled = true
+cast_to = Vector2( 9, 0 )
+collide_with_areas = true
+
+[node name="ColRayBL" type="RayCast2D" parent="WallDetectionNonSpatial/WallDetectionPos"]
+position = Vector2( 1, 0 )
+rotation = 2.53073
+enabled = true
+cast_to = Vector2( 9, 0 )
+collide_with_areas = true
+
+[node name="ColRayB" type="RayCast2D" parent="WallDetectionNonSpatial/WallDetectionPos"]
+rotation = 1.5708
+enabled = true
+cast_to = Vector2( 9, 0 )
+collide_with_areas = true
+
+[node name="ColRayBR" type="RayCast2D" parent="WallDetectionNonSpatial/WallDetectionPos"]
+rotation = 0.785398
+enabled = true
+cast_to = Vector2( 9, 0 )
+collide_with_areas = true
+
+[connection signal="tween_all_completed" from="WoundedTweenUp" to="." method="_on_WoundedTweenUp_tween_all_completed"]
+[connection signal="tween_all_completed" from="WoundedTweenDown" to="." method="_on_WoundedTweenDown_tween_all_completed"]
+[connection signal="timeout" from="CanDmgShipTimer" to="." method="_on_CanDmgShipTimer_timeout"]
+[connection signal="timeout" from="LifeEndParticlesLifeTimeTimer" to="." method="_on_LifeEndParticlesLifeTimeTimer_timeout"]

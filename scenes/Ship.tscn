@@ -45,6 +45,7 @@ texture = ExtResource( 1 )
 shape = SubResource( 2 )
 
 [node name="BodyColArea2D" type="Area2D" parent="."]
+collision_layer = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="BodyColArea2D"]
 shape = SubResource( 5 )

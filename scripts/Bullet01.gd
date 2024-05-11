@@ -11,7 +11,7 @@ var LIFETIME_WAIT_TIME = 10.0
 var COL_PARTICLES_LIFETIME = 1.0
 var COLLISION_NORMAL_CLAMP = 0.01
 var SPEED = 450
-var DMG = 2000
+var DMG = 20
 
 var velocity = Vector2()
 

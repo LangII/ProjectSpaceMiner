@@ -8,7 +8,7 @@
 [sub_resource type="Gradient" id=2]
 colors = PoolColorArray( 1, 0, 0, 1, 1, 1, 1, 1 )
 
-[sub_resource type="GradientTexture" id=3]
+[sub_resource type="GradientTexture" id=5]
 gradient = SubResource( 2 )
 
 [sub_resource type="ParticlesMaterial" id=4]
@@ -22,7 +22,7 @@ orbit_velocity = 0.0
 orbit_velocity_random = 0.0
 scale = 3.0
 scale_random = 1.0
-color_ramp = SubResource( 3 )
+color_ramp = SubResource( 5 )
 
 [node name="Enemy01" type="KinematicBody2D"]
 collision_layer = 16

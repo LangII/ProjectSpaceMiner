@@ -240,10 +240,6 @@ func shoot():
 
 
 func takeDmg(_dmg):
-	
-	print("\nShip takeDmg()")
-	print("_dmg = ", _dmg)
-	
 	health -= _dmg
 	hud.updateHealthValues(health)
 	is_stunned = true

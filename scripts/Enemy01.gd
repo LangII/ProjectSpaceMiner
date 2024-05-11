@@ -25,15 +25,6 @@ var MASTER_MOVE_DELAY_TIME = 0.2
 var MASTER_MOVE_MIN_TIME = 0.5
 var MASTER_MOVE_MAX_TIME = 1.5
 
-var MAX_HEALTH = 80.0
-
-var DMG = 10.0
-var DMG_TO_SELF_MOD = 0.5
-
-var CAN_DMG_SHIP_DELAY = 0.5
-var SHIP_COL_IMPULSE_MOD = 80.0
-var can_dmg_ship = true
-
 var master_behavior = ''  # ['rot_delay', 'rot', 'move_delay', 'move', 'queue_free_sequence']
 var target_behavior = ''  # ['patrol', 'retreat']
 var pursue_trail = []
@@ -50,6 +41,14 @@ var master_target_vector = Vector2()
 var targeting = null
 
 var PURSUE_CHANCE_REDUCTION = 0.25
+
+var CAN_DMG_SHIP_DELAY = 0.5
+var SHIP_COL_IMPULSE_MOD = 80.0
+var can_dmg_ship = true
+
+var MAX_HEALTH = 80.0
+var DMG = 10.0
+var DMG_TO_SELF_MOD = 0.5
 
 var health = MAX_HEALTH
 

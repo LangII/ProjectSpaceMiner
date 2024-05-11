@@ -115,7 +115,7 @@ func addEnemies():
 func addShip():
 	ship = load(SHIP_SCN_REF).instance()
 	add_child(ship)
-	ship.global_position = Vector2(420, 2600)
+	ship.global_position = Vector2(520, 2160)
 
 
 func addCamera():

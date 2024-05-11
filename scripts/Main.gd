@@ -78,9 +78,9 @@ func _process(_delta):
 		var mouse_pos_tile = get_node('Gameplay/TileMap').world_to_map(global_mouse_position)
 		print("mouse_pos_tile = ", mouse_pos_tile)
 		
-		var ship = get_node('Gameplay/Ship')
-		
-		print("\nship.prev_frame_dir = ", ship.prev_frame_dir)
+#		var ship = get_node('Gameplay/Ship')
+#
+#		print("\nship.prev_frame_dir = ", ship.prev_frame_dir)
 		
 #		var enemies = get_node('Gameplay/Enemies')
 		
