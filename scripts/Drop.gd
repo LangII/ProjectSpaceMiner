@@ -64,14 +64,19 @@ func shipSensed():
 	$ExitTweenDelayTimer.start()
 
 
+func startExitTweens() -> void:
+	$ExitTweenScale.start()
+	$ExitTweenAlpha.start()
+	$ExitTweenDurationTimer.start()
+
+
+
 ####################################################################################################
 
 
 func _on_ExitTweenDelayTimer_timeout():
 	gameplay.dropCollected(DROP_TYPE, DROP_VALUE)
-	$ExitTweenScale.start()
-	$ExitTweenAlpha.start()
-	$ExitTweenDurationTimer.start()
+	startExitTweens()
 
 
 func _on_ExitTweenDurationTimer_timeout():

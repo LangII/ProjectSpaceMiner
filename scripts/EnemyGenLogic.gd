@@ -45,11 +45,11 @@ onready var ENEMY_GEN_MAP = {
 
 func genEnemy01s() -> void:
 	
-#	""" for manual placement testing """
+	""" for manual placement testing """
 #	for x in [
-#		{'x': 15, 'y': 130, 'count': 2, 'home_radius':4},
+#		{'x': 27, 'y': 116, 'count': 2, 'home_radius':4},
 #	]:  genEnemy01Swarm(x['x'], x['y'], x['count'], x['home_radius'])
-	
+
 	return
 	
 	var gen_map = ENEMY_GEN_MAP['ENEMY_01']
@@ -85,9 +85,9 @@ func genEnemy01s() -> void:
 
 func genEnemy02s() -> void:
 	
-#	""" for manual placement testing """
+	""" for manual placement testing """
 #	for x in [
-#		{'pos': Vector2(873, 2792), 'segment_count': 20},
+#		{'pos': Vector2(580, 2260), 'segment_count': 20},
 #	]:  genEnemy02(x['pos'], x['segment_count'])
 	
 	return
@@ -130,6 +130,8 @@ func genEnemy03s() -> void:
 	var enemy_inst = enemy_03.instance()
 	enemy_inst.global_position = Vector2(580, 2160)
 	_enemies_.add_child(enemy_inst)
+	
+
 	
 #	var enemy_inst_1 = enemy_03.instance()
 #	enemy_inst_1.global_position = Vector2(600, 2590)

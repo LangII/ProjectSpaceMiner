@@ -57,12 +57,30 @@ DONE
 DONE
 - Add damage exchange behavior for when Ship and Enemy03 (body to body) collide.
 
+DONE
 - Add turret for missiles.
 
+DONE
 - Use shooting of Ship to add shooting to Enemy03.  Maybe for now just have it shoot Bullet01.
+
+	DONE
+	- When turret Ray detects ship, go into "detecting_ship" mode.
+	
+	DONE
+	- If turret Ray no longer detects ship, go out of "detecting_ship" mode.
+	
+	DONE
+	- In "detecting_ship" mode turret will move in direction of ship at DETECTING_SHIP_SPEED.
+	
+		DONE
+		- To do so, will need to get dir_to_ship with ship.global_position and a vector func.
+	
+	DONE
+	- If in "detecting_ship" mode for SHOOT_DELAY shoot missile.
 
 - Upgrade from Bullet01 to Bullet02, a slow moving homing AOE.
 
+DONE
 - Have ship bullets damage Enemy03.
 
 - Add control to not allow Enemy03 to walk up the sky walls (hashed blocks).
@@ -79,6 +97,9 @@ In addition, add some form of visual effect to indicate increase in defense.
 2024-02-02
 Improve on move behavior after collision with ship while floating.
 
+2024-05-11
+Handle behavior when colliding with boarder air wall (permanent air) during both move states.
+
 -----
 OTHER
 -----
@@ -94,6 +115,8 @@ onready var util = get_node('/root/Main/Utilities')
 onready var gameplay = get_node('/root/Main/Gameplay')
 onready var ship = get_node('/root/Main/Gameplay/Ship')
 onready var tilemap = get_node('/root/Main/Gameplay/TileMap')
+
+onready var missile_01 = preload('res://scenes/Missile01.tscn')
 
 var ROT_NODE_MAP = {
 	'RotPosA': {
@@ -161,13 +184,14 @@ var WOUNDED_MAP = {
 var WOUNDED_COLOR = Color(1, 0.4, 0.4, 1)  # red
 var wounded_level = null
 
-var turret_rot_speed = 2
+var turret_rot_speed = 0.8
+
 onready var turret = get_node('TurretNonSpatial/TurretPivot')
 
 var TURRET_ROT_SPEED_MIN = 2
 var TURRET_ROT_SPEED_MAX = 6
-var CAN_SHOOT_BULLET_DELAY = 2.0
-var can_shoot_bullet = true
+var CAN_SHOOT_MISSILE_DELAY = 2.0
+var can_shoot_missile = false
 
 var turret_rot_dir = 0
 var turret_rot_speed_dir = +1
@@ -194,6 +218,17 @@ var TURRET_IS_NEAR_WALL_MIN = 90
 var turret_wall_deg_dif = 0
 var prev_turret_wall_deg_dif = 0
 
+var SHIP_DETECT_RAY_DIST = 300
+
+var is_detecting_ship = false
+
+var turret_rot_frame_drop = 60
+
+var missile_load_inc = 1.2
+var missile_load_dec = 0.4
+var missile_load_max = 100.0
+var missile_load = 0.0
+
 
 ####################################################################################################
 
@@ -201,6 +236,8 @@ var prev_turret_wall_deg_dif = 0
 func _ready() -> void:
 	
 	$CanDmgShipTimer.wait_time = CAN_DMG_SHIP_DELAY
+	
+	$TurretNonSpatial/TurretPivot/ShipDetectRay.cast_to.x = -SHIP_DETECT_RAY_DIST
 	
 	setMoveStateToFloating()
 	
@@ -256,6 +293,19 @@ func _process(_delta:float) -> void:
 	setNonSpatialsPos()
 	
 	handleTurretRotation()
+	
+	if $TurretNonSpatial/TurretPivot/ShipDetectRay.is_colliding():
+		
+		is_detecting_ship = true
+		
+		updateTurretRotSpeedDirToTargetShip()
+		
+		handleMissileLoad('inc')
+	else:
+		
+		is_detecting_ship = false
+		
+		handleMissileLoad('dec')
 
 
 ####################################################################################################
@@ -343,6 +393,13 @@ func setNonSpatialsPos() -> void:
 
 
 func handleTurretRotation() -> void:
+	
+	# to decrease speed of turret rotation when targeting ship, i had to make it so that the turret
+	# will only rotate during certain frames.  this is because even with a massive drop in speed,
+	# the turrets rotation still maintained targeting of ship
+	if is_detecting_ship:
+		if Engine.get_frames_drawn() % turret_rot_frame_drop != 0:  return
+	
 	# continuous turret movement
 	turret.rotate(deg2rad(turret_rot_speed * turret_rot_speed_dir))
 	turret_rot_dir = int(turret.rotation_degrees) % 360
@@ -364,7 +421,7 @@ func setWallDetectionVars() -> void:
 
 func setWallDegDifVars() -> void:
 	prev_turret_wall_deg_dif = turret_wall_deg_dif
-	turret_wall_deg_dif = util.anglesDif(turret_rot_dir, wall_detection_dir_deg)
+	turret_wall_deg_dif = abs(util.anglesDif(turret_rot_dir, wall_detection_dir_deg))
 
 
 func setTurretIsVars() -> void:
@@ -373,13 +430,56 @@ func setTurretIsVars() -> void:
 
 
 func printTurretVars() -> void:		
-	print("turret_rot_speed_dir			= ", turret_rot_speed_dir)
-	print("turret_rot_dir				= ", turret_rot_dir)
-	print("wall_detection_dir			= ", wall_detection_dir)
-	print("wall_detection_dir_deg		= ", wall_detection_dir_deg)
-	print("turret_wall_deg_dif			= ", turret_wall_deg_dif)
-	print("turret_is_near_wall			= ", turret_is_near_wall)
-	print("turret_is_rot_towards_wall	= ", turret_is_rot_towards_wall)
+	print("\nturret_rot_speed_dir       = ", turret_rot_speed_dir)
+	print("turret_rot_dir             = ", turret_rot_dir)
+	print("turret_rot_speed           = ", turret_rot_speed)
+	print("wall_detection_dir         = ", wall_detection_dir)
+	print("wall_detection_dir_deg     = ", wall_detection_dir_deg)
+	print("turret_wall_deg_dif        = ", turret_wall_deg_dif)
+	print("turret_is_near_wall        = ", turret_is_near_wall)
+	print("turret_is_rot_towards_wall = ", turret_is_rot_towards_wall)
+
+
+func handleMissileLoad(_type:String) -> void:
+	match _type:
+		'inc':  missile_load += missile_load_inc
+		'dec':  missile_load -= missile_load_dec
+	if missile_load < 0.0:  missile_load = 0.0
+	if missile_load >= missile_load_max:
+		shootMissile()
+		missile_load = 0.0
+	# update turret sprite color with missile_load value
+	var color = util.normalize(missile_load, 0.0, missile_load_max, 1.0, 0.4)
+	$TurretNonSpatial/TurretPivot/TurretSprite.modulate = Color(1.0, color, color, 1.0)
+
+
+
+### temp for testing
+#var has_shot_missile = false
+
+func shootMissile() -> void:
+	
+	$TurretNonSpatial/TurretPivot/ShootMissileParticles2D.restart()
+	
+#	if has_shot_missile:  return
+
+#	has_shot_missile = true
+
+	var missile = missile_01.instance()
+	gameplay.get_node('Projectiles').add_child(missile)
+	missile.start(
+		$TurretNonSpatial/TurretPivot/BulletSpawn.global_position,
+		$TurretNonSpatial/TurretPivot/BulletSpawn.global_rotation
+	)
+
+
+
+
+func updateTurretRotSpeedDirToTargetShip() -> void:
+	if not is_detecting_ship:  return
+	var ship_rot_dir = util.convAngleTo360Range2(rad2deg(global_position.angle_to_point(ship.global_position)))
+	var turret_ship_angles_dif = util.anglesDif(turret_rot_dir, ship_rot_dir) + 0.00001
+	turret_rot_speed_dir = turret_ship_angles_dif / abs(turret_ship_angles_dif)
 
 
 ####################################################################################################
@@ -400,33 +500,26 @@ func colWithShip(_collider):
 	
 	floating_move_vector = Vector2(floating_linear_speed, 0).rotated(deg2rad(floating_linear_dir))
 	
-	takeDmg(self, DMG * DMG_TO_SELF_MOD)
+	takeDmg(DMG * DMG_TO_SELF_MOD)
 
 
-func takeDmg(_node_took_dmg:Object, _dmg:int) -> void:
+func takeDmg(_dmg:int, _node_took_dmg:Object=self) -> void:
 	health -= _dmg
 	if health <= 0:  startQueueFreeSequence()
 	setWoundedLevel()
 	if wounded_level:  startWoundedTweenUp()
-	
-	print("\nhealth = ", health)
-	print("wounded_level = ", wounded_level)
 
 
 func startQueueFreeSequence():
-	
 	setMoveStateToFloating()
 	floating_move_vector = Vector2()
 	floating_rotate_speed = 0.0
-	
 	collision_layer = 0
 	collision_mask = 0
 	$Sprite.visible = false
 	$TurretNonSpatial/TurretPivot/TurretSprite.visible = false
 	$LifeEndParticles2D.restart()
 	$LifeEndParticlesLifeTimeTimer.start()
-	
-	return
 
 
 func startWoundedTweenUp():
@@ -474,6 +567,10 @@ func _on_CanDmgShipTimer_timeout():
 
 func _on_LifeEndParticlesLifeTimeTimer_timeout():
 	queue_free()
+
+
+func _on_CanShootMissileDelayTimer_timeout():
+	can_shoot_missile = true
 
 
 

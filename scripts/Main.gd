@@ -49,6 +49,10 @@ func _ready():
 #	var angle_to_ship = util.convAngleTo360Range(rad2deg((ship_pos - enemy_pos).angle()))
 #
 #	print("\nangle_to_ship = ", angle_to_ship)
+	
+#	var testing = $Utilities.anglesDif(5.0, 355.0)
+#
+#	print("testing = ", Engine.get_frames_drawn())
 #
 #	return
 	

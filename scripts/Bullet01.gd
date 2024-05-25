@@ -56,15 +56,16 @@ func collidedWithTileMap(col):
 	var mod_normal = col.normal.limit_length(COLLISION_NORMAL_CLAMP)
 	var tile_pos = tile_map.world_to_map(col.position - mod_normal)
 	tile_map_logic.tileTakesDmg(tile_pos, DMG)
-	endOfCollision()
+	takeDmg()
 
 
 func collideWithEnemy(col):
-	col.collider.takeDmg(col.collider, DMG)
-	endOfCollision()
+	col.collider.takeDmg(DMG, col.collider)
+	takeDmg()
 
 
-func endOfCollision():
+func takeDmg(_dmg:float=0.0):
+	# ignoring _dmg
 	has_collided = true
 	velocity = Vector2()
 	collision_layer = 0
@@ -91,9 +92,9 @@ func _on_LifeTimeTimer_timeout():
 
 func _on_Area2D_area_entered(_area):
 	if _area.get_parent().get_parent().name == 'Enemies' and not has_collided:
-		_area.get_parent().takeDmg(_area, DMG)
+		_area.get_parent().takeDmg(DMG, _area)
 		colParticleDisplacementOnAreaCol()
-		endOfCollision()
+		takeDmg()
 
 
 

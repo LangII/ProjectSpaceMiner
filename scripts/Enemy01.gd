@@ -200,10 +200,10 @@ func colWithShip(_collider):
 	$CanDmgShipTimer.start()
 	ship.takeDmg(DMG)
 	ship.apply_central_impulse(_collider.remainder * SHIP_COL_IMPULSE_MOD)
-	takeDmg(self, DMG * DMG_TO_SELF_MOD)
+	takeDmg(DMG * DMG_TO_SELF_MOD)
 
 
-func takeDmg(_node_took_dmg:Object, _dmg:int) -> void:
+func takeDmg(_dmg:int, _node_took_dmg:Object=self) -> void:
 	health -= _dmg
 	if health <= 0:  startQueueFreeSequence()
 	setWoundedLevel()

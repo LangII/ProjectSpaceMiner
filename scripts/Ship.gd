@@ -60,7 +60,8 @@ var prev_frame_dir = 0
 var STUNNED_DELAY = 0.5
 var is_stunned = false
 
-var ENEMY_AREA_COL_STRENGTH_MOD = 280
+#var ENEMY_AREA_COL_STRENGTH_MOD = 280
+var ENEMY_AREA_COL_STRENGTH_MOD = 800
 
 var CONTROL_TYPE = 'shuffle_board'  # 'classic_asteroids' or 'shuffle_board'
 
@@ -247,6 +248,34 @@ func takeDmg(_dmg):
 	gameplay.cam_shake_trauma += 0.2
 
 
+func handleEnemy02AreaCol(_area) -> void:
+	# get relevant vars
+	var enemy = _area.get_parent()
+	# cancel if recently damaged ship
+	if not enemy.can_dmg_ship:  return
+	# update vars
+	enemy.can_dmg_ship = false
+	enemy.get_node('CanDmgShipTimer').start()
+	# trigger takeDmgs
+	takeDmg(enemy.DMG)
+	enemy.takeDmg(enemy.DMG * enemy.DMG_TO_SELF_MOD, _area)
+	
+	
+	# handle collision physics
+#	if can_be_knocked_back:
+#		can_be_knocked_back = false
+#		$KnockBackDelayTimer.start()
+		
+		# ship.apply_central_impulse(global_position.direction_to(ship.global_position) * map['dmg'])
+		
+		
+	var col_vector = _area.global_position.direction_to(global_position)
+	applied_force = col_vector * ENEMY_AREA_COL_STRENGTH_MOD
+	
+#	apply_central_impulse(col_vector)
+#	gameplay.setEnemyColParticles(global_position + (col_vector * 200))
+
+
 ####################################################################################################
 """ signal FUNCS """
 
@@ -268,7 +297,7 @@ func _on_StunnedTimer_timeout():
 	is_stunned = false
 
 
-func _on_BodyColArea2D_area_entered(_area):
+func _on_ShipBodyColArea2D_area_entered(_area):
 	
 	var area_is_enemy = _area.get_parent().get_parent().name == 'Enemies'
 	if area_is_enemy:
@@ -280,21 +309,24 @@ func _on_BodyColArea2D_area_entered(_area):
 				handleEnemy02AreaCol(_area)
 
 
-func handleEnemy02AreaCol(_area) -> void:
-	# get relevant vars
-	var enemy = _area.get_parent()
-	# cancel if recently damaged ship
-	if not enemy.can_dmg_ship:  return
-	# update vars
-	enemy.can_dmg_ship = false
-	enemy.get_node('CanDmgShipTimer').start()
-	# trigger takeDmgs
-	takeDmg(enemy.DMG)
-	enemy.takeDmg(_area, enemy.DMG * enemy.DMG_TO_SELF_MOD)
-	# handle collision physics and particles
-	var col_vector = _area.global_position - global_position
-	applied_force = -col_vector * ENEMY_AREA_COL_STRENGTH_MOD
-	gameplay.setEnemyColParticles(global_position + (col_vector * 0.5))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

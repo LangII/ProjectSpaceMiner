@@ -1,0 +1,113 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://scripts/Missile01.gd" type="Script" id=1]
+[ext_resource path="res://sprites/missile_01.png" type="Texture" id=2]
+
+[sub_resource type="CircleShape2D" id=1]
+radius = 4.0
+
+[sub_resource type="CircleShape2D" id=12]
+radius = 4.0
+
+[sub_resource type="ParticlesMaterial" id=2]
+lifetime_randomness = 0.8
+flag_disable_z = true
+direction = Vector3( 0, -1, 0 )
+spread = 20.0
+gravity = Vector3( 0, 0, 0 )
+initial_velocity = 100.0
+orbit_velocity = 0.0
+orbit_velocity_random = 0.0
+
+[sub_resource type="CircleShape2D" id=3]
+radius = 50.0
+
+[sub_resource type="ParticlesMaterial" id=11]
+flag_disable_z = true
+direction = Vector3( 0, 0, 0 )
+spread = 180.0
+gravity = Vector3( 0, 0, 0 )
+initial_velocity = 100.0
+orbit_velocity = 0.0
+orbit_velocity_random = 0.0
+linear_accel = -100.0
+linear_accel_random = 1.0
+
+[node name="Missile01" type="KinematicBody2D"]
+collision_layer = 4
+collision_mask = 31
+script = ExtResource( 1 )
+
+[node name="Sprite" type="Sprite" parent="."]
+position = Vector2( -2, 0 )
+rotation = -1.5708
+texture = ExtResource( 2 )
+offset = Vector2( 0, 2 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource( 1 )
+
+[node name="MissileBodyColArea2D" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 23
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="MissileBodyColArea2D"]
+shape = SubResource( 12 )
+
+[node name="LifeTimeTimer" type="Timer" parent="."]
+wait_time = 10.0
+one_shot = true
+autostart = true
+
+[node name="ColParticlesLifeTimeTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="ExhaustParticles2D" type="Particles2D" parent="."]
+position = Vector2( 12, 0 )
+rotation = 1.5708
+emitting = false
+amount = 5
+lifetime = 0.2
+speed_scale = 0.5
+explosiveness = 0.2
+local_coords = false
+process_material = SubResource( 2 )
+
+[node name="ExhaustDelayTimer" type="Timer" parent="."]
+wait_time = 0.3
+one_shot = true
+autostart = true
+
+[node name="BlastArea2D01" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 31
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BlastArea2D01"]
+shape = SubResource( 3 )
+
+[node name="BlastParticles2D00" type="Particles2D" parent="."]
+emitting = false
+amount = 20
+lifetime = 0.5
+one_shot = true
+explosiveness = 0.5
+local_coords = false
+process_material = SubResource( 11 )
+
+[node name="BlastParticles2D01" type="Particles2D" parent="."]
+emitting = false
+amount = 80
+lifetime = 0.5
+one_shot = true
+explosiveness = 0.85
+local_coords = false
+process_material = SubResource( 11 )
+
+[node name="QueueFreeDelayTimer" type="Timer" parent="."]
+wait_time = 0.5
+one_shot = true
+
+[connection signal="area_entered" from="MissileBodyColArea2D" to="." method="_on_MissileBodyColArea2D_area_entered"]
+[connection signal="timeout" from="ExhaustDelayTimer" to="." method="_on_ExhaustDelayTimer_timeout"]
+[connection signal="timeout" from="QueueFreeDelayTimer" to="." method="_on_QueueFreeDelayTimer_timeout"]

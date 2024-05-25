@@ -137,7 +137,8 @@ onready var can_dmg_ship = true
 onready var DMG = 20.0
 onready var DMG_TO_SELF_MOD = 0.5
 
-onready var SHIP_COL_IMPULSE_MOD = 80.0
+#onready var SHIP_COL_IMPULSE_MOD = 80.0
+onready var SHIP_COL_IMPULSE_MOD = 20.0
 
 
 ####################################################################################################
@@ -328,8 +329,8 @@ func handleCollision(_col:KinematicCollision2D) -> void:
 			can_dmg_ship = false
 			$CanDmgShipTimer.start()
 			ship.takeDmg(DMG)
-			ship.apply_central_impulse(_col.remainder * SHIP_COL_IMPULSE_MOD)
-			takeDmg(self, DMG * DMG_TO_SELF_MOD)
+#			ship.apply_central_impulse(_col.remainder * SHIP_COL_IMPULSE_MOD)
+			takeDmg(DMG * DMG_TO_SELF_MOD, self)
 			gameplay.setEnemyColParticles(_col.position)
 
 
@@ -396,9 +397,14 @@ func genNewTargetFromCol(col:KinematicCollision2D) -> void:
 ####################################################################################################
 
 
-func takeDmg(_node_took_dmg:Object, _dmg:int) -> void:
+func takeDmg(_dmg:int, _node_took_dmg:Object):
 	HAS_TAKEN_DMG = true
 	var segment_name = getSegmentNameFromSegmentObj(_node_took_dmg)
+	
+	# A VERY DIRTY FIX!!!  PLEASE RETURN TO AND FIX THIS FIX!!!
+	# this problem is triggered when a missle kills too many segments at the same time
+	if not segment_name in segments_data.keys():  return
+	
 	# apply damage
 	segments_data[segment_name]['health'] -= _dmg
 	setWoundedLevels(segment_name)

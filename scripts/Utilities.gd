@@ -135,9 +135,7 @@ func roundToNearestCustom(rounding:float, round_to:Array) -> float:
 
 
 func anglesDif(_angle_1:float, _angle_2:float) -> float:
-#	var dif = abs(_angle_1 - _angle_2) % 360
-	var dif = fmod(abs(_angle_1 - _angle_2), 360)
-	return min(dif, 360 - dif)
+	return fmod((_angle_2 - _angle_1 + 540), 360) - 180
 
 
 
