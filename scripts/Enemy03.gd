@@ -83,6 +83,7 @@ DONE
 DONE
 - Have ship bullets damage Enemy03.
 
+DONE
 - Add drop.
 
 - Add control to not allow Enemy03 to walk up the sky walls (hashed blocks).
@@ -231,6 +232,10 @@ var missile_load_dec = 0.4
 var missile_load_max = 100.0
 var missile_load = 0.0
 
+var DROP_VALUE_MIN = 1
+var DROP_VALUE_MAX = 5
+var drop_value = 0
+
 
 ####################################################################################################
 
@@ -242,6 +247,8 @@ func _ready() -> void:
 	$TurretNonSpatial/TurretPivot/ShipDetectRay.cast_to.x = -SHIP_DETECT_RAY_DIST
 	
 	setMoveStateToFloating()
+	
+	drop_value = util.getRandomInt(DROP_VALUE_MIN, DROP_VALUE_MAX)
 	
 	""" TEST """
 #	floating_linear_dir = 180.0
@@ -506,6 +513,7 @@ func startQueueFreeSequence():
 	$TurretNonSpatial/TurretPivot/TurretSprite.visible = false
 	$LifeEndParticles2D.restart()
 	$LifeEndParticlesLifeTimeTimer.start()
+	gameplay.initDrop('enemy_03', drop_value, global_position)
 
 
 func startWoundedTweenUp():

@@ -14,6 +14,7 @@ onready var enemy_01_texture = preload('res://sprites/enemy_01_drop.png')
 onready var enemy_02_a_texture = preload('res://sprites/enemy_02_a_drop.png')
 onready var enemy_02_b_texture = preload('res://sprites/enemy_02_b_drop.png')
 onready var enemy_02_c_texture = preload('res://sprites/enemy_02_c_drop.png')
+onready var enemy_03_texture = preload('res://sprites/enemy_03_drop.png')
 
 onready var DROP_TEXTURE_MAP = {
 	'mineral_01': mineral_01_texture,
@@ -23,6 +24,7 @@ onready var DROP_TEXTURE_MAP = {
 	'enemy_02_a': enemy_02_a_texture,
 	'enemy_02_b': enemy_02_b_texture,
 	'enemy_02_c': enemy_02_c_texture,
+	'enemy_03': enemy_03_texture,
 }
 
 var TILE_MAP_LOGIC_SCN_REF = 'res://scenes/tiles/TileMapLogic.tscn'

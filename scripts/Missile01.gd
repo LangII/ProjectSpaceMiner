@@ -54,7 +54,7 @@ var has_collided = false
 
 var SHIP_COL_IMPULSE_MOD = 20.0
 
-var DESTROY_DROP_CHANCE = 50.0
+var DESTROY_DROP_CHANCE = 0.2
 
 
 ####################################################################################################
@@ -188,7 +188,7 @@ func giveObjectDmg() -> void:
 
 func giveTerrainDmg() -> void:
 	"""
-	This is my method for getting tiles of a TileMap that are collding with a circle Area2D (with the
+	This is my method for getting tiles of a TileMap that are colliding with a circle Area2D (with the
 	global_position and radius of the Area2D and world_to_map and map_to_world TileMap methods)...
 	
 	For the sake of simplicity, this only checks if a tile's center is within the Area2D.
@@ -196,7 +196,7 @@ func giveTerrainDmg() -> void:
 	Basically, you can check if any tile is within an Area2D with Vector2.distance_to().  Where the
 	Vector2 is the global_position of the Area2D and you pass the tile's global_position as the arg.
 	
-	But to releave some processing, instead of checking all tiles, you first get a square area of
+	But to relieve some processing, instead of checking all tiles, you first get a square area of
 	tiles that would overlap the Area2D by subtracting and adding the Area2D radius from both the x
 	and y of the Area2D global_position to get the top left corner and bottom right corner of the
 	square.  With those coord you can use a couple range() passing the x and y to get an array of
@@ -244,7 +244,6 @@ func _on_QueueFreeDelayTimer_timeout():
 
 
 func _on_MissileBodyColArea2D_area_entered(area):
-	print("area.name = ", area.name)
 	takeDmg()
 
 

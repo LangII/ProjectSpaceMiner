@@ -14,6 +14,12 @@ MVP/V1 TO DOS:
 \
 \
 \
+**Enemy03 example (posted on 2024-05-27):**\
+\
+![](enemy03_example_02.gif)\
+\
+\
+\
 **Latest gameplay example (posted on 2023-07-21):**\
 \
 ![](gameplay_example_01.gif)\
@@ -22,12 +28,6 @@ MVP/V1 TO DOS:
 \
 **Example pic of level generation (posted on 2023-06-30):**\
 \
-![](level_gen_example_01.png)\
-\
-\
-\
-
-
-
+![](level_gen_example_01.png)
 
 
