@@ -142,6 +142,7 @@ var TILE_EDGE_MAP = {
 
 var DESTRUCT_TILE_MAP = {
 	1: {
+		'0': {'TILE_REF': DESTRUCT_TILE_25, 'DIR_CODE_REF': null},
 		'1': {'TILE_REF': DESTRUCT_TILE_25, 'DIR_CODE_REF': null},
 		'2pa': {'TILE_REF': DESTRUCT_TILE_25, 'DIR_CODE_REF': null},
 		'2pe': {'TILE_REF': DESTRUCT_TILE_2EDGE_25, 'DIR_CODE_REF': TILE_2EDGE_DIR_CODE},
@@ -149,6 +150,7 @@ var DESTRUCT_TILE_MAP = {
 		'4': {'TILE_REF': DESTRUCT_TILE_25, 'DIR_CODE_REF': null}
 	},
 	2: {
+		'0': {'TILE_REF': DESTRUCT_TILE_50, 'DIR_CODE_REF': null},
 		'1': {'TILE_REF': DESTRUCT_TILE_50, 'DIR_CODE_REF': null},
 		'2pa': {'TILE_REF': DESTRUCT_TILE_50, 'DIR_CODE_REF': null},
 		'2pe': {'TILE_REF': DESTRUCT_TILE_2EDGE_50, 'DIR_CODE_REF': TILE_2EDGE_DIR_CODE},
@@ -156,6 +158,7 @@ var DESTRUCT_TILE_MAP = {
 		'4': {'TILE_REF': DESTRUCT_TILE_50, 'DIR_CODE_REF': null}
 	},
 	3: {
+		'0': {'TILE_REF': DESTRUCT_TILE_75, 'DIR_CODE_REF': null},
 		'1': {'TILE_REF': DESTRUCT_TILE_75, 'DIR_CODE_REF': null},
 		'2pa': {'TILE_REF': DESTRUCT_TILE_75, 'DIR_CODE_REF': null},
 		'2pe': {'TILE_REF': DESTRUCT_TILE_2EDGE_75, 'DIR_CODE_REF': TILE_2EDGE_DIR_CODE},
@@ -478,53 +481,24 @@ func tileTakesDmg(tile_pos, dmg):
 func updateTileDataDestructTileLevel(k):
 	var dmg_taken = data.tiles[k]['max_health'] - data.tiles[k]['health']
 	var dmg_perc = float(dmg_taken) / float(data.tiles[k]['max_health'])
-	print("dmg_perc = ", dmg_perc)
 	if dmg_perc >= 0.25 and dmg_perc < 0.50:  data.tiles[k]['destruct_tile_level'] = 1
 	elif dmg_perc >= 0.50 and dmg_perc < 0.75:  data.tiles[k]['destruct_tile_level'] = 2
 	elif dmg_perc >= 0.75:  data.tiles[k]['destruct_tile_level'] = 3
-
-
-
-
-
-
-
-
-
 
 
 func updateDestructTileMapCell(k, y, x):
 	if not data.tiles[k]['destruct_tile_level']:
 		return
 	var mod_air_count = getModTypeCount('air', k)
-	print("k = ", k)
 	if data.tiles[k]['is_mineral']:
 		mod_air_count = '4'
-	
-	print("data.tiles[k]['destruct_tile_level'] = ", data.tiles[k]['destruct_tile_level'])
-	
-	print("mod_air_count = ", mod_air_count)
-	
 	var tile_ref = DESTRUCT_TILE_MAP[data.tiles[k]['destruct_tile_level']][mod_air_count]['TILE_REF']
-	
-	
-	
 	var dir_code_ref = DESTRUCT_TILE_MAP[data.tiles[k]['destruct_tile_level']][mod_air_count]['DIR_CODE_REF']
 	if dir_code_ref:
 		var dir_code = dir_code_ref[data.tiles[k]['air_dir_code']]
 		destruct_tile_map.set_cell(x, y, tile_ref, dir_code['flip_x'], dir_code['flip_y'], dir_code['transpose'])
 	else:
 		destruct_tile_map.set_cell(x, y, tile_ref)
-
-
-
-
-
-
-
-
-
-
 
 
 func tileDestroyed(k):

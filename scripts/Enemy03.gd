@@ -19,7 +19,6 @@ BEHAVIOR NOTES
 	- is targeting ship (turret is turning towards ship)
 	- ship is in range
 	- ready
-	- 
 
 -----
 TODOS
@@ -78,10 +77,13 @@ DONE
 	DONE
 	- If in "detecting_ship" mode for SHOOT_DELAY shoot missile.
 
+DONE
 - Upgrade from Bullet01 to Bullet02, a slow moving homing AOE.
 
 DONE
 - Have ship bullets damage Enemy03.
+
+- Add drop.
 
 - Add control to not allow Enemy03 to walk up the sky walls (hashed blocks).
 
@@ -241,7 +243,7 @@ func _ready() -> void:
 	
 	setMoveStateToFloating()
 	
-	# TEST
+	""" TEST """
 #	floating_linear_dir = 180.0
 	floating_linear_dir = 0.0
 	floating_move_vector = Vector2(floating_linear_speed, 0).rotated(deg2rad(floating_linear_dir))
@@ -453,26 +455,14 @@ func handleMissileLoad(_type:String) -> void:
 	$TurretNonSpatial/TurretPivot/TurretSprite.modulate = Color(1.0, color, color, 1.0)
 
 
-
-### temp for testing
-#var has_shot_missile = false
-
 func shootMissile() -> void:
-	
 	$TurretNonSpatial/TurretPivot/ShootMissileParticles2D.restart()
-	
-#	if has_shot_missile:  return
-
-#	has_shot_missile = true
-
 	var missile = missile_01.instance()
 	gameplay.get_node('Projectiles').add_child(missile)
 	missile.start(
 		$TurretNonSpatial/TurretPivot/BulletSpawn.global_position,
 		$TurretNonSpatial/TurretPivot/BulletSpawn.global_rotation
 	)
-
-
 
 
 func updateTurretRotSpeedDirToTargetShip() -> void:
@@ -489,17 +479,13 @@ func colWithShip(_collider):
 	can_dmg_ship = false
 	$CanDmgShipTimer.start()
 	ship.takeDmg(DMG)
-	
 	floating_linear_speed *= COL_WITH_SHIP_SPEED_MOD
-	
 	floating_linear_dir = util.convAngleTo360Range(
 		rad2deg(
 			_collider.global_position.angle_to_point(global_position)
 		) * -1
 	) + 180
-	
 	floating_move_vector = Vector2(floating_linear_speed, 0).rotated(deg2rad(floating_linear_dir))
-	
 	takeDmg(DMG * DMG_TO_SELF_MOD)
 
 

@@ -60,7 +60,6 @@ var prev_frame_dir = 0
 var STUNNED_DELAY = 0.5
 var is_stunned = false
 
-#var ENEMY_AREA_COL_STRENGTH_MOD = 280
 var ENEMY_AREA_COL_STRENGTH_MOD = 800
 
 var CONTROL_TYPE = 'shuffle_board'  # 'classic_asteroids' or 'shuffle_board'
@@ -259,21 +258,9 @@ func handleEnemy02AreaCol(_area) -> void:
 	# trigger takeDmgs
 	takeDmg(enemy.DMG)
 	enemy.takeDmg(enemy.DMG * enemy.DMG_TO_SELF_MOD, _area)
-	
-	
 	# handle collision physics
-#	if can_be_knocked_back:
-#		can_be_knocked_back = false
-#		$KnockBackDelayTimer.start()
-		
-		# ship.apply_central_impulse(global_position.direction_to(ship.global_position) * map['dmg'])
-		
-		
 	var col_vector = _area.global_position.direction_to(global_position)
 	applied_force = col_vector * ENEMY_AREA_COL_STRENGTH_MOD
-	
-#	apply_central_impulse(col_vector)
-#	gameplay.setEnemyColParticles(global_position + (col_vector * 200))
 
 
 ####################################################################################################
