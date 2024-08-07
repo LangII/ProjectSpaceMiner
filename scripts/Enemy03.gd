@@ -30,6 +30,11 @@ TODOS
 LOW PRIORITY TO DOS
 -------------------
 
+2024-08-07
+The roll behavior definitely still needs work.  For the majority of the time it works perfectly as
+intended.  But in tight corners where it has to make many turns back to back, it can roll "into" or
+"behind" the terrain.
+
 2024-08-06
 When avoiding rolling on Permanent Air tiles, when Enemy03 changes direction away from the
 Permanent Air tiles, it can sometimes do an unusal movement where it rolls into the terrain once and
@@ -172,6 +177,11 @@ var drop_value = 0
 
 func _ready() -> void:
 	
+	pass
+
+
+func init(_dir:int) -> void:
+	
 	$CanDmgShipTimer.wait_time = CAN_DMG_SHIP_DELAY
 	$TurretNonSpatial/TurretPivot/ShipDetectRay.cast_to.x = -SHIP_DETECT_RAY_DIST
 	
@@ -179,10 +189,7 @@ func _ready() -> void:
 	
 	drop_value = util.getRandomInt(DROP_VALUE_MIN, DROP_VALUE_MAX)
 	
-	""" TEST """
-#	floating_linear_dir = 180.0
-	floating_linear_dir = 115.0
-	floating_move_vector = Vector2(floating_linear_speed, 0).rotated(deg2rad(floating_linear_dir))
+	floating_move_vector = Vector2(floating_linear_speed, 0).rotated(deg2rad(_dir))
 
 
 func _process(_delta:float) -> void:

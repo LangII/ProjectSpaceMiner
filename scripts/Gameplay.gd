@@ -53,8 +53,8 @@ var CAM_SHAKE_OFFSET_MOD = 200
 var CAM_SHAKE_TRAUMA_MOD = 2.2
 var CAM_SHAKE_MAX_OFFSET = 10
 
-#var mini_map_test = true
-var mini_map_test = false
+var mini_map_test = true
+#var mini_map_test = false
 
 
 ####################################################################################################

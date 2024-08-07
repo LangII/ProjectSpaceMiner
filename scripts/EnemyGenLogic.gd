@@ -36,6 +36,14 @@ onready var ENEMY_GEN_MAP = {
 		},
 		'NEAR_COORDS_DIST': {'MIN': 4, 'MAX': 8},  # by tile
 		'SEGMENT_COUNT': {'MIN': 4, 'MAX': 20},
+	},
+	'ENEMY_03': {
+		'SPAWN_ATTEMPTS_PER_BOTTOM_PERC': {
+			1.00: {'MIN': 1, 'MAX': 3},
+			0.50: {'MIN': 2, 'MAX': 6},
+			0.25: {'MIN': 2, 'MAX': 10},
+		},
+		'NEAR_COORDS_DIST': {'MIN': 2, 'MAX': 4},  # by tile
 	}
 }
 
@@ -125,18 +133,52 @@ func genEnemy02s() -> void:
 
 func genEnemy03s() -> void:
 	
+	""" for manual placement testing """
+	for x in [
+		{'pos': Vector2(580, 2260), 'segment_count': 20},
+	]:  genEnemy02(x['pos'], x['segment_count'])
+	
 #	return
 	
-	var enemy_inst = enemy_03.instance()
-	enemy_inst.global_position = Vector2(140, 690)
-#	enemy_inst.global_position = Vector2(690, 140)
-	_enemies_.add_child(enemy_inst)
+	var gen_map = ENEMY_GEN_MAP['ENEMY_03']
+	var attempting_coords = getAttemptingCoords(gen_map['SPAWN_ATTEMPTS_PER_BOTTOM_PERC'])
 	
+	var success_spawn_coords = []    
+	for coord in attempting_coords:
+		
+		var attempt_y = coord[0]
+		var attempt_x = coord[1]
+		
+		var near_coords_dist = util.getRandomInt(
+			gen_map['NEAR_COORDS_DIST']['MIN'], gen_map['NEAR_COORDS_DIST']['MAX']
+		)
+		
+		var near_coords = getNearCoords(attempt_x, attempt_y, near_coords_dist)
+		
+		if isNearSolidTiles(near_coords):  continue
+		if isTooCloseToOtherSpawn(near_coords, success_spawn_coords):  continue
+		
+		success_spawn_coords += [[attempt_y, attempt_x]]
+		
+		var enemy_pos = Vector2(attempt_x * tile_map.cell_size[0], attempt_y * tile_map.cell_size[0])
+		var enemy_dir = util.getRandomInt(0, 360)
+		
+		genEnemy03(enemy_pos, enemy_dir)
+		
+#		var inst = enemy_03.instance()
+#		inst.global_position = Vector2(attempt_x * tile_map.cell_size[0], attempt_y * tile_map.cell_size[0])
+#		_enemies_.add_child(inst)
+		
+		
+		
+		setMiniTileMapEnemyPos(attempt_x, attempt_y)
 
-	
-#	var enemy_inst_1 = enemy_03.instance()
-#	enemy_inst_1.global_position = Vector2(600, 2590)
-#	_enemies_.add_child(enemy_inst_1)
+
+func genEnemy03(_pos:Vector2, _dir:int) -> void:
+	var enemy_inst = enemy_03.instance()
+	_enemies_.add_child(enemy_inst)
+	enemy_inst.global_position = _pos
+	enemy_inst.init(_dir)
 
 
 ####################################################################################################
