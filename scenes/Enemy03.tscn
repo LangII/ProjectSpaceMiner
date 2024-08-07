@@ -212,8 +212,11 @@ collide_with_areas = true
 
 [node name="CanShootMissileDelayTimer" type="Timer" parent="."]
 
+[node name="CanChangeCurRollDirDelayTimer" type="Timer" parent="."]
+
 [connection signal="tween_all_completed" from="WoundedTweenUp" to="." method="_on_WoundedTweenUp_tween_all_completed"]
 [connection signal="tween_all_completed" from="WoundedTweenDown" to="." method="_on_WoundedTweenDown_tween_all_completed"]
 [connection signal="timeout" from="CanDmgShipTimer" to="." method="_on_CanDmgShipTimer_timeout"]
 [connection signal="timeout" from="LifeEndParticlesLifeTimeTimer" to="." method="_on_LifeEndParticlesLifeTimeTimer_timeout"]
 [connection signal="timeout" from="CanShootMissileDelayTimer" to="." method="_on_CanShootMissileDelayTimer_timeout"]
+[connection signal="timeout" from="CanChangeCurRollDirDelayTimer" to="." method="_on_CanChangeCurRollDirDelayTimer_timeout"]

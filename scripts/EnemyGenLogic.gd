@@ -128,7 +128,8 @@ func genEnemy03s() -> void:
 #	return
 	
 	var enemy_inst = enemy_03.instance()
-	enemy_inst.global_position = Vector2(580, 2160)
+	enemy_inst.global_position = Vector2(140, 690)
+#	enemy_inst.global_position = Vector2(690, 140)
 	_enemies_.add_child(enemy_inst)
 	
 

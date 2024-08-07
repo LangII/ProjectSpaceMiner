@@ -105,10 +105,8 @@ func addTileMap():
 
 
 func addEnemies():
-	
 	enemy_gen_logic = load(ENEMY_GEN_LOGIC_SCN_REF).instance()
 	add_child(enemy_gen_logic)
-	
 	enemy_gen_logic.genEnemy01s()
 	enemy_gen_logic.genEnemy02s()
 	enemy_gen_logic.genEnemy03s()
@@ -117,7 +115,7 @@ func addEnemies():
 func addShip():
 	ship = load(SHIP_SCN_REF).instance()
 	add_child(ship)
-	ship.global_position = Vector2(520, 2160)
+	ship.global_position = Vector2(370, 780)
 
 
 func addCamera():
