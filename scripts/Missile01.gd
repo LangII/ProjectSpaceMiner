@@ -21,40 +21,61 @@ onready var ctrl = get_node('/root/Main/Controls')
 onready var tile_map = gameplay.get_node('TileMap')
 onready var tile_map_logic = get_node('/root/Main/Gameplay/TileMapLogic')
 
-var SPEED = 50.0
-var ROT_SPEED = 0.025
-var NO_ROT_TARGET_DEG = 30.0
+onready var SPEED = util.coalesce([null, ctrl.missile01_speed])
+onready var ROT_SPEED = util.coalesce([null, ctrl.missile01_rot_speed])
+onready var NO_ROT_TARGET_DEG = util.coalesce([null, ctrl.missile01_no_rot_target_deg])
 
 var current_dir = 0.0
 var dir_to_ship = 0.0
 var current_n_ship_dif = 0.0
 var rot_dir = +1  # +1 or -1
-var rot_vector = Vector2(-SPEED, 0.0)
+onready var rot_vector = Vector2(-SPEED, 0.0)
 
 onready var BLAST_MAP = [
-	{'node_name': 'BlastArea2D01', 'dist': 50.0, 'dmg': 20.0},
-	{'node_name': 'BlastArea2D02', 'dist': 10.0, 'dmg': 100.0},
+	{
+		'node_name': 'BlastArea2D01',
+		'dist': util.coalesce([null, ctrl.missile01_blast_map_blastarea2d01_dist]),
+		'dmg': util.coalesce([null, ctrl.missile01_blast_map_blastarea2d01_dmg])
+	},
+	{
+		'node_name': 'BlastArea2D02',
+		'dist': util.coalesce([null, ctrl.missile01_blast_map_blastarea2d02_dist]),
+		'dmg': util.coalesce([null, ctrl.missile01_blast_map_blastarea2d02_dmg])
+	},
 ]
 
 # BlastParticles2D00 is for even particle displacement through out blast area
 onready var BLAST_PARTICLES_00_MAP = {
-	'amount': 20, 'explosiveness': 0.5, 'initial_velocity': 100, 'linear_accel': -100
+	'amount': util.coalesce([null, ctrl.missile01_blast_particles_00_map_amount]),
+	'explosiveness': util.coalesce([null, ctrl.missile01_blast_particles_00_map_explosiveness]),
+	'initial_velocity': util.coalesce([null, ctrl.missile01_blast_particles_00_map_initial_velocity]),
+	'linear_accel': util.coalesce([null, ctrl.missile01_blast_particles_00_map_linear_accel])
 }
 
 # to get accurate values, i manually set BlastArea2D to the desired 'dist' / radius.  then went into
 # BlastParticles2D and played with these settings to find what values have the particles dieing at
 # just the right distance
 onready var BLAST_PARTICLES_MAP = [
-	{'node_name': 'BlastParticles2D01', 'amount': 80, 'initial_velocity': 100, 'linear_accel': -100},
-	{'node_name': 'BlastParticles2D02', 'amount': 40, 'initial_velocity': 30, 'linear_accel': -40},
+	{
+		'node_name': 'BlastParticles2D01',
+		'amount': util.coalesce([null, ctrl.missile01_blast_particles_map_blastparticles2d01_amount]),
+		'initial_velocity': util.coalesce([null, ctrl.missile01_blast_particles_map_blastparticles2d01_initial_velocity]),
+		'linear_accel': util.coalesce([null, ctrl.missile01_blast_particles_map_blastparticles2d01_linear_accel])
+	},
+	{
+		'node_name': 'BlastParticles2D02',
+		'amount': util.coalesce([null, ctrl.missile01_blast_particles_map_blastparticles2d02_amount]),
+		'initial_velocity': util.coalesce([null, ctrl.missile01_blast_particles_map_blastparticles2d02_initial_velocity]),
+		'linear_accel': util.coalesce([null, ctrl.missile01_blast_particles_map_blastparticles2d02_linear_accel])
+	},
 ]
 
 var col = null
 var has_collided = false
 
-var SHIP_COL_IMPULSE_MOD = 20.0
+onready var SHIP_COL_IMPULSE_MOD = util.coalesce([null, ctrl.missile01_ship_col_impulse_mod])
 
-var DESTROY_DROP_CHANCE = 0.2
+onready var DESTROY_DROP_CHANCE = util.coalesce([null, ctrl.missile01_destroy_drop_chance])
 
 
 ####################################################################################################

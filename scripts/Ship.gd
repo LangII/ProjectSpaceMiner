@@ -23,6 +23,7 @@ LOW PRIORITY TO DOS
 extends RigidBody2D
 
 onready var util = get_node('/root/Main/Utilities')
+onready var ctrl = get_node('/root/Main/Controls')
 onready var gameplay = get_node('/root/Main/Gameplay')
 onready var hud = null  # assigned in Hud.gd
 
@@ -32,26 +33,31 @@ onready var tile_map = get_node('/root/Main/Gameplay/TileMap')
 onready var projectiles = get_node('/root/Main/Gameplay/Projectiles')
 onready var bullet_01 = preload('res://scenes/Bullet01.tscn')
 
-var MOVE_ACC = 250
-var MOVE_MAX_SPEED = 180
-var MOVE_MAX_SPEED_RESISTANCE = 5
+onready var MOVE_ACC = util.coalesce([null, ctrl.ship_move_acc])
+onready var MOVE_MAX_SPEED = util.coalesce([null, ctrl.ship_move_max_speed])
+onready var MOVE_MAX_SPEED_RESISTANCE = util.coalesce([null, ctrl.ship_move_max_speed_resistance])
 
-var SPIN_ACC = 2000
-var SPIN_MAX_SPEED = 7
-var SPIN_MAX_SPEED_RESISTANCE = 10
+onready var SPIN_ACC = util.coalesce([null, ctrl.ship_spin_acc])
+onready var SPIN_MAX_SPEED = util.coalesce([null, ctrl.ship_spin_max_speed])
+onready var SPIN_MAX_SPEED_RESISTANCE = util.coalesce([null, ctrl.ship_spin_max_speed_resistance])
 
-var TURRET_COOL_DOWN_WAIT_TIME = 0.4
+onready var TURRET_COOL_DOWN_WAIT_TIME = util.coalesce([null, ctrl.ship_turret_cool_down_wait_time])
 
-var MAX_TERRAIN_COL_DMG = 2.0
-var MAX_HEALTH = 200
-var COL_DMG_SPEED_MODIFIER = 0.75
-var PHYSICAL_ARMOR = 0.02
+onready var MAX_TERRAIN_COL_DMG = util.coalesce([null, ctrl.ship_max_terrain_col_dmg])
+onready var MAX_HEALTH = util.coalesce([null, ctrl.ship_max_health])
+onready var COL_DMG_SPEED_MODIFIER = util.coalesce([null, ctrl.ship_col_dmg_speed_modifier])
+onready var PHYSICAL_ARMOR = util.coalesce([null, ctrl.ship_physical_armor])
+
+onready var DROP_PICK_UP_RADIUS = util.coalesce([null, ctrl.ship_drop_pick_up_radius])
+
+onready var ENEMY_AREA_COL_STRENGTH_MOD = util.coalesce([null, ctrl.ship_enemy_area_col_strength_mod])
+
+onready var CONTROL_TYPE = util.coalesce([null, ctrl.ship_control_type])
+
 var TERRAIN_COL_WAIT_TIME = 0.1
 var can_take_terrain_col_dmg = true
 
-var DROP_PICK_UP_RADIUS = 100
-
-var health = MAX_HEALTH
+onready var health = MAX_HEALTH
 
 var can_shoot = true
 
@@ -60,9 +66,8 @@ var prev_frame_dir = 0
 var STUNNED_DELAY = 0.5
 var is_stunned = false
 
-var ENEMY_AREA_COL_STRENGTH_MOD = 800
 
-var CONTROL_TYPE = 'shuffle_board'  # 'classic_asteroids' or 'shuffle_board'
+
 
 
 ####################################################################################################

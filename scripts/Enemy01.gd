@@ -2,19 +2,41 @@
 extends KinematicBody2D
 
 onready var util = get_node('/root/Main/Utilities')
+onready var ctrl = get_node('/root/Main/Controls')
 onready var gameplay = get_node('/root/Main/Gameplay')
 onready var ship = get_node('/root/Main/Gameplay/Ship')
 onready var tilemap = get_node('/root/Main/Gameplay/TileMap')
+
+onready var ROT_SPEED = util.coalesce([null, ctrl.enemy01_rot_speed])
+onready var MOVE_SPEED = util.coalesce([null, ctrl.enemy01_move_speed])
+onready var AGGRESSIVE_DIST_RANGE = util.coalesce([null, ctrl.enemy01_aggressive_dist_range])
+onready var PURSUE_CHANCE_REDUCTION = util.coalesce([null, ctrl.enemy01_pursue_chance_reduction])
+onready var CAN_DMG_SHIP_DELAY = util.coalesce([null, ctrl.enemy01_can_dmg_ship_delay])
+onready var SHIP_COL_IMPULSE_MOD = util.coalesce([null, ctrl.enemy01_ship_col_impulse_mod])
+onready var MAX_HEALTH = util.coalesce([null, ctrl.enemy01_max_health])
+onready var DMG = util.coalesce([null, ctrl.enemy01_dmg])
+onready var DMG_TO_SELF_MOD = util.coalesce([null, ctrl.enemy01_dmg_to_self_mod])
+onready var LIFEEND_PARTICLES_LIFETIME = util.coalesce([null, ctrl.enemy01_lifeend_particles_lifetime])
+onready var DROP_VALUE_MIN = util.coalesce([null, ctrl.enemy01_drop_value_min])
+onready var DROP_VALUE_MAX = util.coalesce([null, ctrl.enemy01_drop_value_max])
+onready var WOUNDED_MAP = {
+	'high': {
+		'min': util.coalesce([null, ctrl.enemy01_wounded_map_high_min]),
+		'max': util.coalesce([null, ctrl.enemy01_wounded_map_high_max]),
+		'speed': util.coalesce([null, ctrl.enemy01_wounded_map_high_speed])
+	},
+	'low': {
+		'min': util.coalesce([null, ctrl.enemy01_wounded_map_low_min]),
+		'max': util.coalesce([null, ctrl.enemy01_wounded_map_low_max]),
+		'speed': util.coalesce([null, ctrl.enemy01_wounded_map_low_speed])
+	}
+}
 
 var HOME_POS = Vector2()
 var HOME_RADIUS_BY_TILE = 0
 onready var HOME_RADIUS = HOME_RADIUS_BY_TILE * tilemap.cell_size[0]
 
 var ROT_DIRS = ['left', 'right']
-var ROT_SPEED = 4.0
-var MOVE_SPEED = 150.0
-
-var AGGRESSIVE_DIST_RANGE = 400.0
 
 var TARGET_ANGLE_RANGE = 10.0
 
@@ -40,29 +62,13 @@ var master_target_vector = Vector2()
 
 var targeting = null
 
-var PURSUE_CHANCE_REDUCTION = 0.25
-
-var CAN_DMG_SHIP_DELAY = 0.5
-var SHIP_COL_IMPULSE_MOD = 80.0
 var can_dmg_ship = true
 
-var MAX_HEALTH = 80.0
-var DMG = 10.0
-var DMG_TO_SELF_MOD = 0.5
+onready var health = MAX_HEALTH
 
-var health = MAX_HEALTH
-
-var WOUNDED_MAP = {
-	'high': {'min': 0.0, 'max': 0.25, 'speed': 0.25},
-	'low': {'min': 0.25, 'max': 0.5, 'speed': 1.0}
-}
 var WOUNDED_COLOR = Color(1, 0.4, 0.4, 1)  # red
 var wounded_level = null
 
-var LIFEEND_PARTICLES_LIFETIME = 1.0
-
-var DROP_VALUE_MIN = 1
-var DROP_VALUE_MAX = 3
 var drop_value = 0
 
 

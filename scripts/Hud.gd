@@ -3,6 +3,7 @@ extends CanvasLayer
 
 onready var main = get_node('/root/Main')
 onready var data = get_node('/root/Main/Data')
+onready var ctrl = get_node('/root/Main/Controls')
 onready var util = get_node('/root/Main/Utilities')
 onready var gameplay = get_node('/root/Main/Gameplay')
 onready var ship = gameplay.get_node('Ship')
@@ -15,11 +16,11 @@ onready var health_bar_under_tween = find_node('HealthTextureProgUnderTween')
 onready var health_label = find_node('HealthLabel')
 onready var drop_display_res = preload('res://scenes/iterables/HudDropDisplay.tscn')
 
-var DROP_DISPLAY_COUNT = 3
+onready var DROP_DISPLAY_COUNT = util.coalesce([null, ctrl.hud_drop_display_count])
 var DROP_DISPLAY_POS_DIF = 0
 
 var HEALTH_TEXT_FORMAT = '%7.2f'
-var HEALTH_UNDER_TWEEN_DURATION = 1.0
+onready var HEALTH_UNDER_TWEEN_DURATION = util.coalesce([null, ctrl.hud_health_under_tween_duration])
 
 var drop_displays = []
 var drop_display_pos = {}

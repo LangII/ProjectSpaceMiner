@@ -14,32 +14,6 @@ onready var mini_tile_map = preload("res://scenes/tiles/MiniTileMap.tscn").insta
 
 
 ####################################################################################################
-""" adjustable constants """
-
-
-onready var TILE_MAP_WIDTH = ctrl.tile_map_width
-onready var TILE_MAP_HEIGHT = ctrl.tile_map_height
-
-var NOISE_OCTAVES = 3  # 1 = 3 = 9 (int) (edge distortion)
-var NOISE_PERIOD = 64  # 0.1 = 64 = 256 (float) (noise size)
-var NOISE_PERSISTENCE = 0.5  # 0 = 0.5 = 1 (float)
-var NOISE_LACUNARITY = 2  # 0.1 = 2 = 4 (float)
-
-var BOARDER_WALL_TILE_LEVEL = 1
-var BOARDER_WALL_NOISE_MAX_HEIGHT = 10
-var BOARDER_WALL_NOISE_OCTAVES = 2  # 1 = 3 = 9 (int) (edge distortion)
-var BOARDER_WALL_NOISE_PERIOD = 40  # 0.1 = 64 = 256 (float) (noise size)
-var BOARDER_WALL_NOISE_PERSISTENCE = 0.9  # 0 = 0.5 = 1 (float)
-var BOARDER_WALL_NOISE_LACUNARITY = 3.5  # 0.1 = 2 = 4 (float)
-
-onready var SAFE_ZONE_START_HEIGHT = ctrl.safe_zone_start_height
-
-var TILE_01_HEALTH = 80
-var TILE_02_HEALTH = 500
-var TILE_03_HEALTH = 2000
-
-
-####################################################################################################
 """ constants """
 
 
@@ -91,13 +65,6 @@ var TILE_3EDGE_DIR_CODE = {
 	'NSW': {'flip_x': false, 'flip_y': false, 'transpose': true},
 	'NEW': {'flip_x': false, 'flip_y': false, 'transpose': false},
 }
-
-var NOISE_SETTINGS = [
-	{'TILE_LEVEL': 0, 'TILE_CODE': TILE_L00_AIR, 'MINI_TILE_CODE': MINI_TILE_L00, 'LOW': 0.00, 'HIGH': 0.20},
-	{'TILE_LEVEL': 1, 'TILE_CODE': TILE_L01, 'MINI_TILE_CODE': MINI_TILE_L01, 'LOW': 0.20, 'HIGH': 0.30},
-	{'TILE_LEVEL': 2, 'TILE_CODE': TILE_L02, 'MINI_TILE_CODE': MINI_TILE_L02, 'LOW': 0.30, 'HIGH': 0.40},
-	{'TILE_LEVEL': 3, 'TILE_CODE': TILE_L03, 'MINI_TILE_CODE': MINI_TILE_L03, 'LOW': 0.40, 'HIGH': 1.10}
-]
 
 var TILE_COL_MAP = {
 	1: {
@@ -168,6 +135,63 @@ var DESTRUCT_TILE_MAP = {
 }
 
 var noise = OpenSimplexNoise.new()
+
+
+####################################################################################################
+""" adjustable constants """
+
+
+onready var TILE_MAP_WIDTH = util.coalesce([null, ctrl.basetilemaplogic_tile_map_width])
+onready var TILE_MAP_HEIGHT = util.coalesce([null, ctrl.basetilemaplogic_tile_map_height])
+
+onready var NOISE_OCTAVES = util.coalesce([null, ctrl.basetilemaplogic_noise_octaves])  # 1 = 3 = 9 (int) (edge distortion)
+onready var NOISE_PERIOD = util.coalesce([null, ctrl.basetilemaplogic_noise_period])  # 0.1 = 64 = 256 (float) (noise size)
+onready var NOISE_PERSISTENCE = util.coalesce([null, ctrl.basetilemaplogic_noise_persistence])  # 0 = 0.5 = 1 (float)
+onready var NOISE_LACUNARITY = util.coalesce([null, ctrl.basetilemaplogic_noise_lacunarity])  # 0.1 = 2 = 4 (float)
+
+onready var BOARDER_WALL_TILE_LEVEL = util.coalesce([null, ctrl.basetilemaplogic_boarder_wall_tile_level])
+onready var BOARDER_WALL_NOISE_MAX_HEIGHT = util.coalesce([null, ctrl.basetilemaplogic_boarder_wall_noise_max_height])
+onready var BOARDER_WALL_NOISE_OCTAVES = util.coalesce([null, ctrl.basetilemaplogic_boarder_wall_noise_octaves])  # 1 = 3 = 9 (int) (edge distortion)
+onready var BOARDER_WALL_NOISE_PERIOD = util.coalesce([null, ctrl.basetilemaplogic_boarder_wall_noise_period])  # 0.1 = 64 = 256 (float) (noise size)
+onready var BOARDER_WALL_NOISE_PERSISTENCE = util.coalesce([null, ctrl.basetilemaplogic_boarder_wall_noise_persistence])  # 0 = 0.5 = 1 (float)
+onready var BOARDER_WALL_NOISE_LACUNARITY = util.coalesce([null, ctrl.basetilemaplogic_boarder_wall_noise_lacunarity])  # 0.1 = 2 = 4 (float)
+
+onready var SAFE_ZONE_START_HEIGHT = util.coalesce([null, ctrl.basetilemaplogic_safe_zone_start_height])
+
+onready var TILE_01_HEALTH = util.coalesce([null, ctrl.basetilemaplogic_tile_01_health])
+onready var TILE_02_HEALTH = util.coalesce([null, ctrl.basetilemaplogic_tile_02_health])
+onready var TILE_03_HEALTH = util.coalesce([null, ctrl.basetilemaplogic_tile_03_health])
+
+onready var NOISE_SETTINGS = [
+	{
+		'TILE_LEVEL': 0,
+		'TILE_CODE': TILE_L00_AIR,
+		'MINI_TILE_CODE': MINI_TILE_L00,
+		'LOW': util.coalesce([null, ctrl.basetilemaplogic_noise_settings_tile_level_0_low]),
+		'HIGH': util.coalesce([null, ctrl.basetilemaplogic_noise_settings_tile_level_0_high])
+	},
+	{
+		'TILE_LEVEL': 1,
+		'TILE_CODE': TILE_L01,
+		'MINI_TILE_CODE': MINI_TILE_L01,
+		'LOW': util.coalesce([null, ctrl.basetilemaplogic_noise_settings_tile_level_1_low]),
+		'HIGH': util.coalesce([null, ctrl.basetilemaplogic_noise_settings_tile_level_1_high])
+	},
+	{
+		'TILE_LEVEL': 2,
+		'TILE_CODE': TILE_L02,
+		'MINI_TILE_CODE': MINI_TILE_L02,
+		'LOW': util.coalesce([null, ctrl.basetilemaplogic_noise_settings_tile_level_2_low]),
+		'HIGH': util.coalesce([null, ctrl.basetilemaplogic_noise_settings_tile_level_2_high])
+	},
+	{
+		'TILE_LEVEL': 3,
+		'TILE_CODE': TILE_L03,
+		'MINI_TILE_CODE': MINI_TILE_L03,
+		'LOW': util.coalesce([null, ctrl.basetilemaplogic_noise_settings_tile_level_3_low]),
+		'HIGH': util.coalesce([null, ctrl.basetilemaplogic_noise_settings_tile_level_3_high])
+	}
+]
 
 
 ####################################################################################################

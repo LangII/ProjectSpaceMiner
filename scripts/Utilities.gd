@@ -138,7 +138,10 @@ func anglesDif(_angle_1:float, _angle_2:float) -> float:
 	return fmod((_angle_2 - _angle_1 + 540), 360) - 180
 
 
-
+func coalesce(_array:Array) -> Object:
+	for object in _array:
+		if object != null:  return object
+	return null
 
 
 

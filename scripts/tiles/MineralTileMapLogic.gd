@@ -18,18 +18,33 @@ there that were generated.  Investigate why.
 extends 'res://scripts/tiles/BaseTileMapLogic.gd'
 
 
-var MINERAL_MAP = {
+onready var MINERAL_MAP = {
 	'mineral_01': {
-		'TILE_CODE': 0, 'TILE_LEVELS': [1], 'VEIN_ATTEMPTS': 250, 'DROP_VALUE_MIN': 1, 'DROP_VALUE_MAX': 3,
-		'VEIN_SIZE_MIN': 4, 'VEIN_SIZE_MAX': 12
+		'TILE_CODE': 0,
+		'TILE_LEVELS': util.coalesce([null, ctrl.mineraltilemaplogic_mineral_map_01_tile_levels]),
+		'VEIN_ATTEMPTS': util.coalesce([null, ctrl.mineraltilemaplogic_mineral_map_01_vein_attempts]),
+		'DROP_VALUE_MIN': util.coalesce([null, ctrl.mineraltilemaplogic_mineral_map_01_drop_value_min]),
+		'DROP_VALUE_MAX': util.coalesce([null, ctrl.mineraltilemaplogic_mineral_map_01_drop_value_max]),
+		'VEIN_SIZE_MIN': util.coalesce([null, ctrl.mineraltilemaplogic_mineral_map_01_vein_size_min]),
+		'VEIN_SIZE_MAX': util.coalesce([null, ctrl.mineraltilemaplogic_mineral_map_01_vein_size_max])
 	},
 	'mineral_02': {
-		'TILE_CODE': 1, 'TILE_LEVELS': [1], 'VEIN_ATTEMPTS': 150, 'DROP_VALUE_MIN': 1, 'DROP_VALUE_MAX': 3,
-		'VEIN_SIZE_MIN': 2, 'VEIN_SIZE_MAX': 8
+		'TILE_CODE': 1,
+		'TILE_LEVELS': util.coalesce([null, ctrl.mineraltilemaplogic_mineral_map_02_tile_levels]),
+		'VEIN_ATTEMPTS': util.coalesce([null, ctrl.mineraltilemaplogic_mineral_map_02_vein_attempts]),
+		'DROP_VALUE_MIN': util.coalesce([null, ctrl.mineraltilemaplogic_mineral_map_02_drop_value_min]),
+		'DROP_VALUE_MAX': util.coalesce([null, ctrl.mineraltilemaplogic_mineral_map_02_drop_value_max]),
+		'VEIN_SIZE_MIN': util.coalesce([null, ctrl.mineraltilemaplogic_mineral_map_02_vein_size_min]),
+		'VEIN_SIZE_MAX': util.coalesce([null, ctrl.mineraltilemaplogic_mineral_map_02_vein_size_max])
 	},
 	'mineral_03': {
-		'TILE_CODE': 2, 'TILE_LEVELS': [2], 'VEIN_ATTEMPTS': 150, 'DROP_VALUE_MIN': 1, 'DROP_VALUE_MAX': 3,
-		'VEIN_SIZE_MIN': 2, 'VEIN_SIZE_MAX': 8
+		'TILE_CODE': 2,
+		'TILE_LEVELS': util.coalesce([null, ctrl.mineraltilemaplogic_mineral_map_03_tile_levels]),
+		'VEIN_ATTEMPTS': util.coalesce([null, ctrl.mineraltilemaplogic_mineral_map_03_vein_attempts]),
+		'DROP_VALUE_MIN': util.coalesce([null, ctrl.mineraltilemaplogic_mineral_map_03_drop_value_min]),
+		'DROP_VALUE_MAX': util.coalesce([null, ctrl.mineraltilemaplogic_mineral_map_03_drop_value_max]),
+		'VEIN_SIZE_MIN': util.coalesce([null, ctrl.mineraltilemaplogic_mineral_map_03_vein_size_min]),
+		'VEIN_SIZE_MAX': util.coalesce([null, ctrl.mineraltilemaplogic_mineral_map_03_vein_size_max])
 	},
 }
 
@@ -105,8 +120,8 @@ func setMineralTile(k, y, x, _dict, _type):
 
 
 func setMiniTileMapMineralPos(_x:int, _y:int, _buffer:int=1) -> void:
-	for y in range(max(_y - _buffer, 0), min(_y + _buffer, ctrl.tile_map_height - 1)):
-		for x in range(max(_x - _buffer, 0), min(_x + _buffer, ctrl.tile_map_width - 1)):
+	for y in range(max(_y - _buffer, 0), min(_y + _buffer, TILE_MAP_HEIGHT - 1)):
+		for x in range(max(_x - _buffer, 0), min(_x + _buffer, TILE_MAP_WIDTH - 1)):
 			mini_tile_map.set_cell(x, y, 4)
 
 

@@ -20,32 +20,93 @@ onready var enemy_03 = preload('res://scenes/Enemy03.tscn')
 onready var ENEMY_GEN_MAP = {
 	'ENEMY_01': {
 		'SPAWN_ATTEMPTS_PER_BOTTOM_PERC': {
-			1.00: {'MIN': 5, 'MAX': 10},
-			0.50: {'MIN': 5, 'MAX': 10},
-			0.25: {'MIN': 5, 'MAX': 10}
+			1.00: {
+				'MIN': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_01_spawn_attempts_per_botton_perc_100_min]),
+				'MAX': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_01_spawn_attempts_per_botton_perc_100_max])
+			},
+			0.50: {
+				'MIN': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_01_spawn_attempts_per_botton_perc_050_min]),
+				'MAX': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_01_spawn_attempts_per_botton_perc_050_max])
+			},
+			0.25: {
+				'MIN': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_01_spawn_attempts_per_botton_perc_025_min]),
+				'MAX': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_01_spawn_attempts_per_botton_perc_025_max])
+			}
 		},
-		'NEAR_COORDS_DIST': {'MIN': 2, 'MAX': 8},  # by tile
-		'HOME_RADIUS': {'MIN': 4, 'MAX': 10},  # by tile
-		'COUNT_PER_SWARM': {'MIN': 2, 'MAX': 4},
+		'NEAR_COORDS_DIST': {  # by tile
+			'MIN': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_01_near_coords_dist_min]),
+			'MAX': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_01_near_coords_dist_max])
+		},
+		'HOME_RADIUS': {  # by tile
+			'MIN': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_01_home_radius_min]),
+			'MAX': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_01_home_radius_max])
+		},
+		'COUNT_PER_SWARM': {
+			'MIN': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_01_count_per_swarm_min]),
+			'MAX': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_01_count_per_swarm_max])
+		},
 	},
 	'ENEMY_02': {
 		'SPAWN_ATTEMPTS_PER_BOTTOM_PERC': {
-			1.00: {'MIN': 2, 'MAX': 5},
-			0.50: {'MIN': 2, 'MAX': 5},
-			0.25: {'MIN': 2, 'MAX': 5},
+			1.00: {
+				'MIN': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_02_spawn_attempts_per_botton_perc_100_min]),
+				'MAX': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_02_spawn_attempts_per_botton_perc_100_max])
+			},
+			0.50: {
+				'MIN': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_02_spawn_attempts_per_botton_perc_050_min]),
+				'MAX': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_02_spawn_attempts_per_botton_perc_050_max])
+			},
+			0.25: {
+				'MIN': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_02_spawn_attempts_per_botton_perc_025_min]),
+				'MAX': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_02_spawn_attempts_per_botton_perc_025_max])
+			},
 		},
-		'NEAR_COORDS_DIST': {'MIN': 4, 'MAX': 8},  # by tile
-		'SEGMENT_COUNT': {'MIN': 4, 'MAX': 20},
+		'NEAR_COORDS_DIST': {  # by tile
+			'MIN': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_02_near_coords_dist_min]),
+			'MAX': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_02_near_coords_dist_max])
+		},
+		'SEGMENT_COUNT': {
+			'MIN': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_02_segment_count_min]),
+			'MAX': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_02_segment_count_max])
+		},
 	},
 	'ENEMY_03': {
 		'SPAWN_ATTEMPTS_PER_BOTTOM_PERC': {
-			1.00: {'MIN': 1, 'MAX': 3},
-			0.50: {'MIN': 2, 'MAX': 6},
-			0.25: {'MIN': 2, 'MAX': 10},
+			1.00: {
+				'MIN': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_03_spawn_attempts_per_botton_perc_100_min]),
+				'MAX': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_03_spawn_attempts_per_botton_perc_100_max])
+			},
+			0.50: {
+				'MIN': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_03_spawn_attempts_per_botton_perc_050_min]),
+				'MAX': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_03_spawn_attempts_per_botton_perc_050_max])
+			},
+			0.25: {
+				'MIN': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_03_spawn_attempts_per_botton_perc_025_min]),
+				'MAX': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_03_spawn_attempts_per_botton_perc_025_max])
+			},
 		},
-		'NEAR_COORDS_DIST': {'MIN': 2, 'MAX': 4},  # by tile
+		'NEAR_COORDS_DIST': {  # by tile
+			'MIN': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_02_near_coords_dist_min]),
+			'MAX': util.coalesce([null, ctrl.enemygenlogic_gen_map_enemy_02_near_coords_dist_max])
+		},
 	}
 }
+
+onready var GEN_ENEMY01_TYPE = util.coalesce([null, ctrl.enemygenlogic_gen_enemy01_type])
+onready var GEN_ENEMY01_MANUAL_X = util.coalesce([null, ctrl.enemygenlogic_gen_enemy01_manual_x])
+onready var GEN_ENEMY01_MANUAL_Y = util.coalesce([null, ctrl.enemygenlogic_gen_enemy01_manual_y])
+onready var GEN_ENEMY01_MANUAL_PER_SWARM_COUNT = util.coalesce([null, ctrl.enemygenlogic_gen_enemy01_manual_per_swarm_count])
+onready var GEN_ENEMY01_MANUAL_HOME_RADIUS = util.coalesce([null, ctrl.enemygenlogic_gen_enemy01_manual_home_radius])
+
+onready var GEN_ENEMY02_TYPE = util.coalesce([null, ctrl.enemygenlogic_gen_enemy02_type])
+onready var GEN_ENEMY02_MANUAL_X = util.coalesce([null, ctrl.enemygenlogic_gen_enemy02_manual_x])
+onready var GEN_ENEMY02_MANUAL_Y = util.coalesce([null, ctrl.enemygenlogic_gen_enemy02_manual_y])
+onready var GEN_ENEMY02_MANUAL_SEGMENT_COUNT = util.coalesce([null, ctrl.enemygenlogic_gen_enemy02_manual_segment_count])
+
+onready var GEN_ENEMY03_TYPE = util.coalesce([null, ctrl.enemygenlogic_gen_enemy03_type])
+onready var GEN_ENEMY03_MANUAL_X = util.coalesce([null, ctrl.enemygenlogic_gen_enemy03_manual_x])
+onready var GEN_ENEMY03_MANUAL_Y = util.coalesce([null, ctrl.enemygenlogic_gen_enemy03_manual_y])
+onready var GEN_ENEMY03_MANUAL_DIR = util.coalesce([null, ctrl.enemygenlogic_gen_enemy03_manual_dir])
 
 
 ####################################################################################################
@@ -53,12 +114,23 @@ onready var ENEMY_GEN_MAP = {
 
 func genEnemy01s() -> void:
 	
-	""" for manual placement testing """
-#	for x in [
-#		{'x': 27, 'y': 116, 'count': 2, 'home_radius':4},
-#	]:  genEnemy01Swarm(x['x'], x['y'], x['count'], x['home_radius'])
-
-	return
+	match GEN_ENEMY01_TYPE:
+		'off':
+			return
+		'manual':
+			
+			# TODO: add isNearSolidTiles() test
+			
+			genEnemy01Swarm(
+				GEN_ENEMY01_MANUAL_X,
+				GEN_ENEMY01_MANUAL_Y,
+				GEN_ENEMY01_MANUAL_PER_SWARM_COUNT,
+				GEN_ENEMY01_MANUAL_HOME_RADIUS
+			)
+			setMiniTileMapEnemyPos(GEN_ENEMY01_MANUAL_X, GEN_ENEMY01_MANUAL_Y)
+			return
+		'auto':
+			pass
 	
 	var gen_map = ENEMY_GEN_MAP['ENEMY_01']
 	var attempting_coords = getAttemptingCoords(gen_map['SPAWN_ATTEMPTS_PER_BOTTOM_PERC'])
@@ -93,12 +165,22 @@ func genEnemy01s() -> void:
 
 func genEnemy02s() -> void:
 	
-	""" for manual placement testing """
-#	for x in [
-#		{'pos': Vector2(580, 2260), 'segment_count': 20},
-#	]:  genEnemy02(x['pos'], x['segment_count'])
-	
-	return
+	match GEN_ENEMY02_TYPE:
+		'off':
+			return
+		'manual':
+			
+			# TODO: add isNearSolidTiles() test
+			
+			var manual_enemy_pos = Vector2(
+				GEN_ENEMY02_MANUAL_X * tile_map.cell_size[0],
+				GEN_ENEMY02_MANUAL_Y * tile_map.cell_size[0]
+			)
+			genEnemy02(manual_enemy_pos, GEN_ENEMY02_MANUAL_SEGMENT_COUNT)
+			setMiniTileMapEnemyPos(GEN_ENEMY02_MANUAL_X, GEN_ENEMY02_MANUAL_Y)
+			return
+		'auto':
+			pass
 	
 	var gen_map = ENEMY_GEN_MAP['ENEMY_02']
 	var attempting_coords = getAttemptingCoords(gen_map['SPAWN_ATTEMPTS_PER_BOTTOM_PERC'])
@@ -133,12 +215,22 @@ func genEnemy02s() -> void:
 
 func genEnemy03s() -> void:
 	
-	""" for manual placement testing """
-	for x in [
-		{'pos': Vector2(580, 2260), 'segment_count': 20},
-	]:  genEnemy02(x['pos'], x['segment_count'])
-	
-#	return
+	match GEN_ENEMY03_TYPE:
+		'off':
+			return
+		'manual':
+			
+			# TODO: add isNearSolidTiles() test
+			
+			var manual_enemy_pos = Vector2(
+				GEN_ENEMY03_MANUAL_X * tile_map.cell_size[0],
+				GEN_ENEMY03_MANUAL_Y * tile_map.cell_size[0]
+			)
+			genEnemy03(manual_enemy_pos, GEN_ENEMY03_MANUAL_DIR)
+			setMiniTileMapEnemyPos(GEN_ENEMY03_MANUAL_X, GEN_ENEMY03_MANUAL_Y)
+			return
+		'auto':
+			pass
 	
 	var gen_map = ENEMY_GEN_MAP['ENEMY_03']
 	var attempting_coords = getAttemptingCoords(gen_map['SPAWN_ATTEMPTS_PER_BOTTOM_PERC'])
@@ -165,20 +257,8 @@ func genEnemy03s() -> void:
 		
 		genEnemy03(enemy_pos, enemy_dir)
 		
-#		var inst = enemy_03.instance()
-#		inst.global_position = Vector2(attempt_x * tile_map.cell_size[0], attempt_y * tile_map.cell_size[0])
-#		_enemies_.add_child(inst)
-		
-		
-		
 		setMiniTileMapEnemyPos(attempt_x, attempt_y)
 
-
-func genEnemy03(_pos:Vector2, _dir:int) -> void:
-	var enemy_inst = enemy_03.instance()
-	_enemies_.add_child(enemy_inst)
-	enemy_inst.global_position = _pos
-	enemy_inst.init(_dir)
 
 
 ####################################################################################################
@@ -190,19 +270,19 @@ func getAttemptingCoords(_per_bottom_perc_dict:Dictionary) -> Array:
 		var attempts_count = util.getRandomInt(
 			_per_bottom_perc_dict[perc]['MIN'], _per_bottom_perc_dict[perc]['MAX']
 		)
-		var attempt_height_top = max(ctrl.safe_zone_start_height, int(ctrl.tile_map_height * (1 - perc)))
-		var attempt_height_bottom = ctrl.tile_map_height - 1
+		var attempt_height_top = max(tile_map_logic.SAFE_ZONE_START_HEIGHT, int(tile_map_logic.TILE_MAP_HEIGHT * (1 - perc)))
+		var attempt_height_bottom = tile_map_logic.TILE_MAP_HEIGHT - 1
 		for _i in attempts_count:
 			var attempt_y = util.getRandomInt(attempt_height_top, attempt_height_bottom)
-			var attempt_x = util.getRandomInt(0, ctrl.tile_map_width - 1)
+			var attempt_x = util.getRandomInt(0, tile_map_logic.TILE_MAP_WIDTH - 1)
 			attempting_coords += [[attempt_y, attempt_x]]
 	return attempting_coords
 
 
 func getNearCoords(_x:int, _y:int, _how_near:int) -> Array:
 	var near_coords = []
-	for y in range(max(_y - _how_near, 0), min(_y + _how_near, ctrl.tile_map_height - 1)):
-		for x in range(max(_x - _how_near, 0), min(_x + _how_near, ctrl.tile_map_width - 1)):
+	for y in range(max(_y - _how_near, 0), min(_y + _how_near, tile_map_logic.TILE_MAP_HEIGHT - 1)):
+		for x in range(max(_x - _how_near, 0), min(_x + _how_near, tile_map_logic.TILE_MAP_WIDTH - 1)):
 			near_coords += ['%s,%s' % [y, x]]
 	return near_coords
 
@@ -221,8 +301,8 @@ func isTooCloseToOtherSpawn(_near_coords:Array, _success_spawn_coords:Array) -> 
 
 
 func setMiniTileMapEnemyPos(_x:int, _y:int, _buffer:int=1) -> void:
-	for y in range(max(_y - _buffer, 0), min(_y + _buffer, ctrl.tile_map_height - 1)):
-		for x in range(max(_x - _buffer, 0), min(_x + _buffer, ctrl.tile_map_width - 1)):
+	for y in range(max(_y - _buffer, 0), min(_y + _buffer, tile_map_logic.TILE_MAP_HEIGHT - 1)):
+		for x in range(max(_x - _buffer, 0), min(_x + _buffer, tile_map_logic.TILE_MAP_WIDTH - 1)):
 			mini_tile_map.set_cell(x, y, 5)
 
 
@@ -244,6 +324,13 @@ func genEnemy02(
 	_enemies_.add_child(enemy_inst)
 	enemy_inst.global_position = _pos
 	enemy_inst.init(_segment_count, _from_split, _spine, _segments_data)
+
+
+func genEnemy03(_pos:Vector2, _dir:int) -> void:
+	var enemy_inst = enemy_03.instance()
+	_enemies_.add_child(enemy_inst)
+	enemy_inst.global_position = _pos
+	enemy_inst.init(_dir)
 
 
 

@@ -48,6 +48,7 @@ adjustable.
 extends KinematicBody2D
 
 onready var util = get_node('/root/Main/Utilities')
+onready var ctrl = get_node('/root/Main/Controls')
 onready var gameplay = get_node('/root/Main/Gameplay')
 onready var ship = get_node('/root/Main/Gameplay/Ship')
 onready var tilemap = get_node('/root/Main/Gameplay/TileMap')
@@ -57,22 +58,66 @@ onready var missile_01 = preload('res://scenes/Missile01.tscn')
 
 var ROT_NODE_MAP = {
 	'RotPosA': {
-		'next_pos_node':	{'right': 'RotPosD',		'left': 'RotPosB'},
+		'next_pos_node':		{'right': 'RotPosD',			'left': 'RotPosB'},
 		'col_ray':			{'right': 'ColRayARight',	'left': 'ColRayALeft'}
 	},
 	'RotPosB': {
-		'next_pos_node':	{'right': 'RotPosA',		'left': 'RotPosC'},
+		'next_pos_node':		{'right': 'RotPosA',			'left': 'RotPosC'},
 		'col_ray':			{'right': 'ColRayBRight',	'left': 'ColRayBLeft'}
 	},
 	'RotPosC': {
-		'next_pos_node':	{'right': 'RotPosB',		'left': 'RotPosD'},
+		'next_pos_node':		{'right': 'RotPosB',			'left': 'RotPosD'},
 		'col_ray':			{'right': 'ColRayCRight',	'left': 'ColRayCLeft'}
 	},
 	'RotPosD': {
-		'next_pos_node':	{'right': 'RotPosC',		'left': 'RotPosA'},
+		'next_pos_node':		{'right': 'RotPosC',			'left': 'RotPosA'},
 		'col_ray':			{'right': 'ColRayDRight',	'left': 'ColRayDLeft'}
 	}
 }
+
+onready var FLOATING_LINEAR_SPEED_MIN = util.coalesce([null, ctrl.enemy03_floating_linear_speed_min])
+onready var FLOATING_LINEAR_SPEED_MAX = util.coalesce([null, ctrl.enemy03_floating_linear_speed_max])
+onready var FLOATING_ROTATE_SPEED_MIN = util.coalesce([null, ctrl.enemy03_floating_rotate_speed_min])
+onready var FLOATING_ROTATE_SPEED_MAX = util.coalesce([null, ctrl.enemy03_floating_rotate_speed_max])
+
+onready var ROLLING_CHANGE_DIR_CHANCE_MIN = util.coalesce([null, ctrl.enemy03_rolling_change_dir_chance_min])  # perc
+onready var ROLLING_CHANGE_DIR_CHANCE_MAX = util.coalesce([null, ctrl.enemy03_rolling_change_dir_chance_max])  # perc
+
+onready var ROLLING_MOV_MOD = util.coalesce([null, ctrl.enemy03_rolling_mov_mod])
+onready var ROLLING_ROT_MOD = util.coalesce([null, ctrl.enemy03_rolling_rot_mod])
+
+onready var CAN_DMG_SHIP_DELAY = util.coalesce([null, ctrl.enemy03_can_dmg_ship_delay])
+onready var COL_WITH_SHIP_SPEED_MOD = util.coalesce([null, ctrl.enemy03_col_with_ship_speed_mod])  # perc
+
+onready var SHIP_COL_IMPULSE_MOD = util.coalesce([null, ctrl.enemy03_ship_col_impulse_mod])
+
+onready var MAX_HEALTH = util.coalesce([null, ctrl.enemy03_max_health])
+onready var DMG = util.coalesce([null, ctrl.enemy03_dmg])
+onready var DMG_TO_SELF_MOD = util.coalesce([null, ctrl.enemy03_dmg_to_self_mod])
+
+onready var WOUNDED_MAP = {
+	'high': {
+		'min': util.coalesce([null, ctrl.enemy03_wounded_map_high_min]),
+		'max': util.coalesce([null, ctrl.enemy03_wounded_map_high_max]),
+		'speed': util.coalesce([null, ctrl.enemy03_wounded_map_high_speed])
+	},
+	'low': {
+		'min': util.coalesce([null, ctrl.enemy03_wounded_map_low_min]),
+		'max': util.coalesce([null, ctrl.enemy03_wounded_map_low_max]),
+		'speed': util.coalesce([null, ctrl.enemy03_wounded_map_low_speed])
+	}
+}
+
+onready var TURRET_ROT_SPEED_MIN = util.coalesce([null, ctrl.enemy03_turret_rot_speed_min])
+onready var TURRET_ROT_SPEED_MAX = util.coalesce([null, ctrl.enemy03_turret_rot_speed_max])
+onready var CAN_SHOOT_MISSILE_DELAY = util.coalesce([null, ctrl.enemy03_can_shoot_missile_delay])
+
+onready var TURRET_IS_NEAR_WALL_MIN = util.coalesce([null, ctrl.enemy03_turret_is_near_wall_min])
+
+onready var SHIP_DETECT_RAY_DIST = util.coalesce([null, ctrl.enemy03_ship_detect_ray_dist])
+
+onready var DROP_VALUE_MIN = util.coalesce([null, ctrl.enemy03_drop_value_min])
+onready var DROP_VALUE_MAX = util.coalesce([null, ctrl.enemy03_drop_value_max])
 
 var move_state = ''  # 'floating' or 'rolling'
 
@@ -81,17 +126,6 @@ var cur_rotate_around_pos = Vector2()
 var cur_roll_dir = ''
 var cur_roll_dir_mod = 0
 var cur_rotated_enough_ray = null
-
-var FLOATING_LINEAR_SPEED_MIN = 10.0
-var FLOATING_LINEAR_SPEED_MAX = 100.0
-var FLOATING_ROTATE_SPEED_MIN = 0.01
-var FLOATING_ROTATE_SPEED_MAX = 0.2
-
-var ROLLING_CHANGE_DIR_CHANCE_MIN = 0.001  # perc
-var ROLLING_CHANGE_DIR_CHANCE_MAX = 0.300  # perc
-
-var ROLLING_MOV_MOD = 0.08
-var ROLLING_ROT_MOD = 4.0
 
 var floating_linear_speed = 0.0
 var floating_linear_dir = 0.0
@@ -103,22 +137,10 @@ var floating_rotate_dir_mod = 0
 var cur_holding_tile = null
 var cur_holding_tile_code = null
 
-var CAN_DMG_SHIP_DELAY = 1.0
-var COL_WITH_SHIP_SPEED_MOD = 0.80  # perc
-
-var SHIP_COL_IMPULSE_MOD = 80.0
 var can_dmg_ship = true
 
-var MAX_HEALTH = 80.0
-var DMG = 10.0
-var DMG_TO_SELF_MOD = 0.5
+onready var health = MAX_HEALTH
 
-var health = MAX_HEALTH
-
-var WOUNDED_MAP = {
-	'high': {'min': 0.0, 'max': 0.25, 'speed': 0.25},
-	'low': {'min': 0.25, 'max': 0.5, 'speed': 1.0}
-}
 var WOUNDED_COLOR = Color(1, 0.4, 0.4, 1)  # red
 var wounded_level = null
 
@@ -126,9 +148,6 @@ var turret_rot_speed = 0.8
 
 onready var turret = get_node('TurretNonSpatial/TurretPivot')
 
-var TURRET_ROT_SPEED_MIN = 2
-var TURRET_ROT_SPEED_MAX = 6
-var CAN_SHOOT_MISSILE_DELAY = 2.0
 var can_shoot_missile = false
 
 var turret_rot_dir = 0
@@ -141,7 +160,7 @@ onready var WALL_DETECTION_COL_RAYS_MAP = [
 	{'node': get_node('WallDetectionNonSpatial/WallDetectionPos/ColRayTR'),	'dir': 'top_right',		'dir_deg': 135},
 	{'node': get_node('WallDetectionNonSpatial/WallDetectionPos/ColRayR'),	'dir': 'right',			'dir_deg': 180},
 	{'node': get_node('WallDetectionNonSpatial/WallDetectionPos/ColRayBR'),	'dir': 'bottom_right',	'dir_deg': 225},
-	{'node': get_node('WallDetectionNonSpatial/WallDetectionPos/ColRayB'),	'dir': 'bottom',		'dir_deg': 270},
+	{'node': get_node('WallDetectionNonSpatial/WallDetectionPos/ColRayB'),	'dir': 'bottom',			'dir_deg': 270},
 	{'node': get_node('WallDetectionNonSpatial/WallDetectionPos/ColRayBL'),	'dir': 'bottom_left',	'dir_deg': 315},
 ]
 
@@ -151,12 +170,8 @@ var wall_detection_dir_deg = 0
 var turret_is_near_wall = false
 var turret_is_rot_towards_wall = false
 
-var TURRET_IS_NEAR_WALL_MIN = 90
-
 var turret_wall_deg_dif = 0
 var prev_turret_wall_deg_dif = 0
-
-var SHIP_DETECT_RAY_DIST = 300
 
 var is_detecting_ship = false
 
@@ -167,8 +182,6 @@ var missile_load_dec = 0.4
 var missile_load_max = 100.0
 var missile_load = 0.0
 
-var DROP_VALUE_MIN = 1
-var DROP_VALUE_MAX = 5
 var drop_value = 0
 
 

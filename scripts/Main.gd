@@ -1,10 +1,40 @@
 
 """
------
-TODOS
------
+---------------
+FINAL MVP TASKS
+---------------
 
-- Enemy03
+- DONE - adjust settings for windows <> mac
+
+- mothership
+
+- death / restart-level sequence
+
+- menus
+
+	- pause
+	
+	- level generation / settings
+	
+	- title
+
+order to complete:
+	- windows <> mac adjustments
+	- pause menu
+	- mothership
+	- death / level-restart
+	- level-generation / settings
+	- title
+
+
+
+----------
+NEXT TODOS
+----------
+
+
+
+
 
 -----
 NOTES
@@ -53,6 +83,13 @@ func _ready():
 #	var testing = $Utilities.anglesDif(5.0, 355.0)
 #
 #	print("testing = ", Engine.get_frames_drawn())
+
+#	var util = get_node('/root/Main/Utilities')
+#
+##	var var1 = _coalesce(null, '2')
+#	var var1 = util.coalesce([null, '2'])
+#
+#	print("var1 = ", var1)
 #
 #	return
 	

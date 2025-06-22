@@ -32,9 +32,8 @@ var ENEMY_GEN_LOGIC_SCN_REF = 'res://scenes/EnemyGenLogic.tscn'
 var SHIP_SCN_REF = 'res://scenes/Ship.tscn'
 var HUD_SCN_REF = 'res://scenes/Hud.tscn'
 
-#onready var SEED = util.rng.randi()
-#onready var SEED = hash('bender rules')
-onready var SEED = 2926405890
+onready var SEED = util.coalesce([null, ctrl.gameplay_seed])
+#onready var SEED = util.coalesce([util.rng.randi(), ctrl.gameplay_seed])
 
 var tile_map_logic = null
 var tile_map = null
@@ -53,8 +52,10 @@ var CAM_SHAKE_OFFSET_MOD = 200
 var CAM_SHAKE_TRAUMA_MOD = 2.2
 var CAM_SHAKE_MAX_OFFSET = 10
 
-var mini_map_test = true
-#var mini_map_test = false
+onready var mini_map_test = util.coalesce([null, ctrl.gameplay_mini_map_test])
+
+onready var SHIP_START_POS_X = util.coalesce([null, ctrl.gameplay_ship_start_pos_x])
+onready var SHIP_START_POS_Y = util.coalesce([null, ctrl.gameplay_ship_start_pos_y])
 
 
 ####################################################################################################
@@ -115,7 +116,7 @@ func addEnemies():
 func addShip():
 	ship = load(SHIP_SCN_REF).instance()
 	add_child(ship)
-	ship.global_position = Vector2(370, 780)
+	ship.global_position = Vector2(SHIP_START_POS_X, SHIP_START_POS_Y)
 
 
 func addCamera():

@@ -35,6 +35,7 @@ SEGMENT DIES BEHAVIOR
 extends KinematicBody2D
 
 onready var util = get_node('/root/Main/Utilities')
+onready var ctrl = get_node('/root/Main/Controls')
 onready var gameplay = get_node('/root/Main/Gameplay')
 onready var _enemies_ = get_node('/root/Main/Gameplay/Enemies')
 onready var ship = get_node('/root/Main/Gameplay/Ship')
@@ -49,32 +50,16 @@ onready var enemy02 = load('res://scenes/Enemy02.tscn')
 onready var spine = []
 onready var segments_map = {}
 
-onready var TAIL_SPIN_SPEED = 5
 onready var tail_spin_dir = util.getRandomItemFromArray([+1, -1])
 
 onready var SEGMENT_COUNT_MIN = 0
 onready var SEGMENT_COUNT_MAX = 21
 
-onready var SPEED_MIN = 100
-onready var SPEED_MAX = 60
-
-"""
-2023-07-04
-- Need to look into why changing these speed vars causes a crash from a split due to some kind of
-misalignment with the spine (likely has to do with the init() and spine generation).
-"""
-#onready var SPEED_MIN = 60
-#onready var SPEED_MAX = 40
-
-onready var INNER_TURN_SHARPNESS_MIN = 2.5
-onready var INNER_TURN_SHARPNESS_MAX = 1.5
 onready var SEGMENT_COUNT = null
 onready var SPEED = null
 onready var INNER_TURN_SHARPNESS = null
 
-onready var SPEED_TO_DIST_MODIFIER = 60.0
-
-onready var OUTER_TURN_DEG = 70
+onready var OUTER_TURN_DEG = 80  # 70
 
 onready var turn_dir = +1
 onready var cur_dir = 90
@@ -97,48 +82,74 @@ onready var prev_angle_to_target = 0.0
 onready var angle_to_target_is_expanding = null
 onready var is_approaching_target = null
 
-### if this value is too low (20 gave me problems) then enemy02 sometimes ends in an infinite
-### movement loop
-onready var GEN_NEW_TARGET_WITHIN_DIST = 40
-
-onready var NEW_TARGET_DIST_MIN = 200
-onready var NEW_TARGET_DIST_MAX = 400
-
 onready var is_touching_wall = false
 onready var can_get_new_target_from_col = true
 
-onready var CAN_GEN_NEW_TARGET_FROM_COL_DELAY = 2
-
-onready var COL_NEW_TARGET_ANGLE_EXPANSION = 15
-
 onready var collision = null
 
-onready var SEGMENT_MAX_HEALTH = 80.0
-
-### WOUNDED_MAP is not 100% dynamic.  To add additional levels, you'll have to add additional
-### wounded tweens.
-onready var WOUNDED_MAP = {
-	'high': {'min': 0.0, 'max': 0.25, 'speed': 0.25},
-	'low': {'min': 0.25, 'max': 0.5, 'speed': 1.0}
-}
-onready var WOUNDED_COLOR = Color(1, 0.4, 0.4, 1)  # red(ish)
+onready var segments_data = {}
 
 onready var HAS_TAKEN_DMG = false
-
-onready var segments_data = {}
 
 onready var LOWEST_SEGMENT_NAME = ''
 onready var HIGHEST_SEGMENT_NAME = ''
 
-onready var MIN_DIST_TO_SHIP_TO_TARGET = 1_000.0
-
-onready var CAN_DMG_SHIP_DELAY = 0.5
 onready var can_dmg_ship = true
-onready var DMG = 20.0
-onready var DMG_TO_SELF_MOD = 0.5
 
-#onready var SHIP_COL_IMPULSE_MOD = 80.0
-onready var SHIP_COL_IMPULSE_MOD = 20.0
+onready var WOUNDED_COLOR = Color(1, 0.4, 0.4, 1)  # red(ish)
+
+### if this value is too low (20 gave me problems) then enemy02 sometimes ends in an infinite
+### movement loop
+onready var GEN_NEW_TARGET_WITHIN_DIST = util.coalesce([null, ctrl.enemy02_gen_new_target_within_dist])
+
+onready var NEW_TARGET_DIST_MIN = util.coalesce([null, ctrl.enemy02_new_target_dist_min])
+onready var NEW_TARGET_DIST_MAX = util.coalesce([null, ctrl.enemy02_new_target_dist_max])
+
+onready var CAN_GEN_NEW_TARGET_FROM_COL_DELAY = util.coalesce([null, ctrl.enemy02_can_gen_new_target_from_col_delay])
+
+onready var COL_NEW_TARGET_ANGLE_EXPANSION = util.coalesce([null, ctrl.enemy02_col_new_target_angle_expansion])
+
+onready var SEGMENT_MAX_HEALTH = util.coalesce([null, ctrl.enemy02_segment_max_health])
+
+### WOUNDED_MAP is not 100% dynamic.  To add additional levels, you'll have to add additional
+### wounded tweens.
+onready var WOUNDED_MAP = {
+	'high': {
+		'min': util.coalesce([null, ctrl.enemy02_wounded_map_high_min]),
+		'max': util.coalesce([null, ctrl.enemy02_wounded_map_high_max]),
+		'speed': util.coalesce([null, ctrl.enemy02_wounded_map_high_speed])
+	},
+	'low': {
+		'min': util.coalesce([null, ctrl.enemy02_wounded_map_low_min]),
+		'max': util.coalesce([null, ctrl.enemy02_wounded_map_low_max]),
+		'speed': util.coalesce([null, ctrl.enemy02_wounded_map_low_speed])
+	}
+}
+
+onready var MIN_DIST_TO_SHIP_TO_TARGET = util.coalesce([null, ctrl.enemy02_min_dist_to_ship_to_target])
+
+onready var CAN_DMG_SHIP_DELAY = util.coalesce([null, ctrl.enemy02_can_dmg_ship_delay])
+
+onready var DMG = util.coalesce([null, ctrl.enemy02_dmg])
+onready var DMG_TO_SELF_MOD = util.coalesce([null, ctrl.enemy02_dmg_to_self_mod])
+
+onready var SHIP_COL_IMPULSE_MOD = util.coalesce([null, ctrl.enemy02_ship_col_impulse_mod])
+
+onready var TAIL_SPIN_SPEED = util.coalesce([null, ctrl.enemy02_tail_spin_speed])
+
+onready var SPEED_MIN = util.coalesce([null, ctrl.enemy02_speed_min])
+onready var SPEED_MAX = util.coalesce([null, ctrl.enemy02_speed_max])
+"""
+2023-07-04
+- Need to look into why changing these speed vars causes a crash from a split due to some kind of
+misalignment with the spine (likely has to do with the init() and spine generation).
+"""
+#onready var SPEED_MIN = 60
+#onready var SPEED_MAX = 40
+
+onready var SPEED_TO_DIST_MODIFIER = util.coalesce([null, ctrl.enemy02_speed_to_dist_modifier])
+onready var INNER_TURN_SHARPNESS_MIN = util.coalesce([null, ctrl.enemy02_inner_turn_sharpness_min])
+onready var INNER_TURN_SHARPNESS_MAX = util.coalesce([null, ctrl.enemy02_inner_turn_sharpness_max])
 
 
 ####################################################################################################

@@ -3,15 +3,19 @@
 extends KinematicBody2D
 
 onready var util = get_node('/root/Main/Utilities')
+onready var ctrl = get_node('/root/Main/Controls')
 onready var gameplay = get_node('/root/Main/Gameplay')
 onready var tile_map_logic = get_node('/root/Main/Gameplay/TileMapLogic')
 onready var tile_map = get_node('/root/Main/Gameplay/TileMap')
 
-var LIFETIME_WAIT_TIME = 10.0
-var COL_PARTICLES_LIFETIME = 1.0
+onready var LIFETIME_WAIT_TIME = util.coalesce([null, ctrl.bullet01_lifetime_wait_time])
+onready var COL_PARTICLES_LIFETIME = util.coalesce([null, ctrl.bullet01_col_particles_lifetime])
+onready var SPEED = util.coalesce([null, ctrl.bullet01_speed])
+onready var DMG = util.coalesce([null, ctrl.bullet01_dmg])
+
+onready var COL_PARTICLE_DISPLACEMENT_MOD = util.coalesce([null, ctrl.bullet01_col_particle_displacement_mod])
+
 var COLLISION_NORMAL_CLAMP = 0.01
-var SPEED = 450
-var DMG = 20
 
 var velocity = Vector2()
 
@@ -19,7 +23,6 @@ var velocity = Vector2()
 # collided with.
 var has_collided = false
 
-onready var COL_PARTICLE_DISPLACEMENT_MOD = 10
 
 
 ####################################################################################################
