@@ -28,6 +28,7 @@ onready var DROP_TEXTURE_MAP = {
 }
 
 var TILE_MAP_LOGIC_SCN_REF = 'res://scenes/tiles/TileMapLogic.tscn'
+var STRUCTURE_GEN_LOGIC_SCN_REF = 'res://scenes/StructureGenLogic.tscn'
 var ENEMY_GEN_LOGIC_SCN_REF = 'res://scenes/EnemyGenLogic.tscn'
 var SHIP_SCN_REF = 'res://scenes/Ship.tscn'
 var HUD_SCN_REF = 'res://scenes/Hud.tscn'
@@ -37,6 +38,7 @@ onready var SEED = util.coalesce([null, ctrl.gameplay_seed])
 
 var tile_map_logic = null
 var tile_map = null
+var structure_gen_logic = null
 var enemy_gen_logic = null
 var ship = null
 var camera = null
@@ -57,6 +59,8 @@ onready var mini_map_test = util.coalesce([null, ctrl.gameplay_mini_map_test])
 onready var SHIP_START_POS_X = util.coalesce([null, ctrl.gameplay_ship_start_pos_x])
 onready var SHIP_START_POS_Y = util.coalesce([null, ctrl.gameplay_ship_start_pos_y])
 
+onready var frame_count = 0
+
 
 ####################################################################################################
 
@@ -66,7 +70,19 @@ func _ready():
 	print("SEED = ", SEED)
 	util.rng.seed = SEED
 	
+	"""
+	level generation order:
+		addTileMap()
+		addStructures()
+		addShip()
+		addEnemies()
+		AddCamera()
+		AddHud()
+	"""
+	
 	addTileMap()
+	
+#	addStructures()
 	
 	addShip()
 	
@@ -75,6 +91,9 @@ func _ready():
 	addCamera()
 	
 	addHud()
+	
+	$InteractiveTerrain/MothershipLandingPlatform.ship = ship
+	$InteractiveTerrain/MothershipLandingPlatform.hud = hud
 	
 	if mini_map_test:
 		remove_child(hud)
@@ -85,9 +104,18 @@ func _ready():
 		remove_child(get_node('MineralTileMap'))
 	else:
 		remove_child(get_node('MiniTileMap'))
+	
+#	hud.setRectsXPosXSizeForSomeGodForesakenReason()
+	
+	setShipControlType('classic_asteroids')
+#	setShipControlType('shuffle_board')
+	
+#	ship.setControlType('shuffle_board')
 
 
 func _process(delta):
+	
+	frame_count += 1
 	
 	if cam_shake_trauma:
 		cam_shake_trauma = max(cam_shake_trauma - (CAM_SHAKE_DECAY * delta), 0)
@@ -103,6 +131,23 @@ func addTileMap():
 	tile_map_logic.noise.seed = SEED
 	add_child(tile_map_logic)
 	tile_map = get_node('TileMap')
+
+
+
+#func addStructures():
+#
+#	structure_gen_logic = load(STRUCTURE_GEN_LOGIC_SCN_REF).instance()
+#	add_child(structure_gen_logic)
+#
+#	structure_gen_logic.terraformForMotherShip()
+#
+#	tile_map_logic.readyAfterNoiseAndTileCodes()
+#
+##	structure_gen_logic.genMotherShip()
+	
+
+
+
 
 
 func addEnemies():
@@ -140,6 +185,26 @@ func addCamera():
 func addHud():
 	hud = load(HUD_SCN_REF).instance()
 	add_child(hud)
+
+
+func hudAlert(_msg:String, _font_size:int=14) -> void:
+	"""
+	i put this hud.alert() call in gameplay because the Hud is generated/loaded after many of the other
+	systems.  so it can be annoying having to manually detect the Hud Node in every new object or system
+	that is created, so i am going to put the Hud externally called functions here, where Hud is already
+	manually detected and almost everything is a child of Gameplay
+	"""
+	hud.alert(_msg, _font_size)
+
+
+func hudLandingSequenceContainerUp() -> void:
+	""" same note as hudAlert() ^ """
+	hud.landingSequenceContainerUp()
+
+
+func hudLandingSequenceContainerDown() -> void:
+	""" same note as hudAlert() ^ """
+	hud.landingSequenceContainerDown()
 
 
 ####################################################################################################
@@ -238,6 +303,30 @@ func checkForEnemy03ToFloating(_tile_destroyed:String) -> void:
 			for enemy_cur_holding_tile in enemy_cur_holding_tiles:
 				if enemy_cur_holding_tile == _tile_destroyed:
 					enemy.setMoveStateToFloating()
+
+
+
+
+
+
+
+
+
+
+func setShipControlType(_type:String) -> void:
+	ship.CONTROL_TYPE = _type
+	
+#	ship.rotation_degrees = 0
+#	ship.global_rotation_degrees = 0
+	
+	match _type:
+		'classic_asteroids':
+			hud.control_type_texture_rect.texture = hud.control_type_classic_asteroids_texture
+
+		'shuffle_board':
+			hud.control_type_texture_rect.texture = hud.control_type_shuffle_board_texture
+		_:
+			util.throwError("Gameplay.setShipControlTypeTexture(_type) accepts _type='classic_asteroids' or _type='shuffle_board'")
 
 
 

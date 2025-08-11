@@ -24,7 +24,19 @@ BEHAVIOR NOTES
 TODOS
 -----
 
+2025-07-04
 
+updates for when Enemy03 goes underground / mole-mode...
+
+- need to add a sensor which just simply checks to see if the center of Enemy03 is inside a terrain
+tile or not.  then collect data over time and add a timer to see how_long_underground
+
+- while underground / mole-mode, do small amounts of damage to terrain tiles that that Enemy03 "is
+behind"
+
+- code soem "break through" activity where if Enemy03 is underground for too long, just simply teleport
+itself to above ground but in "float" state floating back towards previous location (add some form of
+particle animation so it won't look so cheap)
 
 -------------------
 LOW PRIORITY TO DOS

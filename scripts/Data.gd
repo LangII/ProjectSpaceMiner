@@ -49,3 +49,5 @@ extends Node
 var tiles = {}
 
 var drops_collected = {}
+
+#var mothership_landing_site = {}

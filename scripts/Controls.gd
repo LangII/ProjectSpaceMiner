@@ -6,12 +6,12 @@ extends Node
 #############################
 
 # scripts/Gameplay.gd
-onready var gameplay_seed = hash('Beastie Boys')
+onready var gameplay_seed = hash('Owen is Awesome!')
 #onready var gameplay_seed = 2926405890
-#onready var gameplay_mini_map_test = true
-onready var gameplay_mini_map_test = false
-onready var gameplay_ship_start_pos_x = 370
-onready var gameplay_ship_start_pos_y = 780
+onready var gameplay_mini_map_test = true
+#onready var gameplay_mini_map_test = false
+onready var gameplay_ship_start_pos_x = 200
+onready var gameplay_ship_start_pos_y = 400
 
 # scripts/tiles/BaseTileMapLogic.gd
 onready var basetilemaplogic_tile_map_width = 200
@@ -23,10 +23,10 @@ onready var basetilemaplogic_noise_lacunarity = 2.0					# 0.1 <= X <= 4.0
 onready var basetilemaplogic_boarder_wall_tile_level = 1				# 1	  <= X <= 3
 onready var basetilemaplogic_boarder_wall_noise_max_height = 10
 onready var basetilemaplogic_boarder_wall_noise_octaves = 2			# 1   <= X <= 9 (edge distortion)
-onready var basetilemaplogic_boarder_wall_noise_period = 40.0			# 0.1 <= X <= 256.0 (noise size)
+onready var basetilemaplogic_boarder_wall_noise_period = 30.0			# 0.1 <= X <= 256.0 (noise size)
 onready var basetilemaplogic_boarder_wall_noise_persistence = 0.9		# 0.0 <= X <= 1.0
 onready var basetilemaplogic_boarder_wall_noise_lacunarity = 3.5		# 0.1 <= X <= 4.0
-onready var basetilemaplogic_safe_zone_start_height = 50
+onready var basetilemaplogic_safe_zone_start_height = 50  # 50
 onready var basetilemaplogic_tile_01_health = 80
 onready var basetilemaplogic_tile_02_health = 500
 onready var basetilemaplogic_tile_03_health = 2000
@@ -63,9 +63,9 @@ onready var mineraltilemaplogic_mineral_map_03_vein_size_max = 8
 onready var enemygenlogic_gen_map_enemy_01_spawn_attempts_per_botton_perc_100_min = 5
 onready var enemygenlogic_gen_map_enemy_01_spawn_attempts_per_botton_perc_100_max = 10
 onready var enemygenlogic_gen_map_enemy_01_spawn_attempts_per_botton_perc_050_min = 5
-onready var enemygenlogic_gen_map_enemy_01_spawn_attempts_per_botton_perc_050_max = 10
+onready var enemygenlogic_gen_map_enemy_01_spawn_attempts_per_botton_perc_050_max = 20  # 10
 onready var enemygenlogic_gen_map_enemy_01_spawn_attempts_per_botton_perc_025_min = 5
-onready var enemygenlogic_gen_map_enemy_01_spawn_attempts_per_botton_perc_025_max = 10
+onready var enemygenlogic_gen_map_enemy_01_spawn_attempts_per_botton_perc_025_max = 20  # 10
 onready var enemygenlogic_gen_map_enemy_01_near_coords_dist_min = 2  # dists by tile
 onready var enemygenlogic_gen_map_enemy_01_near_coords_dist_max = 8
 onready var enemygenlogic_gen_map_enemy_01_home_radius_min = 4
@@ -75,9 +75,9 @@ onready var enemygenlogic_gen_map_enemy_01_count_per_swarm_max = 4
 onready var enemygenlogic_gen_map_enemy_02_spawn_attempts_per_botton_perc_100_min = 2
 onready var enemygenlogic_gen_map_enemy_02_spawn_attempts_per_botton_perc_100_max = 10
 onready var enemygenlogic_gen_map_enemy_02_spawn_attempts_per_botton_perc_050_min = 2
-onready var enemygenlogic_gen_map_enemy_02_spawn_attempts_per_botton_perc_050_max = 10
+onready var enemygenlogic_gen_map_enemy_02_spawn_attempts_per_botton_perc_050_max = 20  # 10
 onready var enemygenlogic_gen_map_enemy_02_spawn_attempts_per_botton_perc_025_min = 2
-onready var enemygenlogic_gen_map_enemy_02_spawn_attempts_per_botton_perc_025_max = 5
+onready var enemygenlogic_gen_map_enemy_02_spawn_attempts_per_botton_perc_025_max = 10  # 5
 onready var enemygenlogic_gen_map_enemy_02_near_coords_dist_min = 4  # dists by tile
 onready var enemygenlogic_gen_map_enemy_02_near_coords_dist_max = 8
 onready var enemygenlogic_gen_map_enemy_02_segment_count_min = 4
@@ -85,21 +85,21 @@ onready var enemygenlogic_gen_map_enemy_02_segment_count_max = 20
 onready var enemygenlogic_gen_map_enemy_03_spawn_attempts_per_botton_perc_100_min = 1
 onready var enemygenlogic_gen_map_enemy_03_spawn_attempts_per_botton_perc_100_max = 3
 onready var enemygenlogic_gen_map_enemy_03_spawn_attempts_per_botton_perc_050_min = 2
-onready var enemygenlogic_gen_map_enemy_03_spawn_attempts_per_botton_perc_050_max = 6
+onready var enemygenlogic_gen_map_enemy_03_spawn_attempts_per_botton_perc_050_max = 12  # 6
 onready var enemygenlogic_gen_map_enemy_03_spawn_attempts_per_botton_perc_025_min = 2
-onready var enemygenlogic_gen_map_enemy_03_spawn_attempts_per_botton_perc_025_max = 10
+onready var enemygenlogic_gen_map_enemy_03_spawn_attempts_per_botton_perc_025_max = 20  # 10
 onready var enemygenlogic_gen_map_enemy_03_near_coords_dist_min = 2  # dists by tile
 onready var enemygenlogic_gen_map_enemy_03_near_coords_dist_max = 4
-onready var enemygenlogic_gen_enemy01_type = 'off'  # 'auto', 'manual', or 'off'
+onready var enemygenlogic_gen_enemy01_type = 'auto'  # 'auto', 'manual', or 'off'
 onready var enemygenlogic_gen_enemy01_manual_x = 10
 onready var enemygenlogic_gen_enemy01_manual_y = 20
 onready var enemygenlogic_gen_enemy01_manual_per_swarm_count = 2
 onready var enemygenlogic_gen_enemy01_manual_home_radius = 4
-onready var enemygenlogic_gen_enemy02_type = 'off'  # 'auto', 'manual', or 'off'
+onready var enemygenlogic_gen_enemy02_type = 'auto'  # 'auto', 'manual', or 'off'
 onready var enemygenlogic_gen_enemy02_manual_x = 10
 onready var enemygenlogic_gen_enemy02_manual_y = 30
 onready var enemygenlogic_gen_enemy02_manual_segment_count = 12
-onready var enemygenlogic_gen_enemy03_type = 'manual'  # 'auto', 'manual', or 'off'
+onready var enemygenlogic_gen_enemy03_type = 'auto'  # 'auto', 'manual', or 'off'
 onready var enemygenlogic_gen_enemy03_manual_x = 10
 onready var enemygenlogic_gen_enemy03_manual_y = 40
 onready var enemygenlogic_gen_enemy03_manual_dir = 130
@@ -122,7 +122,7 @@ onready var ship_col_dmg_speed_modifier = 0.75
 onready var ship_physical_armor = 0.02
 onready var ship_drop_pick_up_radius = 100
 onready var ship_enemy_area_col_strength_mod = 800
-onready var ship_control_type = 'shuffle_board'  # 'classic_asteroids' or 'shuffle_board'
+onready var ship_control_type = 'classic_asteroids'  # 'classic_asteroids' or 'shuffle_board'
 
 # scripts/Hud.gd
 onready var hud_drop_display_count = 3

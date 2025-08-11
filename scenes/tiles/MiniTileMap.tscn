@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=2]
 
-[ext_resource path="res://resources/MiniTileSet4.tres" type="TileSet" id=1]
+[ext_resource path="res://resources/MiniTileSet6.tres" type="TileSet" id=1]
 
 [node name="MiniTileMap" type="TileMap"]
 tile_set = ExtResource( 1 )

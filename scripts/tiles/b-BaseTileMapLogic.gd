@@ -1,5 +1,5 @@
 
-extends Node
+extends 'res://scripts/tiles/a-MothershipTileDataTileMapLogic.gd'
 
 onready var main = get_node('/root/Main')
 onready var util = get_node('/root/Main/Utilities')
@@ -223,11 +223,14 @@ func initTileDataContainer():
 				'x': x,
 				'pos': [y, x],
 				'global_pos_center': tile_map.map_to_world(Vector2(x, y)) + (tile_map.cell_size / 2),
+				'noise': null,
 				'tile_level': 0,
 				'tile_code': 0,
 				'mini_tile_code': 0,
-				'noise': null,
 				'is_mineral': false,
+				'is_terraform': false,
+				'is_fixture': false,
+				'fixture_id': null,
 				'mineral_type': null,
 				'mineral_drop_value': 0
 			}
@@ -291,13 +294,39 @@ func setTileDataTileLevelAndTileCode(k):
 			data.tiles[k]['mini_tile_code'] = ln['MINI_TILE_CODE']
 
 
+func setTileMapCells(k, y, x):
+	
+	# this logic will have to be revisited.  for now, the logic for all Fixtures is that if 1 of their
+	# Tiles is destroyed, the entire Fixture is destroyed (Mothership).  later i want to have "destructible"
+	# Fixtures, where if 1 Tile is destroyed, the Fixture can still remain in game.  so this will be
+	# relevant due to tile updates from neighbor destruction
+	if data.tiles[k]['is_fixture']:  return
+	
+	tile_map.set_cell(x, y, data.tiles[k]['tile_code'])
+	mini_tile_map.set_cell(x, y, data.tiles[k]['mini_tile_code'])
+
+
 func setTileDataHealth(k):
 	var tile_health
-	match data.tiles[k]['tile_level']:
-		0:  tile_health = null
-		1:  tile_health = TILE_01_HEALTH
-		2:  tile_health = TILE_02_HEALTH
-		3:  tile_health = TILE_03_HEALTH
+	match data.tiles[k]['is_fixture']:
+		false:
+			match data.tiles[k]['tile_level']:
+				0:  tile_health = null
+				1:  tile_health = TILE_01_HEALTH
+				2:  tile_health = TILE_02_HEALTH
+				3:  tile_health = TILE_03_HEALTH
+		true:
+			var fixture_tile = null
+			
+			# as other fixtures will be added, fixture_tile_data will have to be expanded to
+			# include OTHER_FIXTURE_TILE_DATA
+			var fixture_tile_data = MOTHERSHIP_TILE_DATA
+			
+			for tile_data in fixture_tile_data:
+				if tile_data['fixture_id'] == data.tiles[k]['fixture_id']:
+					fixture_tile = tile_data
+					break
+			tile_health = fixture_tile['health']
 	data.tiles[k]['max_health'] = tile_health
 	data.tiles[k]['health'] = tile_health
 
@@ -308,36 +337,69 @@ func setTileDataDestructs(k):
 
 
 func setTileDataNeighborPos(k, y, x):
+	
+	# 1st set pos values
 	data.tiles[k]['neighbors_pos'] = {
 		'N': [y - 1, x],
 		'E': [y, x + 1],
 		'S': [y + 1, x],
 		'W': [y, x - 1]
 	}
+	
+	# 2nd, if neighbor_pos is "off map", set value to null
 	if y == 0:  data.tiles[k]['neighbors_pos']['N'] = null
 	if x == 0:  data.tiles[k]['neighbors_pos']['W'] = null
 	if y == TILE_MAP_HEIGHT - 1:  data.tiles[k]['neighbors_pos']['S'] = null
 	if x == TILE_MAP_WIDTH - 1:  data.tiles[k]['neighbors_pos']['E'] = null
 
 
-func setTileDataNeighborTileLevelAndCode(k):
+func setTileDataNeighborTileLevelTileCodeIsFixture(k):
+	
 	data.tiles[k]['neighbors_tile_level'] = {}
 	data.tiles[k]['neighbors_tile_code'] = {}
+	data.tiles[k]['neighbors_is_fixture'] = {}
 	for dir in ['N', 'E', 'S', 'W']:
+		
+		# set neighbor tile values using neighbor_pos as key of data.tiles
 		var neighbor_pos = data.tiles[k]['neighbors_pos'][dir]
 		if neighbor_pos:
 			data.tiles[k]['neighbors_tile_level'][dir] = data.tiles['%s,%s' % neighbor_pos]['tile_level']
 			data.tiles[k]['neighbors_tile_code'][dir] = data.tiles['%s,%s' % neighbor_pos]['tile_code']
+			data.tiles[k]['neighbors_is_fixture'][dir] = data.tiles['%s,%s' % neighbor_pos]['is_fixture']
+		
+		# set values to null if neighbor tile is "off map"
 		else:
 			data.tiles[k]['neighbors_tile_level'][dir] = null
 			data.tiles[k]['neighbors_tile_code'][dir] = null
+			data.tiles[k]['neighbors_is_fixture'][dir] = null
 
 
-func setTileDataCol(k):
+func setTileDataIsCol(k):
+	"""
+	tiles that CAN BE col tiles:
+		terrain tiles
+		fixture tiles
+	tiles that, as neighbors, DETERMINE IF A TILE IS a col tile:
+		air tiles
+		fixture tiles
+	so FIXTURE tiles can be COL tiles and are considered in determining if a tile is a col tile or not.
+	this makes for odd logic, but is necessary in ensuring that terrain "that support" fixture tiles,
+	remain as col tiles even "under the surface"
+	"""
+	
+	# set is_col to false
 	data.tiles[k]['is_col'] = false
+	
+	# if tile is air (tile_code = 0), this tile stays with is_col = false
 	if data.tiles[k]['tile_code'] == 0:  return
+	
+	# check to see if any neighbors are air (tile_code = 0) or are a fixture tile, if a neighbor is
+	# air or a fixture, then this tile is_col
 	for dir in ['N', 'E', 'S', 'W']:
-		if data.tiles[k]['neighbors_tile_code'][dir] == 0:
+		if (
+			data.tiles[k]['neighbors_tile_code'][dir] == 0
+			or data.tiles[k]['neighbors_is_fixture'][dir] == true
+		):
 			data.tiles[k]['is_col'] = true
 			break
 
@@ -389,28 +451,37 @@ func setTileDataEdgeDirCode(k):
 	data.tiles[k]['edge_dir_code'] = edge_dir_code
 
 
-func setTileMapCells(k, y, x):
-	tile_map.set_cell(x, y, data.tiles[k]['tile_code'])
-	mini_tile_map.set_cell(x, y, data.tiles[k]['mini_tile_code'])
-
-
 func getModTypeCount(type, k):
 	# type = 'air' or 'edge'
+	
 	var count_type = '%s_count' % [type]
 	var dir_code_type = '%s_dir_code' % [type]
 	var mod_air_count = ''
+	
 	if data.tiles[k][count_type] == 2:
-		if data.tiles[k][dir_code_type] in ['NS', "EW"]:  mod_air_count = '2pa'
-		else:  mod_air_count = '2pe'
-	else:  mod_air_count = str(data.tiles[k][count_type])
+		if data.tiles[k][dir_code_type] in ['NS', "EW"]:
+			mod_air_count = '2pa'
+		else:
+			mod_air_count = '2pe'
+	else:
+		mod_air_count = str(data.tiles[k][count_type])
+	
 	return mod_air_count
 
 
 
 func updateTileMapColTile(k, y, x):
+	
 	if not data.tiles[k]['is_col']:  return
+	
+	# this logic will have to be revisited.  for now, the logic for all Fixtures is that if 1 of their
+	# Tiles is destroyed, the entire Fixture is destroyed (Mothership).  later i want to have "destructible"
+	# Fixtures, where if 1 Tile is destroyed, the Fixture can still remain in game
+	if data.tiles[k]['is_fixture']:  return
+	
 	var mod_air_count = getModTypeCount('air', k)
-	if data.tiles[k]['is_mineral']:  mod_air_count = '4'
+	if data.tiles[k]['is_mineral']:
+		mod_air_count = '4'
 	var tile_ref = TILE_COL_MAP[data.tiles[k]['tile_level']][mod_air_count]['TILE_REF']
 	var dir_code_ref = TILE_COL_MAP[data.tiles[k]['tile_level']][mod_air_count]['DIR_CODE_REF']
 	if dir_code_ref:
@@ -551,8 +622,8 @@ func areaTileUpdateFromCol(k):
 		var n_y = n_pos[0]
 		var n_x = n_pos[1]
 		setTileDataTileLevelAndTileCode(n_k)
-		setTileDataNeighborTileLevelAndCode(n_k)
-		setTileDataCol(n_k)
+		setTileDataNeighborTileLevelTileCodeIsFixture(n_k)
+		setTileDataIsCol(n_k)
 		setTileDataAirCount(n_k)
 		setTileDataAirDirCode(n_k)
 		setTileDataEdge(n_k)
@@ -563,6 +634,3 @@ func areaTileUpdateFromCol(k):
 		updateTileMapEdgeTile(n_k, n_y, n_x)
 		updateTileDataDestructTileLevel(n_k)
 		updateDestructTileMapCell(n_k, n_y, n_x)
-
-
-

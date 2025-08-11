@@ -1,5 +1,12 @@
 
 """
+
+ELEVATOR PITCH:
+Going for a Gradius-like / Terraria-like shmup.  Using simplex noise procedurally generated levels,
+for an Exploratory-like, and Adventure-like, procedurally generated Gradius.
+
+
+
 ---------------
 FINAL MVP TASKS
 ---------------
@@ -7,8 +14,6 @@ FINAL MVP TASKS
 - DONE - adjust settings for windows <> mac
 
 - mothership
-
-- death / restart-level sequence
 
 - menus
 
@@ -18,13 +23,16 @@ FINAL MVP TASKS
 	
 	- title
 
+- death / restart-level sequence
+
 order to complete:
 	- windows <> mac adjustments
-	- pause menu
 	- mothership
+	- pause menu
+	- level-generation / settings menu
 	- death / level-restart
-	- level-generation / settings
-	- title
+	- title menu
+
 
 
 
@@ -90,8 +98,12 @@ func _ready():
 #	var var1 = util.coalesce([null, '2'])
 #
 #	print("var1 = ", var1)
-#
+	
+#	print("is_clockwise() = ", util.is_clockwise(-170, 11))
+
 #	return
+	
+
 	
 	################################################################################################
 	
@@ -99,6 +111,13 @@ func _ready():
 	add_child(gameplay)
 	
 	Input.set_custom_mouse_cursor(load('res://sprites/cursor.png'), 0, Vector2(20, 20))
+
+
+
+
+
+
+
 
 ####################################################################################################
 
@@ -118,6 +137,26 @@ func _process(_delta):
 		
 		var mouse_pos_tile = get_node('Gameplay/TileMap').world_to_map(global_mouse_position)
 		print("mouse_pos_tile = ", mouse_pos_tile)
+		
+		var data = get_node('/root/Main/Data')
+		var k = '%s,%s' % [mouse_pos_tile.y, mouse_pos_tile.x]
+		print("mouse tile = ", data.tiles[k])
+		print("")
+		
+		var gameplay = get_node('Gameplay')
+		gameplay.hudAlert("This Is An Alert...")
+
+
+
+
+
+		
+#		print("FOCUS TILES:\n")
+#
+#		for tile in ['29,22', '29,23', '29,24', '30,23']:
+#			print("tile = ", tile)
+#			print("data.tiles[tile] = ", data.tiles[tile])
+#			print("")
 		
 #		var ship = get_node('Gameplay/Ship')
 #

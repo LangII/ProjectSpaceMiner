@@ -15,7 +15,7 @@ there that were generated.  Investigate why.
 """
 
 
-extends 'res://scripts/tiles/BaseTileMapLogic.gd'
+extends 'res://scripts/tiles/b-BaseTileMapLogic.gd'
 
 
 onready var MINERAL_MAP = {

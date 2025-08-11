@@ -52,6 +52,8 @@ script = ExtResource( 1 )
 
 [node name="Drops" type="Node" parent="."]
 
+[node name="InteractiveTerrain" type="Node" parent="."]
+
 [node name="ShipToTerrainColParticles2D" type="Particles2D" parent="."]
 emitting = false
 amount = 10

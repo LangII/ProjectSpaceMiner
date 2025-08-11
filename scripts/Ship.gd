@@ -67,6 +67,8 @@ var STUNNED_DELAY = 0.5
 var is_stunned = false
 
 
+onready var prev_body_global_rot_deg = 0.0
+onready var rotate_dir = 'right'  # 'right' or 'left' (clockwise or counter-clockwise)
 
 
 
@@ -130,6 +132,9 @@ func setPrevFrameDir(state):
 	prev_frame_dir = prev_frame_dir if prev_frame_dir > 0 else 360 + prev_frame_dir
 
 
+
+
+
 func applyMoveAccCA():
 	if Input.is_action_pressed('up') and Input.is_action_pressed('down') and not is_stunned:
 		applied_force = Vector2()
@@ -137,22 +142,60 @@ func applyMoveAccCA():
 	elif Input.is_action_pressed('up') and not is_stunned:
 		applied_force = Vector2(0, -MOVE_ACC).rotated(rotation)
 		linear_damp = 0
-	elif Input.is_action_pressed('down') and not is_stunned:
-		applied_force = -Vector2(0, -MOVE_ACC).rotated(rotation)
-		linear_damp = 0
+		
+		
+#		$ExhaustParticles2D.restart()
+	
+#	elif Input.is_action_pressed('down') and not is_stunned:
+#		applied_force = -Vector2(0, -MOVE_ACC).rotated(rotation)
+#		linear_damp = 0
+	
 	else:
 		applied_force = Vector2()
 		linear_damp = 0
+	
+	
+	
+	if Input.is_action_just_pressed('up'):
+		$Body/Forward1ExhaustParticles2D.emitting = true
+		$Body/Forward2ExhaustParticles2D.emitting = true
+	if Input.is_action_just_released('up'):
+		$Body/Forward1ExhaustParticles2D.emitting = false
+		$Body/Forward2ExhaustParticles2D.emitting = false
+
+
 
 
 func applyMoveMaxSpeed():
 	if linear_velocity.length() > MOVE_MAX_SPEED:  applied_force = linear_velocity * -MOVE_MAX_SPEED_RESISTANCE
 
 
+
+
+
+
 func applySpinAcc():
 	if Input.is_action_pressed('right'):  applied_torque = +SPIN_ACC
 	elif Input.is_action_pressed('left'):  applied_torque = -SPIN_ACC
 	else:  applied_torque = 0
+	
+	
+	
+	if Input.is_action_just_pressed('right'):
+		$Body/Right1ExhaustParticles2D.emitting = true
+		$Body/Right2ExhaustParticles2D.emitting = true
+	if Input.is_action_just_released('right'):
+		$Body/Right1ExhaustParticles2D.emitting = false
+		$Body/Right2ExhaustParticles2D.emitting = false
+	
+	if Input.is_action_just_pressed('left'):
+		$Body/Left1ExhaustParticles2D.emitting = true
+		$Body/Left2ExhaustParticles2D.emitting = true
+	if Input.is_action_just_released('left'):
+		$Body/Left1ExhaustParticles2D.emitting = false
+		$Body/Left2ExhaustParticles2D.emitting = false
+
+
 
 
 func applySpinDamp():
@@ -200,10 +243,217 @@ func applyMoveAccSB() -> void:
 	else:
 		applied_force = Vector2()
 		linear_damp = 0
+	
+#	var ship_looking_at = int(rad2deg($Body.rotation)) % 360
+#	var ship_looking_at = $Body.global_rotation_degrees
+#	var ship_looking_at = deg2rad(prev_frame_dir)
+	
+#	print("\nship_looking_at = ", ship_looking_at)
+
+	match util.isClockwise(prev_body_global_rot_deg, $Body.global_rotation_degrees):
+		true: rotate_dir = 'right'
+		false: rotate_dir = 'left'
+	
+	print("rotate_dir = ", rotate_dir)
+	
+#	print("frames_drawn = ", Engine.get_frames_drawn())
+	
+	if Input.is_action_pressed('up'):
+		
+		if (
+			($Body.global_rotation_degrees >= 0 and $Body.global_rotation_degrees <= 30)
+			or ($Body.global_rotation_degrees < 0 and $Body.global_rotation_degrees >= -30)
+		):
+		
+			$Body/Right1ExhaustParticles2D.emitting = false
+			$Body/Right2ExhaustParticles2D.emitting = false
+			$Body/Left1ExhaustParticles2D.emitting = false
+			$Body/Left2ExhaustParticles2D.emitting = false
+		
+			$Body/Forward1ExhaustParticles2D.emitting = true
+			$Body/Forward2ExhaustParticles2D.emitting = true
+		
+		else:
+			
+			match rotate_dir:
+				'right':
+					$Body/Right1ExhaustParticles2D.emitting = true
+					$Body/Right2ExhaustParticles2D.emitting = true
+				'left':
+					$Body/Left1ExhaustParticles2D.emitting = true
+					$Body/Left2ExhaustParticles2D.emitting = true
+		
+	if Input.is_action_just_released('up'):
+		
+		$Body/Forward1ExhaustParticles2D.emitting = false
+		$Body/Forward2ExhaustParticles2D.emitting = false
+		
+		$Body/Right1ExhaustParticles2D.emitting = false
+		$Body/Right2ExhaustParticles2D.emitting = false
+		$Body/Left1ExhaustParticles2D.emitting = false
+		$Body/Left2ExhaustParticles2D.emitting = false
+
+	if (
+		Input.is_action_pressed('down')
+		and (
+			($Body.global_rotation_degrees <= 180 and $Body.global_rotation_degrees >= 150)
+			or ($Body.global_rotation_degrees >= -180 and $Body.global_rotation_degrees <= -150)
+		)
+	):
+		$Body/Forward1ExhaustParticles2D.emitting = true
+		$Body/Forward2ExhaustParticles2D.emitting = true
+	if Input.is_action_just_released('down'):
+		$Body/Forward1ExhaustParticles2D.emitting = false
+		$Body/Forward2ExhaustParticles2D.emitting = false
+	
+	if (
+		Input.is_action_pressed('left')
+		and (
+			($Body.global_rotation_degrees >= -120 and $Body.global_rotation_degrees <= -60)
+#			or ($Body.global_rotation_degrees < 0 and $Body.global_rotation_degrees >= -30)
+		)
+	):
+		$Body/Forward1ExhaustParticles2D.emitting = true
+		$Body/Forward2ExhaustParticles2D.emitting = true
+	if Input.is_action_just_released('left'):
+		$Body/Forward1ExhaustParticles2D.emitting = false
+		$Body/Forward2ExhaustParticles2D.emitting = false
+	
+	if (
+		Input.is_action_pressed('right')
+		and (
+			($Body.global_rotation_degrees >= 60 and $Body.global_rotation_degrees <= 120)
+#			or ($Body.global_rotation_degrees < 0 and $Body.global_rotation_degrees >= -30)
+		)
+	):
+		$Body/Forward1ExhaustParticles2D.emitting = true
+		$Body/Forward2ExhaustParticles2D.emitting = true
+	if Input.is_action_just_released('right'):
+		$Body/Forward1ExhaustParticles2D.emitting = false
+		$Body/Forward2ExhaustParticles2D.emitting = false
+	
+	"""
+	
+	TURNOVER NOTES:
+		
+		- working on Exhaust Particle Emission for Ship.CONTROL_TYPE = 'shuffle_board'
+	
+	"""
+	
+	if gameplay.frame_count % 3 == 0:
+		prev_body_global_rot_deg = $Body.global_rotation_degrees
+	
+	
+	
+#	if Input.is_action_just_pressed('up'):
+#
+#		match rotate_dir:
+#
+#			'right':
+#				$Body/Right1ExhaustParticles2D.emitting = true
+#				$Body/Right2ExhaustParticles2D.emitting = true
+#
+#			'left':
+#				$Body/Left1ExhaustParticles2D.emitting = true
+#				$Body/Left2ExhaustParticles2D.emitting = true
+#
+#	if Input.is_action_just_released('up'):
+#		$Body/Right1ExhaustParticles2D.emitting = false
+#		$Body/Right2ExhaustParticles2D.emitting = false
+#		$Body/Left1ExhaustParticles2D.emitting = false
+#		$Body/Left2ExhaustParticles2D.emitting = false
+	
+	
+#	if (
+#		Input.is_action_pressed('up')
+#		and (
+#			($Body.global_rotation_degrees >= 30)
+#			or ($Body.global_rotation_degrees <= -30)
+#		)
+#	):
+#		$Body/Right1ExhaustParticles2D.emitting = true
+#		$Body/Right2ExhaustParticles2D.emitting = true
+#		$Body/Left1ExhaustParticles2D.emitting = true
+#		$Body/Left2ExhaustParticles2D.emitting = true
+	
+	
+#	if (
+#		Input.is_action_pressed('up')
+#		and (
+#			($Body.global_rotation_degrees < 30)
+#			or ($Body.global_rotation_degrees <= -30)
+#		)
+#	):
+#		$Body/Right1ExhaustParticles2D.emitting = true
+#		$Body/Right2ExhaustParticles2D.emitting = true
+#		$Body/Left1ExhaustParticles2D.emitting = true
+#		$Body/Left2ExhaustParticles2D.emitting = true
+	
+	
+#	if Input.is_action_just_released('up'):
+#		$Body/Right1ExhaustParticles2D.emitting = false
+#		$Body/Right2ExhaustParticles2D.emitting = false
+#		$Body/Left1ExhaustParticles2D.emitting = false
+#		$Body/Left2ExhaustParticles2D.emitting = false
+	
+#	print("\n$Body.global_rotation_degrees =        ", $Body.global_rotation_degrees)
+#	print("$Body.global_rotation_degrees >= 30 =  ", $Body.global_rotation_degrees >= 30)
+#	print("$Body.global_rotation_degrees <= -30 = ", $Body.global_rotation_degrees <= -30)
+	
+	
+	
+	
+	
+	
+
+
+
+
+
+
+
+#func setControlType(_type:String) -> void:
+#	CONTROL_TYPE = _type
+#	match _type:
+#		'classic_asteroids':
+#			hud.control_type_texture_rect.texture = hud.control_type_classic_asteroids_texture
+#
+#		'shuffle_board':
+#			hud.control_type_texture_rect.texture = hud.control_type_shuffle_board_texture
+#		_:
+#			util.throwError("Gameplay.setShipControlTypeTexture(_type) accepts _type='classic_asteroids' or _type='shuffle_board'")
+
+
+
+
+
 
 
 func autoRotate() -> void:
 	$Body.look_at(global_position + Vector2(0, 1).rotated(deg2rad(prev_frame_dir)))
+	
+#	var ship_moving_dir = util.convAngleTo360Range2(rad2deg(linear_velocity.angle()))
+	
+#	var ship_looking_at = util.convAngleTo360Range2($Body.rotation_degrees - 90)
+	
+#	print("\nship_moving_dir = ", ship_moving_dir)
+#	print("ship_looking_at = ", ship_looking_at)
+	
+#	if Input.is_action_just_pressed('up'):
+#	if util.anglesDif(ship_moving_dir, ship_looking_at) < 30:
+#		$Body/Forward1ExhaustParticles2D.emitting = true
+#		$Body/Forward2ExhaustParticles2D.emitting = true
+#	else:
+#		$Body/Forward1ExhaustParticles2D.emitting = false
+#		$Body/Forward2ExhaustParticles2D.emitting = false
+
+
+
+
+
+
+
+
 
 
 func loopThroughColContacts(state):

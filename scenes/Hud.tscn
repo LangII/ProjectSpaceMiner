@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://scenes/HudTopLeftPort.tscn" type="PackedScene" id=1]
 [ext_resource path="res://scripts/Hud.gd" type="Script" id=2]
@@ -6,12 +6,88 @@
 [ext_resource path="res://sprites/hud_health_bar_under.png" type="Texture" id=4]
 [ext_resource path="res://resources/Aquarius-RegularMono.ttf" type="DynamicFontData" id=5]
 [ext_resource path="res://sprites/hud_health_bar_background.png" type="Texture" id=6]
+[ext_resource path="res://sprites/hud_landing_sequence_circle_meter.png" type="Texture" id=7]
+[ext_resource path="res://sprites/control_type_classic_asteroids.png" type="Texture" id=8]
+
+[sub_resource type="DynamicFont" id=2]
+size = 10
+font_data = ExtResource( 5 )
 
 [sub_resource type="DynamicFont" id=1]
 font_data = ExtResource( 5 )
 
 [node name="Hud" type="CanvasLayer"]
+pause_mode = 2
 script = ExtResource( 2 )
+
+[node name="PauseFadeColorRect" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0, 0, 0, 0.588235 )
+
+[node name="PauseContainerBoarder" type="ColorRect" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -225.0
+margin_top = -125.0
+margin_right = 225.0
+margin_bottom = 125.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="MarginContainer" type="MarginContainer" parent="PauseContainerBoarder"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 2
+custom_constants/margin_top = 2
+custom_constants/margin_left = 2
+custom_constants/margin_bottom = 2
+__meta__ = {
+"_edit_use_anchors_": true
+}
+
+[node name="ColorRect" type="ColorRect" parent="PauseContainerBoarder/MarginContainer"]
+margin_left = 2.0
+margin_top = 2.0
+margin_right = 448.0
+margin_bottom = 248.0
+
+[node name="MarginContainer" type="MarginContainer" parent="PauseContainerBoarder/MarginContainer/ColorRect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 5
+custom_constants/margin_top = 5
+custom_constants/margin_left = 5
+custom_constants/margin_bottom = 5
+__meta__ = {
+"_edit_use_anchors_": true
+}
+
+[node name="ColorRect" type="ColorRect" parent="PauseContainerBoarder/MarginContainer/ColorRect/MarginContainer"]
+margin_left = 5.0
+margin_top = 5.0
+margin_right = 441.0
+margin_bottom = 241.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="MarginContainer" type="MarginContainer" parent="PauseContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 2
+custom_constants/margin_top = 2
+custom_constants/margin_left = 2
+custom_constants/margin_bottom = 2
+__meta__ = {
+"_edit_use_anchors_": true
+}
+
+[node name="ColorRect" type="ColorRect" parent="PauseContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer"]
+margin_left = 2.0
+margin_top = 2.0
+margin_right = 434.0
+margin_bottom = 234.0
+color = Color( 0, 0.392157, 0.470588, 1 )
 
 [node name="TopLeftContainerBoarder" type="ColorRect" parent="."]
 margin_right = 160.0
@@ -19,18 +95,12 @@ margin_bottom = 128.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 color = Color( 0, 0, 0, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="MarginContainer" type="MarginContainer" parent="TopLeftContainerBoarder"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 custom_constants/margin_right = 2
 custom_constants/margin_bottom = 2
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="ColorRect" type="ColorRect" parent="TopLeftContainerBoarder/MarginContainer"]
 margin_right = 158.0
@@ -41,9 +111,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 custom_constants/margin_right = 5
 custom_constants/margin_bottom = 5
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="ColorRect" type="ColorRect" parent="TopLeftContainerBoarder/MarginContainer/ColorRect/MarginContainer"]
 margin_right = 153.0
@@ -88,6 +155,430 @@ current = true
 
 [node name="HudTopLeftPort" parent="TopLeftContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/TopLeftViewportContainer/Viewport" instance=ExtResource( 1 )]
 
+[node name="AlertsContainerBoarderA" type="ColorRect" parent="."]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -180.0
+margin_top = -68.0
+margin_right = 180.0
+margin_bottom = -34.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="MarginContainer" type="MarginContainer" parent="AlertsContainerBoarderA"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 2
+custom_constants/margin_top = 2
+custom_constants/margin_left = 2
+
+[node name="ColorRect" type="ColorRect" parent="AlertsContainerBoarderA/MarginContainer"]
+margin_left = 2.0
+margin_top = 2.0
+margin_right = 358.0
+margin_bottom = 34.0
+
+[node name="MarginContainer" type="MarginContainer" parent="AlertsContainerBoarderA/MarginContainer/ColorRect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 5
+custom_constants/margin_top = 5
+custom_constants/margin_left = 5
+
+[node name="ColorRect" type="ColorRect" parent="AlertsContainerBoarderA/MarginContainer/ColorRect/MarginContainer"]
+margin_left = 5.0
+margin_top = 5.0
+margin_right = 351.0
+margin_bottom = 32.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="MarginContainer" type="MarginContainer" parent="AlertsContainerBoarderA/MarginContainer/ColorRect/MarginContainer/ColorRect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 2
+custom_constants/margin_top = 2
+custom_constants/margin_left = 2
+
+[node name="ColorRect" type="ColorRect" parent="AlertsContainerBoarderA/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer"]
+margin_left = 2.0
+margin_top = 2.0
+margin_right = 344.0
+margin_bottom = 27.0
+color = Color( 0, 0.392157, 0.470588, 1 )
+
+[node name="MarginContainer" type="MarginContainer" parent="AlertsContainerBoarderA/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="AlertsLabelA" type="Label" parent="AlertsContainerBoarderA/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer"]
+margin_top = 5.0
+margin_right = 342.0
+margin_bottom = 20.0
+custom_fonts/font = SubResource( 2 )
+align = 1
+
+[node name="AlertsContainerBoarderB" type="ColorRect" parent="."]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -180.0
+margin_top = -68.0
+margin_right = 180.0
+margin_bottom = -34.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="MarginContainer" type="MarginContainer" parent="AlertsContainerBoarderB"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 2
+custom_constants/margin_top = 2
+custom_constants/margin_left = 2
+
+[node name="ColorRect" type="ColorRect" parent="AlertsContainerBoarderB/MarginContainer"]
+margin_left = 2.0
+margin_top = 2.0
+margin_right = 358.0
+margin_bottom = 34.0
+
+[node name="MarginContainer" type="MarginContainer" parent="AlertsContainerBoarderB/MarginContainer/ColorRect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 5
+custom_constants/margin_top = 5
+custom_constants/margin_left = 5
+
+[node name="ColorRect" type="ColorRect" parent="AlertsContainerBoarderB/MarginContainer/ColorRect/MarginContainer"]
+margin_left = 5.0
+margin_top = 5.0
+margin_right = 351.0
+margin_bottom = 32.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="MarginContainer" type="MarginContainer" parent="AlertsContainerBoarderB/MarginContainer/ColorRect/MarginContainer/ColorRect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 2
+custom_constants/margin_top = 2
+custom_constants/margin_left = 2
+
+[node name="ColorRect" type="ColorRect" parent="AlertsContainerBoarderB/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer"]
+margin_left = 2.0
+margin_top = 2.0
+margin_right = 344.0
+margin_bottom = 27.0
+color = Color( 0, 0.392157, 0.470588, 1 )
+
+[node name="MarginContainer" type="MarginContainer" parent="AlertsContainerBoarderB/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="AlertsLabelB" type="Label" parent="AlertsContainerBoarderB/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer"]
+margin_top = 5.0
+margin_right = 342.0
+margin_bottom = 20.0
+custom_fonts/font = SubResource( 2 )
+align = 1
+
+[node name="LandingSequenceContainerBoarder" type="ColorRect" parent="."]
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_top = -68.0
+margin_right = 280.0
+margin_bottom = -34.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="MarginContainer" type="MarginContainer" parent="LandingSequenceContainerBoarder"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 2
+custom_constants/margin_top = 2
+
+[node name="ColorRect" type="ColorRect" parent="LandingSequenceContainerBoarder/MarginContainer"]
+margin_top = 2.0
+margin_right = 278.0
+margin_bottom = 34.0
+
+[node name="MarginContainer" type="MarginContainer" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 5
+custom_constants/margin_top = 5
+
+[node name="ColorRect" type="ColorRect" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer"]
+margin_top = 5.0
+margin_right = 273.0
+margin_bottom = 32.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="MarginContainer" type="MarginContainer" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 2
+custom_constants/margin_top = 2
+
+[node name="ColorRect" type="ColorRect" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer"]
+margin_top = 2.0
+margin_right = 271.0
+margin_bottom = 27.0
+color = Color( 0, 0.392157, 0.470588, 1 )
+
+[node name="HBoxContainerDisplays" type="HBoxContainer" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect"]
+margin_right = 271.0
+margin_bottom = 25.0
+
+[node name="MarginContainer" type="MarginContainer" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays"]
+margin_right = 64.0
+margin_bottom = 25.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="CenterContainer" type="CenterContainer" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer"]
+margin_right = 64.0
+margin_bottom = 25.0
+
+[node name="ColorRect" type="ColorRect" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer/CenterContainer"]
+margin_left = 12.0
+margin_top = 2.0
+margin_right = 52.0
+margin_bottom = 22.0
+rect_min_size = Vector2( 40, 20 )
+size_flags_horizontal = 0
+size_flags_vertical = 0
+color = Color( 0, 0.313726, 0.388235, 1 )
+
+[node name="MarginContainer" type="MarginContainer" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer"]
+margin_right = 64.0
+margin_bottom = 25.0
+custom_constants/margin_top = 2
+custom_constants/margin_left = 12
+
+[node name="ColorRectVelocityMeter*" type="ColorRect" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer/MarginContainer"]
+margin_left = 12.0
+margin_top = 2.0
+margin_right = 14.0
+margin_bottom = 20.0
+rect_min_size = Vector2( 2, 18 )
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="MarginContainer2" type="MarginContainer" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays"]
+margin_left = 68.0
+margin_right = 133.0
+margin_bottom = 25.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="CenterContainer2" type="CenterContainer" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer2"]
+margin_right = 65.0
+margin_bottom = 25.0
+
+[node name="GridContainer" type="GridContainer" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer2/CenterContainer2"]
+margin_left = 22.0
+margin_top = 2.0
+margin_right = 43.0
+margin_bottom = 23.0
+grow_horizontal = 2
+grow_vertical = 2
+custom_constants/vseparation = -1
+custom_constants/hseparation = -1
+columns = 2
+
+[node name="TextureRect" type="TextureRect" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer2/CenterContainer2/GridContainer"]
+margin_right = 11.0
+margin_bottom = 11.0
+rect_min_size = Vector2( 11, 11 )
+size_flags_horizontal = 0
+size_flags_vertical = 0
+size_flags_stretch_ratio = 0.5
+texture = ExtResource( 7 )
+expand = true
+stretch_mode = 1
+flip_h = true
+
+[node name="TextureRect2" type="TextureRect" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer2/CenterContainer2/GridContainer"]
+margin_left = 10.0
+margin_right = 21.0
+margin_bottom = 11.0
+rect_min_size = Vector2( 11, 11 )
+size_flags_horizontal = 0
+size_flags_vertical = 0
+size_flags_stretch_ratio = 0.5
+texture = ExtResource( 7 )
+expand = true
+stretch_mode = 1
+
+[node name="TextureRect3" type="TextureRect" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer2/CenterContainer2/GridContainer"]
+margin_top = 10.0
+margin_right = 11.0
+margin_bottom = 21.0
+rect_min_size = Vector2( 11, 11 )
+size_flags_horizontal = 0
+size_flags_vertical = 0
+size_flags_stretch_ratio = 0.5
+texture = ExtResource( 7 )
+expand = true
+stretch_mode = 1
+flip_h = true
+flip_v = true
+
+[node name="TextureRect4" type="TextureRect" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer2/CenterContainer2/GridContainer"]
+margin_left = 10.0
+margin_top = 10.0
+margin_right = 21.0
+margin_bottom = 21.0
+rect_min_size = Vector2( 11, 11 )
+size_flags_horizontal = 0
+size_flags_vertical = 0
+size_flags_stretch_ratio = 0.5
+texture = ExtResource( 7 )
+expand = true
+stretch_mode = 1
+flip_v = true
+
+[node name="MarginContainer" type="MarginContainer" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer2"]
+margin_right = 65.0
+margin_bottom = 25.0
+custom_constants/margin_bottom = 11
+
+[node name="CenterContainer" type="CenterContainer" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer2/MarginContainer"]
+margin_right = 65.0
+margin_bottom = 14.0
+
+[node name="ColorRectSpinMeter*" type="ColorRect" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer2/MarginContainer/CenterContainer"]
+margin_left = 31.0
+margin_top = 2.0
+margin_right = 33.0
+margin_bottom = 12.0
+rect_min_size = Vector2( 2, 10 )
+rect_pivot_offset = Vector2( 1, 10 )
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="MarginContainer3" type="MarginContainer" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays"]
+margin_left = 137.0
+margin_right = 202.0
+margin_bottom = 25.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_constants/margin_top = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer3"]
+margin_top = 2.0
+margin_right = 65.0
+margin_bottom = 25.0
+custom_constants/separation = -1
+alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer3/HBoxContainer"]
+margin_left = 13.0
+margin_right = 33.0
+margin_bottom = 20.0
+size_flags_horizontal = 0
+size_flags_vertical = 0
+texture = ExtResource( 7 )
+flip_h = true
+
+[node name="TextureRect2" type="TextureRect" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer3/HBoxContainer"]
+margin_left = 32.0
+margin_right = 52.0
+margin_bottom = 20.0
+size_flags_horizontal = 0
+size_flags_vertical = 0
+texture = ExtResource( 7 )
+
+[node name="MarginContainer" type="MarginContainer" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer3"]
+margin_top = 2.0
+margin_right = 65.0
+margin_bottom = 25.0
+custom_constants/margin_bottom = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer3/MarginContainer"]
+margin_right = 65.0
+margin_bottom = 21.0
+
+[node name="ColorRectAngleMeter*" type="ColorRect" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer3/MarginContainer/CenterContainer"]
+margin_left = 31.0
+margin_top = 1.0
+margin_right = 33.0
+margin_bottom = 19.0
+rect_min_size = Vector2( 2, 18 )
+rect_pivot_offset = Vector2( 1, 18 )
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="MarginContainer4" type="MarginContainer" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays"]
+margin_left = 206.0
+margin_right = 271.0
+margin_bottom = 25.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_constants/margin_right = 8
+custom_constants/margin_left = 8
+
+[node name="HBoxContainerSignals" type="HBoxContainer" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer4"]
+margin_left = 8.0
+margin_right = 57.0
+margin_bottom = 25.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_constants/separation = 10
+alignment = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer4/HBoxContainerSignals"]
+margin_right = 9.0
+margin_bottom = 25.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_constants/margin_top = 9
+custom_constants/margin_left = 0
+custom_constants/margin_bottom = 9
+
+[node name="ColorRectVelocityMeterSignal*" type="ColorRect" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer4/HBoxContainerSignals/MarginContainer"]
+margin_top = 9.0
+margin_right = 9.0
+margin_bottom = 16.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color( 1, 0, 0, 1 )
+
+[node name="MarginContainer2" type="MarginContainer" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer4/HBoxContainerSignals"]
+margin_left = 19.0
+margin_right = 29.0
+margin_bottom = 25.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_constants/margin_top = 9
+custom_constants/margin_left = 0
+custom_constants/margin_bottom = 9
+
+[node name="ColorRectSpinMeterSignal*" type="ColorRect" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer4/HBoxContainerSignals/MarginContainer2"]
+margin_top = 9.0
+margin_right = 10.0
+margin_bottom = 16.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color( 1, 0, 0, 1 )
+
+[node name="MarginContainer3" type="MarginContainer" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer4/HBoxContainerSignals"]
+margin_left = 39.0
+margin_right = 49.0
+margin_bottom = 25.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_constants/margin_top = 9
+custom_constants/margin_left = 0
+custom_constants/margin_bottom = 9
+
+[node name="ColorRectAngleMeterSignal*" type="ColorRect" parent="LandingSequenceContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainerDisplays/MarginContainer4/HBoxContainerSignals/MarginContainer3"]
+margin_top = 9.0
+margin_right = 10.0
+margin_bottom = 16.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color( 1, 0, 0, 1 )
+
 [node name="BottomContainerBoarder" type="ColorRect" parent="."]
 anchor_top = 1.0
 anchor_right = 1.0
@@ -96,17 +587,11 @@ margin_top = -34.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 color = Color( 0, 0, 0, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="MarginContainer" type="MarginContainer" parent="BottomContainerBoarder"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 custom_constants/margin_top = 2
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="ColorRect" type="ColorRect" parent="BottomContainerBoarder/MarginContainer"]
 margin_top = 2.0
@@ -117,9 +602,6 @@ margin_bottom = 34.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 custom_constants/margin_top = 5
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="ColorRect" type="ColorRect" parent="BottomContainerBoarder/MarginContainer/ColorRect/MarginContainer"]
 margin_top = 5.0
@@ -131,9 +613,6 @@ color = Color( 0, 0, 0, 1 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 custom_constants/margin_top = 2
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="ColorRect" type="ColorRect" parent="BottomContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer"]
 margin_top = 2.0
@@ -149,13 +628,22 @@ anchor_bottom = 1.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 alignment = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
+
+[node name="MarginContainer" type="MarginContainer" parent="BottomContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainer"]
+margin_left = 330.0
+margin_right = 350.0
+margin_bottom = 25.0
+custom_constants/margin_top = 2
+
+[node name="ControlTypeTextureRect*" type="TextureRect" parent="BottomContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainer/MarginContainer"]
+margin_top = 2.0
+margin_right = 20.0
+margin_bottom = 25.0
+texture = ExtResource( 8 )
 
 [node name="HealthLabelMarginContainer" type="MarginContainer" parent="BottomContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainer"]
-margin_left = 342.0
-margin_right = 445.0
+margin_left = 354.0
+margin_right = 457.0
 margin_bottom = 25.0
 custom_constants/margin_left = 5
 
@@ -167,8 +655,8 @@ custom_fonts/font = SubResource( 1 )
 text = "0000.00"
 
 [node name="HealthBarMarginContainer" type="MarginContainer" parent="BottomContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainer"]
-margin_left = 449.0
-margin_right = 617.0
+margin_left = 461.0
+margin_right = 629.0
 margin_bottom = 25.0
 custom_constants/margin_right = 5
 custom_constants/margin_top = 5
@@ -193,3 +681,48 @@ value = 100.0
 texture_progress = ExtResource( 3 )
 
 [node name="HealthTextureProgUnderTween" type="Tween" parent="BottomContainerBoarder/MarginContainer/ColorRect/MarginContainer/ColorRect/MarginContainer/ColorRect/HBoxContainer/HealthBarMarginContainer"]
+
+[node name="AlertsContainerAMarginTopTweenUp" type="Tween" parent="."]
+
+[node name="AlertsContainerAMarginBottomTweenUp" type="Tween" parent="."]
+
+[node name="AlertsContainerAMarginTopTweenDown" type="Tween" parent="."]
+
+[node name="AlertsContainerAMarginBottomTweenDown" type="Tween" parent="."]
+
+[node name="AlertDownTimerA" type="Timer" parent="."]
+one_shot = true
+
+[node name="AlertsContainerBMarginTopTweenUp" type="Tween" parent="."]
+
+[node name="AlertsContainerBMarginBottomTweenUp" type="Tween" parent="."]
+
+[node name="AlertsContainerBMarginTopTweenDown" type="Tween" parent="."]
+
+[node name="AlertsContainerBMarginBottomTweenDown" type="Tween" parent="."]
+
+[node name="AlertDownTimerB" type="Timer" parent="."]
+one_shot = true
+
+[node name="LandingSequenceContainerMarginTopTweenUp" type="Tween" parent="."]
+
+[node name="LandingSequenceContainerMarginBottomTweenUp" type="Tween" parent="."]
+
+[node name="LandingSequenceContainerMarginTopTweenDown" type="Tween" parent="."]
+
+[node name="LandingSequenceContainerMarginBottomTweenDown" type="Tween" parent="."]
+
+[node name="PauseContainerMarginTopTweenUp" type="Tween" parent="."]
+
+[node name="PauseContainerMarginBottomTweenUp" type="Tween" parent="."]
+
+[node name="PauseContainerMarginTopTweenDown" type="Tween" parent="."]
+
+[node name="PauseContainerMarginBottomTweenDown" type="Tween" parent="."]
+
+[node name="PauseFadeTweenUp" type="Tween" parent="."]
+
+[node name="PauseFadeTweenDown" type="Tween" parent="."]
+
+[connection signal="timeout" from="AlertDownTimerA" to="." method="_on_AlertDownTimerA_timeout"]
+[connection signal="timeout" from="AlertDownTimerB" to="." method="_on_AlertDownTimerB_timeout"]

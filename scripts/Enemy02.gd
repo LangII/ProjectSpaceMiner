@@ -1,8 +1,18 @@
 
 """
+
 -------------------
 LOW PRIORITY TO DOS
 -------------------
+
+2025-07-19
+
+- i don't think this is windows/mac related, but i don't recall these problems existing before dev-ing
+on mac...
+
+	- but the Ship <> Segment Collision does not work, the Ship passes right through Enemy02 Segments
+
+	- Segment spacing opens and closes, seemingly related to frame rate
 
 2023-02-05
 

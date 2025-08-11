@@ -93,8 +93,11 @@ func convAngleTo360Range2(_angle:float) -> float:
 func convTileMapPosToGlobalPos(tile_map_pos:Vector2, global_pos_type:String='center') -> Vector2:
 	var global_pos = data.tiles['%s,%s' % [tile_map_pos.y, tile_map_pos.x]]['global_pos_center']
 	global_pos = Vector2(global_pos[0], global_pos[1])
-	var width_adjust = ctrl.tile_width / 2
-	var height_adjust = ctrl.tile_height / 2
+	
+	# these vars are based on a hard coded value of the TileMap Tile Width and Height of 20 x 20
+	var width_adjust = 10
+	var height_adjust = 10
+	
 	var adjust = {}
 	match global_pos_type:
 		'top_left':     adjust = {'x': -width_adjust, 'y': -height_adjust}
@@ -142,6 +145,17 @@ func coalesce(_array:Array) -> Object:
 	for object in _array:
 		if object != null:  return object
 	return null
+
+
+func isClockwise(_angle_1: float, _angle_2: float) -> bool:
+	"""
+	- chatgpt assisted
+	- _angle_2 is clockwise from _angle_1
+	- this is proven to work for angle degrees of
+	N->E->S = 0 -> 180 and N->W->S = 0 -> -180
+	"""
+	var delta = wrapf(_angle_1 - _angle_2, -180.0, 180.0)
+	return not delta > 0
 
 
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://sprites/ship.png" type="Texture" id=1]
 [ext_resource path="res://scripts/Ship.gd" type="Script" id=2]
@@ -6,6 +6,41 @@
 
 [sub_resource type="PhysicsMaterial" id=1]
 bounce = 0.5
+
+[sub_resource type="Gradient" id=8]
+offsets = PoolRealArray( 0.00154799, 0.346749, 1 )
+colors = PoolColorArray( 1, 0.313726, 0, 1, 1, 1, 0.231373, 1, 1, 1, 1, 1 )
+
+[sub_resource type="GradientTexture" id=9]
+gradient = SubResource( 8 )
+
+[sub_resource type="ParticlesMaterial" id=7]
+lifetime_randomness = 0.8
+flag_disable_z = true
+direction = Vector3( 0, -1, 0 )
+spread = 40.0
+gravity = Vector3( 0, 98, 0 )
+initial_velocity = 100.0
+orbit_velocity = 0.0
+orbit_velocity_random = 0.0
+color_ramp = SubResource( 9 )
+
+[sub_resource type="Gradient" id=10]
+colors = PoolColorArray( 1, 0.784314, 0, 1, 1, 1, 1, 1 )
+
+[sub_resource type="GradientTexture" id=11]
+gradient = SubResource( 10 )
+
+[sub_resource type="ParticlesMaterial" id=6]
+lifetime_randomness = 0.8
+flag_disable_z = true
+direction = Vector3( 0, -1, 0 )
+spread = 20.0
+gravity = Vector3( 0, 0, 0 )
+initial_velocity = 100.0
+orbit_velocity = 0.0
+orbit_velocity_random = 0.0
+color_ramp = SubResource( 11 )
 
 [sub_resource type="CircleShape2D" id=2]
 radius = 20.0
@@ -40,6 +75,72 @@ script = ExtResource( 2 )
 
 [node name="Body" type="Sprite" parent="."]
 texture = ExtResource( 1 )
+
+[node name="Forward1ExhaustParticles2D" type="Particles2D" parent="Body"]
+position = Vector2( -2, 15 )
+rotation = -3.14159
+emitting = false
+amount = 60
+lifetime = 0.3
+speed_scale = 0.5
+explosiveness = 0.2
+randomness = 0.8
+local_coords = false
+process_material = SubResource( 7 )
+
+[node name="Forward2ExhaustParticles2D" type="Particles2D" parent="Body"]
+position = Vector2( 2, 15 )
+rotation = -3.14159
+emitting = false
+amount = 60
+lifetime = 0.3
+speed_scale = 0.5
+explosiveness = 0.2
+randomness = 0.8
+local_coords = false
+process_material = SubResource( 7 )
+
+[node name="Right1ExhaustParticles2D" type="Particles2D" parent="Body"]
+position = Vector2( -3, -20 )
+rotation = -1.22173
+emitting = false
+lifetime = 0.2
+speed_scale = 0.5
+explosiveness = 0.2
+local_coords = false
+process_material = SubResource( 6 )
+
+[node name="Right2ExhaustParticles2D" type="Particles2D" parent="Body"]
+position = Vector2( 22, 20 )
+rotation = 1.22173
+emitting = false
+amount = 4
+lifetime = 0.1
+speed_scale = 0.5
+explosiveness = 0.2
+local_coords = false
+process_material = SubResource( 6 )
+
+[node name="Left1ExhaustParticles2D" type="Particles2D" parent="Body"]
+position = Vector2( 3, -20 )
+rotation = 1.22173
+emitting = false
+lifetime = 0.2
+speed_scale = 0.5
+explosiveness = 0.2
+local_coords = false
+process_material = SubResource( 6 )
+
+[node name="Left2ExhaustParticles2D" type="Particles2D" parent="Body"]
+position = Vector2( -22, 20 )
+rotation = -1.22173
+emitting = false
+amount = 4
+lifetime = 0.1
+speed_scale = 0.5
+explosiveness = 0.2
+local_coords = false
+process_material = SubResource( 6 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource( 2 )
