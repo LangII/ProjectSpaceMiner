@@ -15,7 +15,7 @@ there that were generated.  Investigate why.
 """
 
 
-extends 'res://scripts/tiles/b-BaseTileMapLogic.gd'
+extends 'res://scripts/tiles/TileMapLogic2_Base.gd'
 
 
 onready var MINERAL_MAP = {
@@ -84,8 +84,8 @@ func generateMineralVeins(mineral_type):
 		var cur_vein_ks = []
 		for v in util.getRandomInt(mineral_dict['VEIN_SIZE_MIN'], mineral_dict['VEIN_SIZE_MAX']):
 			
-			cur_y = prev_y + util.getRandomInt(-1, +1)
-			cur_x = prev_x + util.getRandomInt(-1, +1)
+			cur_y = clamp(prev_y + util.getRandomInt(-1, +1), 0, TILE_MAP_HEIGHT - 1)
+			cur_x = clamp(prev_x + util.getRandomInt(-1, +1), 0, TILE_MAP_WIDTH - 1)
 			cur_k = '%s,%s' % [cur_y, cur_x]
 			
 			if (

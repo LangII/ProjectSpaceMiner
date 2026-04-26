@@ -92,6 +92,13 @@ func _physics_process(_delta):
 	$Turret.rotate(deg2rad(90))
 	
 	if Input.is_action_pressed('left_click') and can_shoot:  shoot()
+	
+	if Input.is_action_just_pressed('Action_1'):
+		match CONTROL_TYPE:
+			'classic_asteroids':
+				setControlType('shuffle_board')
+			'shuffle_board':
+				setControlType('classic_asteroids')
 
 
 func _integrate_forces(state):
@@ -557,7 +564,20 @@ func _on_ShipBodyColArea2D_area_entered(_area):
 
 
 
+func setControlType(_type:String) -> void:
+	CONTROL_TYPE = _type
 
+#	ship.rotation_degrees = 0
+#	ship.global_rotation_degrees = 0
+
+	match _type:
+		'classic_asteroids':
+			hud.control_type_texture_rect.texture = hud.control_type_classic_asteroids_texture
+
+		'shuffle_board':
+			hud.control_type_texture_rect.texture = hud.control_type_shuffle_board_texture
+		_:
+			util.throwError("Gameplay.setShipControlTypeTexture(_type) accepts _type='classic_asteroids' or _type='shuffle_board'")
 
 
 

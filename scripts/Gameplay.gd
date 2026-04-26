@@ -1,5 +1,9 @@
 
+
+
 extends Node
+
+
 
 onready var main = get_node('/root/Main')
 onready var util = get_node('/root/Main/Utilities')
@@ -28,13 +32,11 @@ onready var DROP_TEXTURE_MAP = {
 }
 
 var TILE_MAP_LOGIC_SCN_REF = 'res://scenes/tiles/TileMapLogic.tscn'
-var STRUCTURE_GEN_LOGIC_SCN_REF = 'res://scenes/StructureGenLogic.tscn'
 var ENEMY_GEN_LOGIC_SCN_REF = 'res://scenes/EnemyGenLogic.tscn'
 var SHIP_SCN_REF = 'res://scenes/Ship.tscn'
 var HUD_SCN_REF = 'res://scenes/Hud.tscn'
 
 onready var SEED = util.coalesce([null, ctrl.gameplay_seed])
-#onready var SEED = util.coalesce([util.rng.randi(), ctrl.gameplay_seed])
 
 var tile_map_logic = null
 var tile_map = null
@@ -43,7 +45,6 @@ var enemy_gen_logic = null
 var ship = null
 var camera = null
 var hud = null
-
 
 var cam_noise = OpenSimplexNoise.new()
 var cam_shake_noise_x = 0
@@ -62,7 +63,9 @@ onready var SHIP_START_POS_Y = util.coalesce([null, ctrl.gameplay_ship_start_pos
 onready var frame_count = 0
 
 
+
 ####################################################################################################
+
 
 
 func _ready():
@@ -70,19 +73,7 @@ func _ready():
 	print("SEED = ", SEED)
 	util.rng.seed = SEED
 	
-	"""
-	level generation order:
-		addTileMap()
-		addStructures()
-		addShip()
-		addEnemies()
-		AddCamera()
-		AddHud()
-	"""
-	
 	addTileMap()
-	
-#	addStructures()
 	
 	addShip()
 	
@@ -91,9 +82,6 @@ func _ready():
 	addCamera()
 	
 	addHud()
-	
-	$InteractiveTerrain/MothershipLandingPlatform.ship = ship
-	$InteractiveTerrain/MothershipLandingPlatform.hud = hud
 	
 	if mini_map_test:
 		remove_child(hud)
@@ -104,13 +92,7 @@ func _ready():
 		remove_child(get_node('MineralTileMap'))
 	else:
 		remove_child(get_node('MiniTileMap'))
-	
-#	hud.setRectsXPosXSizeForSomeGodForesakenReason()
-	
-	setShipControlType('classic_asteroids')
-#	setShipControlType('shuffle_board')
-	
-#	ship.setControlType('shuffle_board')
+
 
 
 func _process(delta):
@@ -122,8 +104,10 @@ func _process(delta):
 		shakeCam()
 
 
+
 ####################################################################################################
 """ _ready FUNCS """
+
 
 
 func addTileMap():
@@ -131,22 +115,6 @@ func addTileMap():
 	tile_map_logic.noise.seed = SEED
 	add_child(tile_map_logic)
 	tile_map = get_node('TileMap')
-
-
-
-#func addStructures():
-#
-#	structure_gen_logic = load(STRUCTURE_GEN_LOGIC_SCN_REF).instance()
-#	add_child(structure_gen_logic)
-#
-#	structure_gen_logic.terraformForMotherShip()
-#
-#	tile_map_logic.readyAfterNoiseAndTileCodes()
-#
-##	structure_gen_logic.genMotherShip()
-	
-
-
 
 
 
@@ -158,10 +126,12 @@ func addEnemies():
 	enemy_gen_logic.genEnemy03s()
 
 
+
 func addShip():
 	ship = load(SHIP_SCN_REF).instance()
 	add_child(ship)
 	ship.global_position = Vector2(SHIP_START_POS_X, SHIP_START_POS_Y)
+
 
 
 func addCamera():
@@ -182,9 +152,14 @@ func addCamera():
 	ship.add_child(camera)
 
 
+
 func addHud():
 	hud = load(HUD_SCN_REF).instance()
 	add_child(hud)
+	
+	### adding Hud Reference to Other Nodes
+	main.get_node('Gameplay/InteractiveTerrain/MothershipLandingPlatform').hud = hud
+
 
 
 func hudAlert(_msg:String, _font_size:int=14) -> void:
@@ -197,9 +172,11 @@ func hudAlert(_msg:String, _font_size:int=14) -> void:
 	hud.alert(_msg, _font_size)
 
 
+
 func hudLandingSequenceContainerUp() -> void:
 	""" same note as hudAlert() ^ """
 	hud.landingSequenceContainerUp()
+
 
 
 func hudLandingSequenceContainerDown() -> void:
@@ -207,8 +184,10 @@ func hudLandingSequenceContainerDown() -> void:
 	hud.landingSequenceContainerDown()
 
 
+
 ####################################################################################################
 """ _process FUNCS """
+
 
 
 func shakeCam():
@@ -224,7 +203,9 @@ func shakeCam():
 	)
 
 
+
 ####################################################################################################
+
 
 
 func initDrop(drop_type, drop_value, pos):
@@ -234,6 +215,7 @@ func initDrop(drop_type, drop_value, pos):
 	new_drop.DROP_VALUE = drop_value
 	new_drop.global_position = pos
 	$Drops.add_child(new_drop)
+
 
 
 func dropCollected(drop_type, drop_value):
@@ -246,6 +228,7 @@ func dropCollected(drop_type, drop_value):
 		data.drops_collected[drop_type]['value'] += drop_value
 		drop_is_new = false
 	hud.dropCollected(drop_is_new, drop_type)
+
 
 
 func getTerrainColDataPack(ship_obj, col_state, col_i) -> Dictionary:
@@ -266,6 +249,7 @@ func getTerrainColDataPack(ship_obj, col_state, col_i) -> Dictionary:
 	return data_pack
 
 
+
 func setTerrainColParticlesFromDataPack(data_pack):
 	$ShipToTerrainColParticles2D.global_position = data_pack['col_pos']
 	$ShipToTerrainColParticles2D.global_rotation_degrees = data_pack['prev_frame_dir'] + 90
@@ -274,15 +258,18 @@ func setTerrainColParticlesFromDataPack(data_pack):
 	$ShipToTerrainColParticles2D.restart()
 
 
+
 func setEnemyColParticles(_pos):
 	$ShipToEnemyColParticles2D.global_position = _pos
 	$ShipToEnemyColParticles2D.restart()
+
 
 
 func setShipShootBulletParticles(_pos, _rot):
 	$ShipShootBulletParticles2D.global_position = _pos
 	$ShipShootBulletParticles2D.rotation = _rot
 	$ShipShootBulletParticles2D.restart()
+
 
 
 func checkForEnemy03ToFloating(_tile_destroyed:String) -> void:
@@ -306,27 +293,6 @@ func checkForEnemy03ToFloating(_tile_destroyed:String) -> void:
 
 
 
-
-
-
-
-
-
-
-func setShipControlType(_type:String) -> void:
-	ship.CONTROL_TYPE = _type
-	
-#	ship.rotation_degrees = 0
-#	ship.global_rotation_degrees = 0
-	
-	match _type:
-		'classic_asteroids':
-			hud.control_type_texture_rect.texture = hud.control_type_classic_asteroids_texture
-
-		'shuffle_board':
-			hud.control_type_texture_rect.texture = hud.control_type_shuffle_board_texture
-		_:
-			util.throwError("Gameplay.setShipControlTypeTexture(_type) accepts _type='classic_asteroids' or _type='shuffle_board'")
 
 
 

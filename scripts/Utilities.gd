@@ -80,6 +80,14 @@ func getAvgFromArray(_array:Array) -> float:
 	return getSumFromArray(_array) / _array.size()
 
 
+func getUniqueFromArray(_array:Array) -> Array:
+	var unique_from_array_ = []
+	for each in _array:
+		if not each in unique_from_array_:
+			unique_from_array_ += [each]
+	return unique_from_array_
+
+
 func convAngleTo360Range(_angle:float) -> float:
 	if _angle >= 0:  return _angle
 	else:  return (_angle * -1) + 180

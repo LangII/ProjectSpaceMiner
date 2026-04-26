@@ -1,19 +1,24 @@
 
 extends Node
 
-#############################
-# GENERATIONAL CONTROL VARS #
-#############################
+#####################################
+###   GENERATIONAL CONTROL VARS   ###
+#####################################
 
 # scripts/Gameplay.gd
+
 onready var gameplay_seed = hash('Owen is Awesome!')
+
+### testing how to apply Asteroid Classes to Seeds (looks like this is all i need)
+#onready var gameplay_seed = int(str(hash('Owen is Awesome!')) + '1')
+
 #onready var gameplay_seed = 2926405890
-onready var gameplay_mini_map_test = true
-#onready var gameplay_mini_map_test = false
+#onready var gameplay_mini_map_test = true
+onready var gameplay_mini_map_test = false
 onready var gameplay_ship_start_pos_x = 200
 onready var gameplay_ship_start_pos_y = 400
 
-# scripts/tiles/BaseTileMapLogic.gd
+# scripts/tiles/TileMapLogic2_Base.gd
 onready var basetilemaplogic_tile_map_width = 200
 onready var basetilemaplogic_tile_map_height = 200
 onready var basetilemaplogic_noise_octaves = 3						# 1   <= X <= 9 (edge distortion)
@@ -39,7 +44,7 @@ onready var basetilemaplogic_noise_settings_tile_level_2_high = 0.40
 onready var basetilemaplogic_noise_settings_tile_level_3_low = 0.40
 onready var basetilemaplogic_noise_settings_tile_level_3_high = 1.10
 
-# scripts/tiles/MineralTileMapLogic.gd
+# scripts/tiles/TileMapLogic3_Mineral.gd
 onready var mineraltilemaplogic_mineral_map_01_tile_levels = [1]  # [1], [2], [3], [1, 2], [1, 3], [2, 3], or [1, 2, 3]
 onready var mineraltilemaplogic_mineral_map_01_vein_attempts = 250
 onready var mineraltilemaplogic_mineral_map_01_drop_value_min = 1
@@ -58,6 +63,9 @@ onready var mineraltilemaplogic_mineral_map_03_drop_value_min = 1
 onready var mineraltilemaplogic_mineral_map_03_drop_value_max = 3
 onready var mineraltilemaplogic_mineral_map_03_vein_size_min = 2
 onready var mineraltilemaplogic_mineral_map_03_vein_size_max = 8
+
+# scripts/tiles/TileMapLogic4_Fixture.gd
+onready var fixturetilemaplogic___ = null
 
 # scripts/EnemyGenLogic.gd
 onready var enemygenlogic_gen_map_enemy_01_spawn_attempts_per_botton_perc_100_min = 5
@@ -104,9 +112,9 @@ onready var enemygenlogic_gen_enemy03_manual_x = 10
 onready var enemygenlogic_gen_enemy03_manual_y = 40
 onready var enemygenlogic_gen_enemy03_manual_dir = 130
 
-##########################
-# BEHAIORAL CONTROL VARS #
-##########################
+##################################
+###   BEHAIORAL CONTROL VARS   ###
+##################################
 
 # scripts/Ship.gd
 onready var ship_move_acc = 250

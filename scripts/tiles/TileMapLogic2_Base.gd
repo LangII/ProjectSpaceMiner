@@ -1,5 +1,7 @@
 
-extends 'res://scripts/tiles/a-MothershipTileDataTileMapLogic.gd'
+
+extends 'res://scripts/tiles/TileMapLogic1_FixtureTileData.gd'
+
 
 onready var main = get_node('/root/Main')
 onready var util = get_node('/root/Main/Utilities')
